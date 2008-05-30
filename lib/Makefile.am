@@ -1,4 +1,4 @@
-# $Id: Makefile.am 14 2008-05-05 03:58:48Z naoaki $
+# $Id$
 
 lib_LTLIBRARIES = libclassias.la
 

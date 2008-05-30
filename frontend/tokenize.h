@@ -23,7 +23,7 @@
  *
  */
 
-/* $Id: tokenize.h 18 2008-05-05 04:40:38Z naoaki $ */
+/* $Id$ */
 
 #ifndef __TOKENIZE_H__
 #define __TOKENIZE_H__

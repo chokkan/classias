@@ -1,4 +1,4 @@
-# $Id: Makefile.am 11 2008-05-05 03:32:50Z naoaki $
+# $Id$
 
 bin_PROGRAMS = classias
 #man_MANS = classias.1

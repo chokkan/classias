@@ -29,7 +29,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* $Id: multiclass.cpp 18 2008-05-05 04:40:38Z naoaki $ */
+/* $Id$ */
 
 #ifdef  HAVE_CONFIG_H
 #include <config.h>

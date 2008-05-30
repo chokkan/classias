@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autogen.sh 4 2008-02-28 05:23:04Z naoaki $
+# $Id$
 
 if [ "$1" = "--force" ];
 then

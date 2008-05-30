@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-/* $Id: lbfgs.h 7 2008-04-25 23:08:27Z naoaki $ */
+/* $Id$ */
 
 #ifndef __LBFGS_H__
 #define __LBFGS_H__

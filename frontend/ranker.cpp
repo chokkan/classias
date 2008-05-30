@@ -29,7 +29,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* $Id: ranker.cpp 20 2008-05-09 15:46:44Z naoaki $ */
+/* $Id$ */
 
 #ifdef  HAVE_CONFIG_H
 #include <config.h>

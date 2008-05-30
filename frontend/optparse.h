@@ -23,7 +23,7 @@
  *
  */
 
-/* $Id: optparse.h 7 2008-04-23 16:03:33Z naoaki $ */
+/* $Id$ */
 
 /*
  * Class 'optparse' implements a parser for GNU-style command-line arguments.
