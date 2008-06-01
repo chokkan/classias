@@ -1,13 +1,11 @@
 #ifndef __CLASSIAS_FEATURE_H__
 #define __CLASSIAS_FEATURE_H__
 
-#include <algorithm>
-#include <map>
+#include <iostream>
 #include <string>
-#include <stdexcept>
-#include <vector>
 
 #include "base.h"
+#include "quark.h"
 
 namespace classias {
 

@@ -184,15 +184,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\multiclass.cpp"
+				RelativePath=".\multi_classify.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ranker.cpp"
+				RelativePath=".\multi_rank.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\selector.cpp"
+				RelativePath=".\multi_select.cpp"
 				>
 			</File>
 		</Filter>

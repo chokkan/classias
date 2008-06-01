@@ -163,7 +163,7 @@ public:
 };
 
 /**
- * Instance class.
+ * Candidate class.
  */
 template <class candidate_base>
 class candidates_base
@@ -335,7 +335,9 @@ public:
     }
 };
 
-
+/**
+ * Labaled candidate class.
+ */
 template <class instance_tmpl>
 class labeled_candidate_base
 {
