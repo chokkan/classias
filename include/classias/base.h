@@ -2,225 +2,15 @@
 #define __CLASSIAS_BASE_H__
 
 #include <map>
-#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "quark.h"
+#include "feature.h"
+
 namespace classias
 {
-
-class unknown_association : public std::out_of_range
-{
-public:
-    unknown_association(const std::string& message) : std::out_of_range(message)
-    {
-    }
-};
-
-template <class item_base>
-class basic_quark {
-public:
-    typedef item_base item_type;
-
-    typedef std::vector<item_type> inverse_map_type;
-    typedef typename inverse_map_type::size_type value_type;
-    typedef std::map<item_type, value_type> forward_map_type;
-
-protected:
-    /// Forward mapping: (item0, item1) -> value.
-    forward_map_type m_fwd;
-    /// Inverse mapping: value -> (item0, item1).
-    inverse_map_type m_inv;
-
-public:
-    basic_quark()
-    {
-    }
-
-    virtual ~basic_quark()
-    {
-    }
-
-    inline value_type size() const
-    {
-        return m_fwd.size();
-    }
-
-    inline bool exists(const item_type& x)
-    {
-        return m_fwd.find(x) != m_fwd.end();
-    }
-
-    inline value_type operator() (const item_type& x)
-    {
-        return associate(x);
-    }
-
-    inline value_type associate(const item_type& x)
-    {
-        typename forward_map_type::const_iterator it = m_fwd.find(x);
-        if (it != m_fwd.end()) {
-            return it->second;
-        } else {
-            value_type v = m_inv.size();
-            m_fwd.insert(typename forward_map_type::value_type(x, v));
-            m_inv.push_back(x);
-            return v;
-        }
-    }
-
-    inline value_type to_value(const item_type& x) const
-    {
-        typename forward_map_type::const_iterator it = m_fwd.find(x);
-        if (it != m_fwd.end()) {
-            return it->second;
-        } else {
-            throw unknown_association("Unknown forward mapping");
-        }           
-    }
-
-    inline const item_type& to_item(const value_type& v) const
-    {
-        if (v < m_inv.size()) {
-            return m_inv[v];
-        } else {
-            throw unknown_association("Unknown inverse mapping");
-        }
-    }
-};
-
-
-
-template <class item0_base, class item1_base>
-class basic_quark2 {
-public:
-    typedef item0_base item0_type;
-    typedef item1_base item1_type;
-
-    typedef std::pair<item0_type, item1_type> elem_type;
-    typedef std::vector<elem_type> inverse_map_type;
-    typedef typename inverse_map_type::size_type value_type;
-    typedef std::map<elem_type, value_type> forward_map_type;
-
-protected:
-    /// Forward mapping: (item0, item1) -> value.
-    forward_map_type m_fwd;
-    /// Inverse mapping: value -> (item0, item1).
-    inverse_map_type m_inv;
-
-public:
-    basic_quark2()
-    {
-    }
-
-    virtual ~basic_quark2()
-    {
-    }
-
-    inline value_type size() const
-    {
-        return m_fwd.size();
-    }
-
-    inline value_type operator() (const item0_type& x, const item1_base& y)
-    {
-        return associate(x, y);
-    }
-
-    inline bool exists(const item0_type& x, const item1_base& y)
-    {
-        return m_fwd.find(elem_type(x, y)) != m_fwd.end();
-    }
-
-    inline value_type associate(const item0_type& x, const item1_base& y)
-    {
-        typename forward_map_type::const_iterator it = m_fwd.find(elem_type(x, y));
-        if (it != m_fwd.end()) {
-            return it->second;
-        } else {
-            value_type v = m_inv.size();
-            elem_type il(x, y);
-            m_fwd.insert(typename forward_map_type::value_type(il, v));
-            m_inv.push_back(il);
-            return v;
-        }
-    }
-
-    inline value_type to_value(const item0_type& x, const item1_type& y) const
-    {
-        typename forward_map_type::const_iterator it = m_fwd.find(elem_type(x, y));
-        if (it != m_fwd.end()) {
-            return it->second;
-        } else {
-            throw unknown_association("Unknown forward mapping");
-        }           
-    }
-
-    inline void to_item(const value_type& v, item0_type& x, item1_base& y) const
-    {
-        if (v < m_inv.size()) {
-            x = m_inv[v].first;
-            y = m_inv[v].second;
-        } else {
-            throw unknown_association("Unknown inverse mapping");
-        }
-    }
-};
-
-template <class label_temp>
-class label_base
-{
-protected:
-    enum {
-        flag_true = 0x10000000,
-        flag_positive = 0x20000000,
-    };
-
-public:
-    typedef label_temp label_type;
-    label_type label;
-
-    label_base()
-    {
-    }
-
-    label_base(const label_type& l) : label(l)
-    {
-    }
-
-    virtual ~label_base()
-    {
-    }
-
-    inline void set_label(const label_type& l)
-    {
-        label = l;
-    }
-
-    inline const label_type& get_label() const
-    {
-        return label;
-    }
-
-    inline void set_label(bool is_true, bool is_positive)
-    {
-        label = 0;
-        if (is_true) label += flag_true;
-        if (is_positive) label += flag_positive;
-    }
-
-    inline bool is_true() const
-    {
-        return (label & flag_true);
-    }
-
-    inline bool is_positive() const
-    {
-        return (label & flag_positive);
-    }
-};
-
 
 /**
  * Sparse attribute vector.
@@ -348,6 +138,11 @@ public:
         cont.push_back(attribute_type(name, value));
     }
 
+    /**
+     * Compute the inner product with a vector.
+     *  @param  v           The vector.
+     *  @retval double      The inner product.
+     */
     template <class vector_type>
     inline double inner_product(const vector_type& v) const
     {
@@ -359,34 +154,11 @@ public:
     }
 
     template <class vector_type>
-    inline void add(vector_type& v, double scale) const
+    inline void add(vector_type& v, const double scale) const
     {
         for (const_iterator it = begin();it != end();++it) {
             v[it->first] += scale * (double)it->second;
         }
-    }
-};
-
-template <class attributes_tmpl, class label_tmpl>
-class labeled_attributes_base : 
-    public attributes_tmpl,
-    public label_base<label_tmpl>
-{
-public:
-    typedef attributes_tmpl attributes_type;
-    typedef label_tmpl label_type;
-
-    labeled_attributes_base()
-    {
-    }
-
-    labeled_attributes_base(const label_type& l) :
-        label_base<label_tmpl>(l)
-    {
-    }
-
-    virtual ~labeled_attributes_base()
-    {
     }
 };
 
@@ -397,7 +169,7 @@ template <class candidate_base>
 class candidates_base
 {
 public:
-    /// A type representing a attributes.
+    /// A type representing an attributes.
     typedef candidate_base candidate_type;
     /// A type providing a container of attributes of all candidates.
     typedef std::vector<candidate_type> candidates_type;
@@ -414,21 +186,21 @@ protected:
 
 public:
     /**
-     * Constructs an instance.
+     * Constructs an object.
      */
     candidates_base()
     {
     }
 
     /**
-     * Destructs an instance.
+     * Destructs the object.
      */
     virtual ~candidates_base()
     {
     }
 
     /**
-     * Erases all the candidates in the instance.
+     * Erases all the candidates in the object.
      */
     inline void clear()
     {
@@ -436,8 +208,8 @@ public:
     }
 
     /**
-     * Tests if the instance is empty.
-     *  @retval bool        \c true if the instance is empty,
+     * Tests if the object has no candidate.
+     *  @retval bool        \c true if the object has no candidate,
      *                      \c false otherwise.
      */
     inline bool empty() const
@@ -446,8 +218,8 @@ public:
     }
 
     /**
-     * Returns the number of candidates for the instance.
-     *  @retval int     The number of candidates associated with the instance.
+     * Returns the number of candidates.
+     *  @retval int     The number of candidates associated with the object.
      */
     inline size_t size() const
     {
@@ -497,9 +269,8 @@ public:
     }
 
     /**
-     * Adds an attribute (id, value) to the end of the vector.
-     *  @param  id          An identifier.
-     *  @param  value       A value.
+     * Adds an candidate to the object.
+     *  @param  candidate   The candidate to be inserted to this object.
      */
     inline void append(const candidate_type& candidate)
     {
@@ -508,79 +279,414 @@ public:
 
     inline candidate_type& new_element()
     {
-        candidates.resize(candidates.size()+1);
+        candidates.push_back(candidate_type());
         return candidates.back();
     }
 };
 
+/**
+ * Group number class.
+ */
 class group_base
 {
-public:
+protected:
     typedef int group_type;
-    group_type group;
+    group_type m_group;
 
-    group_base() : group(0)
+public:
+    /**
+     * Constructs the object.
+     */
+    group_base() : m_group(0)
     {
     }
 
-    group_base(const group_type& _group) : group(_group)
+    /**
+     * Constructs the object.
+     *  @param  group           The group number.
+     */
+    group_base(const group_type& group) : m_group(group)
     {
     }
 
+    /**
+     * Destructs the object.
+     */
     virtual ~group_base()
     {
     }
 
-    inline void set_group(int g)
+    /**
+     * Set the group number.
+     *  @param  group       The group number.
+     */
+    inline void set_group(int group)
     {
-        group = g;
+        m_group = group;
     }
 
+    /**
+     * Get the group number.
+     *  @retval int         The group number.
+     */
     inline int get_group() const
     {
-        return group;
+        return m_group;
     }
 };
 
+
 template <class instance_tmpl>
+class labeled_candidate_base
+{
+public:
+    typedef instance_tmpl instance_type;
+    typedef typename instance_type::attributes_type attributes_type;
+    typedef typename instance_type::label_type label_type;
+
+    const instance_type* instance;
+    label_type label;
+
+    labeled_candidate_base()
+        : instance(NULL), label(-1)
+    {
+    }
+
+    labeled_candidate_base(
+        const instance_type* inst
+        )
+        : instance(inst), label(-1)
+    {
+    }
+
+    labeled_candidate_base(
+        const instance_type* inst,
+        label_type l
+        )
+        : instance(inst), label(l)
+    {
+    }
+
+    labeled_candidate_base(
+        const labeled_candidate_base& rho
+        )
+    {
+        operator=(rho);
+    }
+
+    inline labeled_candidate_base& operator=(
+        const labeled_candidate_base& rho
+        )
+    {
+        instance = rho.instance;
+        label = rho.label;
+        return *this;
+    }
+
+    inline bool is_true() const
+    {
+        return (label == instance->label);
+    }
+
+    template <class vector_type>
+    inline double inner_product(const vector_type& v) const
+    {
+        double s = 0.;
+        typename attributes_type::const_iterator it;
+        for (it = instance->attributes.begin();it != instance->attributes.end();++it) {
+            int fid = instance->ptr_features->to_value(it->first, label, -1);
+            if (0 <= fid) {
+                s += (double)v[fid] * (double)it->second;
+            }
+        }
+        return s;
+    }
+
+    template <class vector_type>
+    inline void add(vector_type& v, double scale) const
+    {
+        typename attributes_type::const_iterator it;
+        for (it = instance->attributes.begin();it != instance->attributes.end();++it) {
+            int fid = instance->ptr_features->to_value(it->first, label, -1);
+            if (0 <= fid) {
+                v[fid] += scale * (double)it->second;
+            }
+        }
+    }
+};
+
+template <
+    class attributes_tmpl,
+    class label_tmpl,
+    class features_tmpl
+>
 class classification_instance_base :
-    public instance_tmpl,
     public group_base
 {
 public:
-    classification_instance_base()
+    typedef attributes_tmpl attributes_type;
+    typedef label_tmpl label_type;
+    typedef features_tmpl features_type;
+    typedef classification_instance_base<attributes_type, label_type, features_type> instance_type;
+
+    typedef labeled_candidate_base<instance_type> candidate_type;
+
+    attributes_type attributes;
+    label_type label;
+
+public:
+    const features_type* ptr_features;
+    const label_type* ptr_num_labels;
+
+    class candidate_iterator
+    {
+    public:
+        candidate_type candidate;
+
+        candidate_iterator()
+        {
+        }
+
+        candidate_iterator(const instance_type& inst, label_type label)
+            : candidate(&inst, label)
+        {
+        }
+
+        inline candidate_iterator& operator=(const candidate_iterator& x)
+        {
+            candidate = x.candidate;
+            return *this;
+        }
+
+        inline candidate_type& operator*() const
+        {
+            return candidate;
+        }
+
+        inline const candidate_type* operator->() const
+        {
+            return &candidate;
+        }
+
+        inline candidate_iterator& operator++()
+        {
+            candidate.label++;
+            return *this;
+        }
+
+        inline candidate_iterator& operator--()
+        {
+            candidate.label--;
+            return *this;
+        }
+
+        inline bool operator==(const candidate_iterator& x)
+        {
+            return (candidate.label == x.candidate.label);
+        }
+
+        inline bool operator!=(const candidate_iterator& x)
+        {
+            return !operator==(x);
+        }
+    };
+
+    typedef candidate_iterator const_iterator;
+
+public:
+    classification_instance_base() : features(NULL), ptr_num_labels(NULL)
+    {
+    }
+
+    classification_instance_base(const features_type* features, const label_type* num_labels)
+        : ptr_features(features), ptr_num_labels(num_labels)
     {
     }
 
     virtual ~classification_instance_base()
     {
     }
+
+    inline const_iterator begin() const
+    {
+        return candidate_iterator(*this, 0);
+    }
+
+    inline const_iterator end() const
+    {
+        return candidate_iterator(*this, *ptr_num_labels);
+    }
+
+    inline label_type size() const
+    {
+        return *ptr_num_labels;
+    }
 };
 
-template <class instance_tmpl>
+
+template <
+    class attributes_tmpl,
+    class label_tmpl,
+    class features_tmpl
+>
 class selection_instance_base :
-    public classification_instance_base<instance_tmpl>
+    public group_base
 {
 public:
-    typedef typename instance_tmpl::label_type label_type;
-    typedef candidates_base<label_base<label_type> > labels_type;
-    labels_type labels;
+    typedef attributes_tmpl attributes_type;
+    typedef label_tmpl label_type;
+    typedef features_tmpl features_type;
+    typedef selection_instance_base<attributes_type, label_type, features_type> instance_type;
 
-    selection_instance_base()
+    typedef labeled_candidate_base<instance_type> candidate_type;
+
+    typedef candidates_base<label_type> labels_type;
+    typedef typename labels_type::const_iterator labels_iterator;
+
+    attributes_type attributes;
+    label_type label;
+    labels_type candidates;
+
+public:
+    const features_type* ptr_features;
+    const label_type* ptr_num_labels;
+
+public:
+    class iterator
+    {
+    public:
+        labels_iterator it;
+        labels_iterator last;
+        candidate_type candidate;
+
+        iterator()
+        {
+        }
+
+        iterator(const instance_type& inst, labels_iterator iter, labels_iterator end)
+            : candidate(&inst), it(iter), last(end)
+        {
+            set();
+        }
+
+        inline void set()
+        {
+            candidate.label = (it != last ? *it : -1);
+        }
+
+        inline iterator& operator=(const iterator& x)
+        {
+            it = x.it;
+            last = x.last;
+            candidate = x.candidate;
+            return *this;
+        }
+
+        inline candidate_type& operator*() const
+        {
+            return candidate;
+        }
+
+        inline const candidate_type* operator->() const
+        {
+            return &candidate;
+        }
+
+        inline iterator& operator++()
+        {
+            ++it;
+            set();
+            return *this;
+        }
+
+        inline iterator& operator--()
+        {
+            --it;
+            set();
+            return *this;
+        }
+
+        inline bool operator==(const iterator& x)
+        {
+            return (it == x.it);
+        }
+
+        inline bool operator!=(const iterator& x)
+        {
+            return !operator==(x);
+        }
+    };
+
+    typedef iterator const_iterator;
+
+    selection_instance_base() : features(NULL)
+    {
+    }
+
+    selection_instance_base(const features_type* features, const label_type* num_labels = NULL)
+        : ptr_features(features)
     {
     }
 
     virtual ~selection_instance_base()
     {
     }
+
+    inline const_iterator begin() const
+    {
+        return const_iterator(*this, candidates.begin(), candidates.end());
+    }
+
+    inline const_iterator end() const
+    {
+        return const_iterator(*this, candidates.end(), candidates.end());
+    }
+
+    inline label_type size() const
+    {
+        return (label_type)candidates.size();
+    }
 };
 
-template <class instance_tmpl>
+template <
+    class attributes_tmpl,
+    class label_tmpl
+>
+class ranking_candidate_base : 
+    public attributes_tmpl
+{
+public:
+    typedef attributes_tmpl attributes_type;
+    typedef label_tmpl label_type;
+
+    label_type label;
+
+    ranking_candidate_base() : label(0)
+    {
+    }
+
+    virtual ~ranking_candidate_base()
+    {
+    }
+
+    inline bool is_true() const
+    {
+        return (label != 0);
+    }
+};
+
+template <class candidate_tmpl>
 class ranking_instance_base :
-    public candidates_base<instance_tmpl>,
+    public candidates_base<candidate_tmpl>,
     public group_base
 {
 public:
+    typedef candidate_tmpl candidate_type;
+    typedef typename candidates_base<candidate_tmpl> candidates_type;
+
+    typedef typename candidate_type::attributes_type attributes_type;
+    typedef typename candidate_type::label_type label_type;
+
     ranking_instance_base()
     {
     }
@@ -590,20 +696,141 @@ public:
     }
 };
 
+template <
+    class instance_tmpl,
+    class attribute_quark_tmpl
+>
+class ranking_data_base
+{
+public:
+    typedef instance_tmpl instance_type;
+    typedef attribute_quark_tmpl attribute_quark_type;
 
+    typedef typename instance_type::label_type label_type;
 
+    typedef std::vector<instance_type> instances_type;
+    typedef typename instances_type::size_type size_type;
+    typedef typename instances_type::iterator iterator;
+    typedef typename instances_type::const_iterator const_iterator;
 
-typedef basic_quark<int> quark;
-typedef basic_quark2<int, int> quark2;
+    instances_type instances;
+    attribute_quark_type attributes;
+
+    ranking_data_base()
+    {
+    }
+
+    virtual ~ranking_data_base()
+    {
+    }
+
+    inline void clear()
+    {
+        instances.clear();
+    }
+
+    inline bool empty() const
+    {
+        return instances.empty();
+    }
+
+    inline size_type size() const
+    {
+        return instances.size();
+    }
+
+    inline iterator begin()
+    {
+        return instances.begin();
+    }
+
+    inline const_iterator begin() const
+    {
+        return instances.begin();
+    }
+
+    inline iterator end()
+    {
+        return instances.end();
+    }
+
+    inline const_iterator end() const
+    {
+        return instances.end();
+    }
+
+    inline instance_type& back()
+    {
+        return instances.back();
+    }
+
+    inline instance_type& new_element()
+    {
+        instances.push_back(instance_type());
+        return back();
+    }
+
+    inline size_type num_features() const
+    {
+        return attributes.size();
+    }
+};
+
+template <
+    class instance_tmpl,
+    class attribute_quark_tmpl,
+    class label_quark_tmpl,
+    class features_tmpl
+>
+class classification_data_base :
+    public ranking_data_base<instance_tmpl, attribute_quark_tmpl>
+{
+public:
+    typedef label_quark_tmpl label_quark_type;
+    typedef features_tmpl features_type;
+
+    label_quark_type labels;
+    features_type features;
+
+    label_type num_labels;
+
+    classification_data_base()
+    {
+    }
+
+    virtual ~classification_data_base()
+    {
+    }
+
+    inline instance_type& back()
+    {
+        return instances.back();
+    }
+
+    inline instance_type& new_element()
+    {
+        instances.push_back(instance_type(&features, &num_labels));
+        return back();
+    }
+
+    inline size_type num_features() const
+    {
+        return features.size();
+    }
+};
+
 typedef sparse_attributes_base<int, double> sparse_attributes;
-typedef labeled_attributes_base<sparse_attributes, int> instance;
-typedef classification_instance_base<instance> cinstance;
-typedef selection_instance_base<instance> sinstance;
-typedef ranking_instance_base<instance> rinstance;
+typedef quark2_base<int, int> attribute_label_features;
 
-typedef basic_quark<std::string> string_quark;
-typedef basic_quark2<std::string, std::string> string_quark2;
-
+typedef ranking_candidate_base<sparse_attributes, int> rcandidate;
+typedef ranking_candidate_base<sparse_attributes, int> binstance;
+typedef ranking_instance_base<rcandidate> rinstance;
+typedef selection_instance_base<sparse_attributes, int, attribute_label_features> sinstance;
+typedef classification_instance_base<sparse_attributes, int, attribute_label_features> cinstance;
+typedef ranking_data_base<binstance, quark> sbdata;
+typedef ranking_data_base<rinstance, quark> srdata;
+typedef classification_data_base<cinstance, quark, quark, attribute_label_features> scdata;
+typedef classification_data_base<sinstance, quark, quark, attribute_label_features> ssdata;
 
 };
 

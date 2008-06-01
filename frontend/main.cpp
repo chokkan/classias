@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
                 ret = selector_train(opt);
                 break;
             case option::TYPE_RANKER:
-                //ret = ranker_train(opt);
+                ret = ranker_train(opt);
                 break;
             }
         } else if (opt.mode == option::MODE_TAG) {

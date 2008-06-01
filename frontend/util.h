@@ -113,16 +113,10 @@ get_name_value(
     }
 }
 
-template <
-    class data_type,
-    class attribute_quark_type,
-    class label_quark_type
->
+template <class data_type>
 static void
 read_data(
     data_type& data,
-    attribute_quark_type& attrs,
-    label_quark_type& labels,
     const option& opt
     )
 {
@@ -133,14 +127,14 @@ read_data(
     if (opt.files.empty()) {
         // Read the data from STDIN.
         os << "STDIN" << std::endl;
-        read_stream(std::cin, data, attrs, labels, 0);
+        read_stream(std::cin, data, 0);
     } else {
         // Read the data from files.
         for (int i = 0;i < (int)opt.files.size();++i) {
             std::ifstream ifs(opt.files[i].c_str());
             if (!ifs.fail()) {
                 os << "File (" << i+1 << "/" << opt.files.size() << ") : " << opt.files[i] << std::endl;
-                read_stream(ifs, data, attrs, labels, i);
+                read_stream(ifs, data, i);
             }
             ifs.close();
         }
@@ -157,26 +151,20 @@ split_data(
     int i = 0;
     typename data_type::iterator it;
     for (it = data.begin();it != data.end();++it, ++i) {
-        it->group = i % opt.split;
+        it->set_group(i % opt.split);
     }
     return opt.split;
 }
 
-template <
-    class data_type,
-    class attribute_quark_type,
-    class label_quark_type
->
+template <class data_type>
 static int
 read_dataset(
     data_type& data,
-    attribute_quark_type& attrs,
-    label_quark_type& labels,
     const option& opt
     )
 {
     // Read the training data.
-    read_data(data, attrs, labels, opt);
+    read_data(data, opt);
 
     // Split the training data if necessary.
     if (0 < opt.split) {
@@ -200,11 +188,6 @@ timestamp(std::basic_ostream<char_type, traits_type>& os)
 
     os << str;
     return (os);
-}
-
-inline bool is_positive_label(const std::string& str)
-{
-    return (str.compare(0, 1, "-") != 0);
 }
 
 #if 0

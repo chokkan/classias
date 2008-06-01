@@ -41,8 +41,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(SolutionDir)include;win32"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
+				AdditionalIncludeDirectories="$(SolutionDir)include;$(SolutionDir)win32;win32"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;HAVE_CONFIG_H"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -107,8 +107,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="$(SolutionDir)include;win32"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				AdditionalIncludeDirectories="$(SolutionDir)include;$(SolutionDir)win32;win32"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;HAVE_CONFIG_H"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -177,7 +177,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\include\classias\logress.h"
+				>
+			</File>
+			<File
 				RelativePath="..\include\classias\maxent.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\classias\quark.h"
 				>
 			</File>
 		</Filter>

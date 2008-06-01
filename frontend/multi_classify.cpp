@@ -43,6 +43,7 @@
 #include <iterator>
 
 #include <classias/base.h>
+#include <classias/feature.h>
 
 #include "option.h"
 #include "tokenize.h"
@@ -75,7 +76,7 @@ read_line(
     }
 
     // Set the correct label.
-    instance.set_label(labels(*field));
+    instance.label = labels(*field);
 
     // Loop over attributes.
     while (field.next()) {
@@ -83,27 +84,21 @@ read_line(
             double value;
             std::string name;
             get_name_value(*field, name, value);
-            instance.append(attrs(name), value);
+            instance.attributes.append(attrs(name), value);
         }
     }
 }
 
-template <
-    class data_type,
-    class attribute_quark_type,
-    class label_quark_type
->
+template <class data_type>
 static void
 read_stream(
     std::istream& is,
     data_type& data,
-    attribute_quark_type& attrs,
-    label_quark_type& labels,
     int group = 0
     )
 {
     int lines = 0;
-    typedef typename data_type::value_type instance_type;
+    typedef typename data_type::instance_type instance_type;
 
     for (;;) {
         // Read a line.
@@ -125,55 +120,30 @@ read_stream(
         }
 
         // Construct an instance object inside of the vector for efficiency.
-        data.resize(data.size()+1);
-        instance_type& inst = data.back();
+        instance_type& inst = data.new_element();
 
         // Initialize the instance object.
         inst.set_group(group);
-        read_line(line, inst, attrs, labels, lines);
+        read_line(line, inst, data.attributes, data.labels, lines);
     }
 }
 
 template <
-    class training_data_type,
-    class features_type,
-    class attribute_quark_type,
-    class label_quark_type,
-    class raw_data_iterator_type
->
-static void
-convert_to_ranking(
-    training_data_type& ddata,
-    features_type& features,
-    attribute_quark_type& attrs,
-    label_quark_type& labels,
-    raw_data_iterator_type begin,
-    raw_data_iterator_type end
-    )
-{
-    classias::classification_to_ranking(ddata, features, attrs, labels, begin, end);
-}
-
-template <
-    class features_type,
-    class value_type,
-    class attribute_quark_type,
-    class label_quark_type
+    class data_type,
+    class value_type
 >
 static void
 output_model(
-    features_type& features,
+    data_type& data,
     const value_type* weights,
-    attribute_quark_type& attrs,
-    label_quark_type& labels,
     const option& opt
     )
 {
     std::ofstream ofs(opt.model.c_str());
-    classias::output_model(ofs, features, weights, attrs, labels);
+    classias::output_model(ofs, data.features, weights, data.attributes, data.labels);
 }
 
 int multiclass_train(option& opt)
 {
-    return train_al<classias::cinstance>(opt);
+    return train_al<classias::scdata>(opt);
 }

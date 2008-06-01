@@ -12,27 +12,29 @@ namespace classias
 {
 
 /**
- * Training a log-linear model using the maximum entropy framework.
- *  @param  feature_base        Feature class.
- *  @param  attributes_base     Content class.
- *  @param  instance_base       Instance class.
- *  @param  data_base           Data class.
- *  @param  value_type          
+ * Training a log-linear model using the maximum entropy modeling.
+ *  @param  data_tmpl           Training data class.
+ *  @param  value_tmpl          The type for computation.
  */
-template <class data_iterator_base>
+template <
+    class data_tmpl,
+    class value_tmpl = double
+>
 class trainer_maxent : public lbfgs_solver
 {
-public:
-    ///
-    typedef double value_type;
-
-    /// A type representing this class.
-    typedef trainer_maxent<data_iterator_base> this_class;
-    /// A type representing a data_base for training.
-    typedef data_iterator_base data_iterator_type;
-    /// 
-    typedef typename data_iterator_type::value_type instance_type;
+protected:
+    /// A type representing a data set for training.
+    typedef data_tmpl data_type;
+    /// A type representing values for internal computations.
+    typedef value_tmpl value_type;
+    /// A synonym of this class.
+    typedef trainer_maxent<data_type, value_type> this_class;
+    /// A type representing an instance in the training data.
+    typedef typename data_type::instance_type instance_type;
+    /// A type representing a candidate for an instance.
     typedef typename instance_type::candidate_type candidate_type;
+    /// A type providing a read-only random-access iterator for instances.
+    typedef typename data_type::const_iterator const_iterator;
 
     /// An array [K] of observation expectations.
     value_type *m_oexps;
@@ -43,7 +45,7 @@ public:
     /// An array [M] of scores for candidate labels.
     value_type *m_scores;
 
-    /// A group number for holdout evaluation.
+    /// A group number used for holdout evaluation.
     int m_holdout;
     /// Maximum number of iterations.
     int m_maxiter;
@@ -54,10 +56,11 @@ public:
     /// L2-regularization constant.
     value_type m_c2;
 
-    /// A data_base for training.
-    data_iterator_type* m_begin;
-    data_iterator_type* m_end;
+    /// A data set for training.
+    const data_type* m_data;
+    /// An output stream to which this object outputs log messages.
     std::ostream* m_os;
+    /// An internal variable (previous timestamp).
     clock_t m_clk_prev;
 
 public:
@@ -93,8 +96,7 @@ public:
         m_weights = 0;
         m_scores = 0;
 
-        m_begin = NULL;
-        m_end = NULL;
+        m_data = NULL;
         m_os = NULL;
     }
 
@@ -135,12 +137,15 @@ public:
     }
 
     virtual value_type lbfgs_evaluate(
-        const value_type *x, value_type *g, const int n, const value_type step)
+        const value_type *x,
+        value_type *g,
+        const int n,
+        const value_type step
+        )
     {
         int i;
         value_type loss = 0, norm = 0;
-        data_iterator_type begin = *m_begin;
-        data_iterator_type end = *m_end;
+        const data_type& data = *m_data;
 
         // Initialize the model expectations as zero.
         for (i = 0;i < n;++i) {
@@ -148,26 +153,25 @@ public:
         }
 
         // For each instance in the data.
-        for (data_iterator_type iti = begin;iti != end;++iti) {
+        for (const_iterator iti = data.begin();iti != data.end();++iti) {
             value_type logp = 0.;
             value_type norm = 0.;
-            const instance_type& inst = *iti;
             typename instance_type::const_iterator itc;
 
             // Exclude instances for holdout evaluation.
-            if (inst.group == m_holdout) {
+            if (iti->get_group() == m_holdout) {
                 continue;
             }
 
             // Compute score[i] for each candidate #i.
-            for (i = 0, itc = inst.begin();itc != inst.end();++i, ++itc) {
+            for (i = 0, itc = iti->begin();itc != iti->end();++i, ++itc) {
                 m_scores[i] = itc->inner_product(x);
                 if (itc->is_true()) logp = m_scores[i];
                 norm = logsumexp(norm, m_scores[i], (i == 0));
-           }
+            }
 
             // Accumulate the model expectations of attributes.
-            for (i = 0, itc = inst.begin();itc != inst.end();++i, ++itc) {
+            for (i = 0, itc = iti->begin();itc != iti->end();++i, ++itc) {
                 itc->add(m_mexps, std::exp(m_scores[i] - norm));
             }
 
@@ -248,11 +252,13 @@ public:
     }
 
     int train(
-        data_iterator_type& begin,
-        data_iterator_type& end, std::ostream& os, int holdout = -1)
+        const data_type& data,
+        std::ostream& os,
+        int holdout = -1
+        )
     {
         size_t M = 0;
-        const size_t K = count_attributes(begin, end);
+        const size_t K = data.num_features();
 
         // Initialize feature expectations and weights.
         m_oexps = new double[K];
@@ -279,16 +285,15 @@ public:
         os << std::endl;
 
         // Compute observation expectations of the features.
-        for (data_iterator_type iti = begin;iti != end;++iti) {
+        for (const_iterator iti = data.begin();iti != data.end();++iti) {
             // Skip instances for holdout evaluation.
-            if (iti->group == m_holdout) {
+            if (iti->get_group() == m_holdout) {
                 continue;
             }
 
             // Compute the observation expectations.
-            const instance_type& inst = *iti;
             typename instance_type::const_iterator itc;
-            for (itc = inst.begin();itc != inst.end();++itc) {
+            for (itc = iti->begin();itc != iti->end();++itc) {
                 if (itc->is_true()) {
                     // m_oexps[k] += 1.0 * (*itc)[k].
                     itc->add(m_oexps, 1.0);
@@ -296,17 +301,18 @@ public:
             }
 
             // Store the maximum number of candidates.
-            if (M < inst.size()) {
-                M = inst.size();
+            if (M < iti->size()) {
+                M = iti->size();
             }
         }
 
-        // Call the L-BFGS solver.
+        // Initialze the variables used by callback functions.
         m_os = &os;
-        m_begin = &begin;
-        m_end = &end;
+        m_data = &data;
         m_clk_prev = clock();
         m_scores = new double[M];
+
+        // Call the L-BFGS solver.
         int ret = lbfgs_solve((const int)K, m_weights, NULL, m_epsilon, m_c1);
 
         // Report the result from the L-BFGS solver.
@@ -322,28 +328,21 @@ public:
     void holdout_evaluation()
     {
         std::ostream& os = *m_os;
-        int num_total = 0;
-        int num_tp = 0, num_fp = 0;
-        int num_tn = 0, num_fn = 0;
-        data_iterator_type begin = *m_begin;
-        data_iterator_type end = *m_end;
+        const data_type& data = *m_data;
+        int num_correct = 0, num_total = 0;
 
         // Loop over instances.
-        for (data_iterator_type iti = begin;iti != end;++iti) {
-            const instance_type& inst = *iti;
-
+        for (const_iterator iti = data.begin();iti != data.end();++iti) {
             // Exclude instances for holdout evaluation.
-            if (inst.group != m_holdout) {
+            if (iti->get_group() != m_holdout) {
                 continue;
             }
 
             // Compute the score for each candidate #i.
-            int i;
             value_type score_max = -DBL_MAX;
             typename instance_type::const_iterator itc;
-            typename instance_type::const_iterator itc_max = inst.end();
-            typename instance_type::const_iterator itc_ref = inst.end();
-            for (i = 0, itc = inst.begin();itc != inst.end();++i, ++itc) {
+            typename instance_type::const_iterator itc_max = iti->end();
+            for (itc = iti->begin();itc != iti->end();++itc) {
                 value_type score = itc->inner_product(m_weights);
 
                 // Store the candidate that yields the maximum score.
@@ -351,49 +350,21 @@ public:
                     score_max = score;
                     itc_max = itc;
                 }
-
-                // Store the candidate with the reference label.
-                if (itc->is_true()) {
-                    itc_ref = itc;
-                }
             }
 
             // Update the 2x2 confusion matrix.
             if (itc_max->is_true()) {
-                if (itc_max->is_positive()) {
-                    ++num_tp;
-                } else {
-                    ++num_tn;
-                }
-            } else {
-                if (itc_max->is_positive()) {
-                    ++num_fp;
-                } else {
-                    ++num_fn;
-                }
+                ++num_correct;
             }
             ++num_total;
         }
 
         // Report accuracy, precision, recall, and f1 score.
         double accuracy = 0.;
-        double precision = 0., recall = 0., fscore = 0.;
         if (0 < num_total) {
-            accuracy = (num_tp + num_tn) / (double)num_total;
+            accuracy = num_correct / (double)num_total;
         }
-        if (0 < num_tp + num_fp) {
-            precision = num_tp / (double)(num_tp + num_fp);
-        }
-        if (0 < num_tp + num_fn) {
-            recall = num_tp / (double)(num_tp + num_fn);
-        }
-        if (0 < precision + recall) {
-            fscore = 2 * precision * recall / (precision + recall);
-        }
-        os << "Accuracy: " << accuracy << " (" << (num_tp + num_tn) << "/" << num_total << ")" << std::endl;
-        os << "Precision: " << precision << " (" << num_tp << "/" << (num_tp + num_fp) << ")" << std::endl;
-        os << "Recall: " << recall << " (" << num_tp << "/" << (num_tp + num_fn) << ")" << std::endl;
-        os << "F1 score: " << fscore << std::endl;
+        os << "Accuracy: " << accuracy << " (" << num_correct << "/" << num_total << ")" << std::endl;
     }
 
 protected:
@@ -412,25 +383,6 @@ protected:
             return vmax;
         else
             return vmax + std::log(std::exp(vmin - vmax) + 1.0);
-    }
-
-    static int count_attributes(data_iterator_type begin, data_iterator_type end)
-    {
-        int K = 0;
-        for (data_iterator_type iti = begin;iti != end;++iti) {
-            const instance_type& inst = *iti;
-            typename instance_type::const_iterator itc;
-            for (itc = inst.begin();itc != inst.end();++itc) {
-                const candidate_type& cand = *itc;
-                typename candidate_type::const_iterator ita;
-                for (ita = cand.begin();ita != cand.end();++ita) {
-                    if (K < ita->first) {
-                        K = ita->first;
-                    }
-                }
-            }
-        }
-        return K+1;
     }
 };
 

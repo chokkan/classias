@@ -51,15 +51,13 @@
 
 template <
     class instance_type,
-    class attribute_quark_type,
-    class label_quark_type
+    class attribute_quark_type
 >
 static void
 read_line(
     const std::string& line,
     instance_type& instance,
     attribute_quark_type& attrs,
-    label_quark_type& labels,
     int lines = 0
     )
 {
@@ -77,8 +75,7 @@ read_line(
     }
 
     // Set the binary class.
-    bool is_true = (*field == "+1" || *field == "1" || *field == "-1");
-    bool is_positive = (field->compare(0, 1, "-") != 0);
+    bool is_true = (*field == "+1" || *field == "1");
 
     // Move to the label.
     if (!field.next()) {
@@ -87,7 +84,7 @@ read_line(
 
     // Create a new candidate.
     candidate_type& cand = instance.new_element();
-    cand.set_label(is_true, is_positive);
+    cand.label = is_true ? 1 : 0;
 
     // Set attributes for the instance.
     while (field.next()) {
@@ -101,21 +98,17 @@ read_line(
 }
 
 template <
-    class data_type,
-    class attribute_quark_type,
-    class label_quark_type
+    class data_type
 >
 static void
 read_stream(
     std::istream& is,
     data_type& data,
-    attribute_quark_type& attrs,
-    label_quark_type& labels,
     int group = 0
     )
 {
     int lines = 0;
-    typedef typename data_type::value_type instance_type;
+    typedef typename data_type::instance_type instance_type;
 
     for (;;) {
         // Read a line.
@@ -138,28 +131,24 @@ read_stream(
 
         if (line.compare(0, 3, "BOI") == 0) {
             // Start of a new instance.
-            data.resize(data.size()+1);
+            data.new_element();
         } else if (line.compare(0, 3, "EOI") == 0) {
             // End of a new instance.
         } else {
             // A new candidate.
-            read_line(line, data.back(), attrs, labels, lines);
+            read_line(line, data.back(), data.attributes, lines);
         }
     }
 }
 
 template <
-    class features_type,
-    class value_type,
-    class attribute_quark_type,
-    class label_quark_type
+    class data_type,
+    class value_type
 >
 static void
 output_model(
-    features_type& features,
+    data_type& data,
     const value_type* weights,
-    attribute_quark_type& attrs,
-    label_quark_type& labels,
     const option& opt
     )
 {
@@ -169,6 +158,5 @@ output_model(
 
 int ranker_train(option& opt)
 {
-    train_a<classias::rinstance>(opt);
-    return 0;
+    return train_a<classias::srdata>(opt);
 }
