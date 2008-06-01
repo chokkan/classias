@@ -205,4 +205,3 @@ typedef quark2_base<std::string, std::string> quark2;
 };
 
 #endif/*__CLASSIAS_QUARK_H__*/
-	

@@ -496,7 +496,7 @@ public:
     typedef candidate_iterator const_iterator;
 
 public:
-    classification_instance_base() : features(NULL), ptr_num_labels(NULL)
+    classification_instance_base() : ptr_features(NULL), ptr_num_labels(NULL)
     {
     }
 
@@ -621,7 +621,7 @@ public:
 
     typedef iterator const_iterator;
 
-    selection_instance_base() : features(NULL)
+    selection_instance_base() : ptr_features(NULL)
     {
     }
 
@@ -684,7 +684,7 @@ class ranking_instance_base :
 {
 public:
     typedef candidate_tmpl candidate_type;
-    typedef typename candidates_base<candidate_tmpl> candidates_type;
+    typedef candidates_base<candidate_tmpl> candidates_type;
 
     typedef typename candidate_type::attributes_type attributes_type;
     typedef typename candidate_type::label_type label_type;
@@ -788,6 +788,13 @@ class classification_data_base :
     public ranking_data_base<instance_tmpl, attribute_quark_tmpl>
 {
 public:
+    typedef instance_tmpl instance_type;
+    typedef attribute_quark_tmpl attribute_quark_type;
+    typedef ranking_data_base<instance_tmpl, attribute_quark_tmpl> base_type;
+
+    typedef typename base_type::label_type label_type;
+    typedef typename base_type::size_type size_type;
+
     typedef label_quark_tmpl label_quark_type;
     typedef features_tmpl features_type;
 
