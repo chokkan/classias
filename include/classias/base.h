@@ -811,11 +811,6 @@ public:
     {
     }
 
-    inline instance_type& back()
-    {
-        return instances.back();
-    }
-
     inline instance_type& new_element()
     {
         instances.push_back(instance_type(&features, &num_labels));
