@@ -813,8 +813,8 @@ public:
 
     inline instance_type& new_element()
     {
-        instances.push_back(instance_type(&features, &num_labels));
-        return back();
+        this->instances.push_back(instance_type(&features, &num_labels));
+        return this->back();
     }
 
     inline size_type num_features() const
