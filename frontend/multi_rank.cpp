@@ -152,8 +152,19 @@ output_model(
     const option& opt
     )
 {
-    std::ofstream ofs(opt.model.c_str());
-    //classias::output_model(ofs, features, trainer.get_weights(), attrs, labels);
+    typedef typename data_type::attribute_quark_type attribute_quark_type;
+    typedef typename attribute_quark_type::value_type attribute_type;
+    const attribute_quark_type& attributes = data.attributes;
+
+    // Open a model file for writing.
+    std::ofstream os(opt.model.c_str());
+
+    for (attribute_type i = 0;i < attributes.size();++i) {
+        value_type w = weights[i];
+        if (w != 0.) {
+            os << w << '\t' << attributes.to_item(i) << std::endl;
+        }
+    }
 }
 
 int ranker_train(option& opt)
