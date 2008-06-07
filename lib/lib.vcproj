@@ -177,6 +177,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\include\classias\linear.h"
+				>
+			</File>
+			<File
 				RelativePath="..\include\classias\logress.h"
 				>
 			</File>

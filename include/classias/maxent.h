@@ -100,35 +100,36 @@ public:
         m_os = NULL;
     }
 
-    bool set(const std::string& name, int value)
+    static bool parse_param(const std::string& param, const std::string& name, std::string& value)
     {
-        if (name == "holdout") {
-            m_holdout = value;
-        } else if (name == "maxiter") {
-            m_maxiter = value;
+        if (param.compare(0, name.length(), name) == 0) {
+            value = param.substr(name.length());
+            return true;
         } else {
             return false;
         }
-        return true;
     }
 
-    bool set(const std::string& name, double value)
+    bool set(const std::string& param)
     {
-        if (name == "epsilon") {
-            m_epsilon = value;
-        } else if (name == "sigma1") {
-            m_c1 = (value <= 0.) ? 0. : 1.0 / value;
-        } else if (name == "sigma2") {
-            m_c2 = (value <= 0.) ? 0. : 1.0 / (value * value);
-        } else {
-            return false;
+        std::string str;
+
+        if (parse_param(param, "regularization.l1=", str)) {
+            double d = std::atoi(str.c_str());
+            m_c1 = (d <= 0.) ? 0. : 1.0 / d;
+            return true;
+        } else if (parse_param(param, "regularization.l2=", str)) {
+            double d = std::atoi(str.c_str());
+            m_c2 = (d <= 0.) ? 0. : 1.0 / d;
+            return true;
+        } else if (parse_param(param, "lbfgs.maxiter=", str)) {
+            int i = std::atoi(str.c_str());
+            m_maxiter = i;
+            return true;
+        } else if (parse_param(param, "lbfgs.epsilon=", str)) {
+            m_epsilon = std::atoi(str.c_str());
+            return true;
         }
-        return true;
-    }
-
-    bool set(const std::string& name, const std::string& value)
-    {
-        return false;
     }
 
     const value_type* get_weights() const

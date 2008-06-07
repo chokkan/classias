@@ -38,22 +38,34 @@ public:
             mode = MODE_HELP;
 
         ON_OPTION_WITH_ARG(SHORTOPT('f') || LONGOPT("task"))
-            if (strcmp(arg, "multiclass") == 0 || strcmp(arg, "m") == 0) {
+            if (strcmp(arg, "binary") == 0 || strcmp(arg, "b") == 0) {
+                type = TYPE_BICLASS;
+            } else if (strcmp(arg, "multiclass") == 0 || strcmp(arg, "m") == 0) {
                 type = TYPE_MULTICLASS;
             } else if (strcmp(arg, "selection") == 0 || strcmp(arg, "s") == 0) {
                 type = TYPE_SELECTOR;
             } else if (strcmp(arg, "ranking") == 0 || strcmp(arg, "r") == 0) {
                 type = TYPE_RANKER;
-            } else if (strcmp(arg, "biclass") == 0 || strcmp(arg, "b") == 0) {
-                type = TYPE_BICLASS;
             } else {
                 std::stringstream ss;
-                ss << "unrecognized task type: " << arg;
+                ss << "unknown task type specified: " << arg;
                 throw invalid_value(ss.str());
             }
 
-        ON_OPTION(SHORTOPT('u') || LONGOPT("unify"))
-            unify = true;
+        ON_OPTION_WITH_ARG(SHORTOPT('m') || LONGOPT("model"))
+            model = arg;
+
+        ON_OPTION_WITH_ARG(SHORTOPT('a') || LONGOPT("algorithm"))
+            if (strcmp(arg, "MaxEnt") == 0) {
+            } else {
+                std::stringstream ss;
+                ss << "unknown training algorithm specified: " << arg;
+                throw invalid_value(ss.str());
+            }
+            algorithm = arg;
+
+        ON_OPTION_WITH_ARG(SHORTOPT('p') || LONGOPT("set"))
+            params.push_back(arg);
 
         ON_OPTION_WITH_ARG(SHORTOPT('g') || LONGOPT("split"))
             split = atoi(arg);
@@ -63,23 +75,6 @@ public:
 
         ON_OPTION(SHORTOPT('x') || LONGOPT("cross-validate"))
             cross_validation = true;
-
-        ON_OPTION_WITH_ARG(SHORTOPT('m') || LONGOPT("model"))
-            model = arg;
-
-        ON_OPTION_WITH_ARG(SHORTOPT('a') || LONGOPT("algorithm"))
-            if (strcmp(arg, "MLE") != 0 && strcmp(arg, "L1") != 0 && strcmp(arg, "L2") != 0) {
-                std::stringstream ss;
-                ss << "unrecognized training algorithm: " << arg;
-                throw invalid_value(ss.str());
-            }
-            algorithm = arg;
-
-        ON_OPTION_WITH_ARG(SHORTOPT('s') || LONGOPT("sigma"))
-            sigma = atof(arg);
-
-        ON_OPTION_WITH_ARG(SHORTOPT('i') || LONGOPT("maxiter"))
-            maxiter = atoi(arg);
 
     END_OPTION_MAP()
 };
@@ -93,40 +88,47 @@ static void usage(std::ostream& os, const char *argv0)
     os << "          instances in each file; if no file is specified, the tool reads" << std::endl;
     os << "          a data set from STDIN" << std::endl;
     os << std::endl;
-    os << "OPTIONS:" << std::endl;
+    os << "COMMANDS:" << std::endl;
     os << "  -l, --learn           train a model from the training set" << std::endl;
     os << "  -t, --tag             tag the data with the model (specified by -m option)" << std::endl;
+    os << "  -h, --help            show this message and exit" << std::endl;
+    os << std::endl;
+    os << "COMMON OPTIONS:" << std::endl;
     os << "  -f, --task=TYPE       specify a task type (DEFAULT='classification'):" << std::endl;
-    os << "      b, biclass            an instance consists of an attribute vector;" << std::endl;
-    os << "                            an instance label is boolean, 0 or 1" << std::endl;
+    os << "      b, binary             an instance consists of an attribute vector;" << std::endl;
+    os << "                            an instance label is boolean, 0 or 1;" << std::endl;
+    os << "                            features are identical to attributes" << std::endl;
     os << "      m, multiclass         an instance consists of an attribute vector;" << std::endl;
     os << "                            an instance label is chosen from all of the labels" << std::endl;
-    os << "                            found in the training set" << std::endl;
+    os << "                            found in the training set; features are represented" << std::endl;
+    os << "                            by Cartesian products of attributes and labels" << std::endl;
     os << "      s, selection          an instance consists of an attribute vector;" << std::endl;
     os << "                            an instance label is chosen from candidate labels" << std::endl;
-    os << "                            explicitly associated with the instance" << std::endl;
+    os << "                            specified by the instance; features are represented" << std::endl;
+    os << "                            by Cartesian products of attributes and labels" << std::endl;
     os << "      r, ranking            an instance consists of candidates each of which" << std::endl;
     os << "                            has an attribute vector; a candidate that yields" << std::endl;
-    os << "                            the highest score is chosen" << std::endl;
-    os << "  -u, --unify           unify multiple attributes with the same identifier into" << std::endl;
-    os << "                        a single attribute" << std::endl;
+    os << "                            the highest score is chosen; features are identical" << std::endl;
+    os << "                            to attributes" << std::endl;
+    os << "  -m, --model=FILE      store/load a model to/from FILE (DEFAULT='')" << std::endl;
+    os << std::endl;
+    os << "TRAINING OPTIONS:" << std::endl;
+    os << "  -a, --algorithm=NAME  specify a training algorithm (DEFAULT='MaxEnt')" << std::endl;
+    os << "      MaxEnt                maximum entropy modeling for task types MSR;" << std::endl;
+    os << "                            logistic regression for task type B" << std::endl;
+//    os << "      MLE                   maximum likelihood estimation (MLE) without" << std::endl;
+//    os << "                            regularization" << std::endl;
+//    os << "      L1                    maximum a posterior (MAP) estimation with L1 norm" << std::endl;
+//    os << "                            of parameters (L1 regularization; Laplacian prior)" << std::endl;
+//    os << "      L2                    maximum a posterior (MAP) estimation with L2 norm" << std::endl;
+//    os << "                            of parameters (L2 regularization; Gaussian prior)" << std::endl;
+    os << "  -p, --set=NAME=VALUE  set the parameter NAME to VALUE" << std::endl;
     os << "  -g, --split=N         split the instances into N groups; this option is useful" << std::endl;
     os << "                        for holdout evaluation and cross validation" << std::endl;
     os << "  -e, --holdout=M       use the M-th data for holdout evaluation and the rest" << std::endl;
     os << "                        for training" << std::endl;
     os << "  -x, --cross-validate  repeat holdout evaluations for M in {1, ..., N}" << std::endl;
     os << "                        (N-fold cross validation)" << std::endl;
-    os << "  -m, --model=FILE      store/load a model to/from FILE (DEFAULT='')" << std::endl;
-    os << "  -a, --algorithm=NAME  specify a training algorithm (DEFAULT='L2')" << std::endl;
-    os << "      MLE                   maximum likelihood estimation (MLE) without" << std::endl;
-    os << "                            regularization" << std::endl;
-    os << "      L1                    maximum a posterior (MAP) estimation with L1 norm" << std::endl;
-    os << "                            of parameters (L1 regularization; Laplacian prior)" << std::endl;
-    os << "      L2                    maximum a posterior (MAP) estimation with L2 norm" << std::endl;
-    os << "                            of parameters (L2 regularization; Gaussian prior)" << std::endl;
-    os << "  -s, --sigma=VALUE     specify a sigma value for parameter estimation" << std::endl;
-    os << "  -i, --maxiter=VALUE   specify the maximum number of iterations" << std::endl;
-    os << "  -h, --help            show this message and exit" << std::endl;
     os << std::endl;
 }
 

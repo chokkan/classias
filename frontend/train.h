@@ -18,12 +18,9 @@ train_maxent(
     trainer_type trainer;
 
     // Set parameters.
-    if (opt.algorithm == "L1") {
-        trainer.set("sigma1", opt.sigma);
-        trainer.set("sigma2", 0.);
-    } else if (opt.algorithm == "L2") {
-        trainer.set("sigma1", 0.);
-        trainer.set("sigma2", opt.sigma);
+    typename option::params_type::const_iterator itp;
+    for (itp = opt.params.begin();itp != opt.params.end();++itp) {
+        trainer.set(*itp);
     }
 
     trainer.train(data, opt.os, holdout);
