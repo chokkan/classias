@@ -385,11 +385,6 @@ public:
         return *this;
     }
 
-    inline bool is_true() const
-    {
-        return (label == instance->label);
-    }
-
     template <class vector_type>
     inline double inner_product(const vector_type& v) const
     {
@@ -438,7 +433,6 @@ public:
 
 public:
     const features_type* ptr_features;
-    const label_type* ptr_num_labels;
 
     class candidate_iterator
     {
@@ -496,12 +490,12 @@ public:
     typedef candidate_iterator const_iterator;
 
 public:
-    classification_instance_base() : ptr_features(NULL), ptr_num_labels(NULL)
+    classification_instance_base() : ptr_features(NULL)
     {
     }
 
-    classification_instance_base(const features_type* features, const label_type* num_labels)
-        : ptr_features(features), ptr_num_labels(num_labels)
+    classification_instance_base(const features_type* features)
+        : ptr_features(features)
     {
     }
 
@@ -516,12 +510,12 @@ public:
 
     inline const_iterator end() const
     {
-        return candidate_iterator(*this, *ptr_num_labels);
+        return candidate_iterator(*this, ptr_features->get_num_labels());
     }
 
     inline label_type size() const
     {
-        return *ptr_num_labels;
+        return ptr_features->get_num_labels();
     }
 };
 
@@ -551,7 +545,6 @@ public:
 
 public:
     const features_type* ptr_features;
-    const label_type* ptr_num_labels;
 
 public:
     class iterator
@@ -625,7 +618,7 @@ public:
     {
     }
 
-    selection_instance_base(const features_type* features, const label_type* num_labels = NULL)
+    selection_instance_base(const features_type* features)
         : ptr_features(features)
     {
     }
@@ -670,11 +663,6 @@ public:
     virtual ~ranking_candidate_base()
     {
     }
-
-    inline bool is_true() const
-    {
-        return (label != 0);
-    }
 };
 
 template <class candidate_tmpl>
@@ -689,7 +677,9 @@ public:
     typedef typename candidate_type::attributes_type attributes_type;
     typedef typename candidate_type::label_type label_type;
 
-    ranking_instance_base()
+    label_type label;
+
+    ranking_instance_base() : label(0)
     {
     }
 
@@ -700,13 +690,15 @@ public:
 
 template <
     class instance_tmpl,
-    class attribute_quark_tmpl
+    class attribute_quark_tmpl,
+    class label_quark_tmpl
 >
 class ranking_data_base
 {
 public:
     typedef instance_tmpl instance_type;
     typedef attribute_quark_tmpl attribute_quark_type;
+    typedef label_quark_tmpl label_quark_type;
 
     typedef typename instance_type::label_type label_type;
 
@@ -715,8 +707,12 @@ public:
     typedef typename instances_type::iterator iterator;
     typedef typename instances_type::const_iterator const_iterator;
 
+    typedef std::vector<label_type> positive_labels_type;
+
     instances_type instances;
     attribute_quark_type attributes;
+    label_quark_type labels;
+    positive_labels_type positive_labels;
 
     ranking_data_base()
     {
@@ -776,6 +772,11 @@ public:
     {
         return attributes.size();
     }
+
+    inline size_type num_labels() const
+    {
+        return labels.size();
+    }
 };
 
 template <
@@ -785,23 +786,20 @@ template <
     class features_tmpl
 >
 class classification_data_base :
-    public ranking_data_base<instance_tmpl, attribute_quark_tmpl>
+    public ranking_data_base<instance_tmpl, attribute_quark_tmpl, label_quark_tmpl>
 {
 public:
     typedef instance_tmpl instance_type;
     typedef attribute_quark_tmpl attribute_quark_type;
-    typedef ranking_data_base<instance_tmpl, attribute_quark_tmpl> base_type;
+    typedef label_quark_tmpl label_quark_type;
+    typedef features_tmpl features_type;
+
+    typedef ranking_data_base<instance_tmpl, attribute_quark_tmpl, label_quark_tmpl> base_type;
 
     typedef typename base_type::label_type label_type;
     typedef typename base_type::size_type size_type;
 
-    typedef label_quark_tmpl label_quark_type;
-    typedef features_tmpl features_type;
-
-    label_quark_type labels;
     features_type features;
-
-    label_type num_labels;
 
     classification_data_base()
     {
@@ -813,7 +811,7 @@ public:
 
     inline instance_type& new_element()
     {
-        this->instances.push_back(instance_type(&features, &num_labels));
+        this->instances.push_back(instance_type(&features));
         return this->back();
     }
 
@@ -823,17 +821,46 @@ public:
     }
 };
 
+class attribute_label_features : public quark2_base<int, int>
+{
+public:
+    typedef int label_type;
+    label_type m_num_labels;
+
+    attribute_label_features()
+    {
+    }
+
+    virtual ~attribute_label_features()
+    {
+    }
+
+    void set_num_labels(label_type num_labels)
+    {
+        m_num_labels = num_labels;
+    }
+
+    label_type get_num_labels() const
+    {
+        return m_num_labels;
+    }
+};
+
 typedef sparse_attributes_base<int, double> sparse_attributes;
-typedef quark2_base<int, int> attribute_label_features;
 
 typedef ranking_candidate_base<sparse_attributes, int> rcandidate;
 typedef ranking_candidate_base<sparse_attributes, int> binstance;
 typedef ranking_instance_base<rcandidate> rinstance;
 typedef selection_instance_base<sparse_attributes, int, attribute_label_features> sinstance;
 typedef classification_instance_base<sparse_attributes, int, attribute_label_features> cinstance;
-typedef ranking_data_base<binstance, quark> sbdata;
-typedef ranking_data_base<rinstance, quark> srdata;
+
+/// Data type for a binary classifier.
+typedef ranking_data_base<binstance, quark, quark> sbdata;
+/// Data type for a ranker.
+typedef ranking_data_base<rinstance, quark, quark> srdata;
+/// Data type for a multiclass classifier.
 typedef classification_data_base<cinstance, quark, quark, attribute_label_features> scdata;
+/// Data type for a selector.
 typedef classification_data_base<sinstance, quark, quark, attribute_label_features> ssdata;
 
 };

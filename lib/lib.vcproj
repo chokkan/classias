@@ -169,15 +169,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\include\classias\evaluation.h"
+				>
+			</File>
+			<File
 				RelativePath="..\include\classias\feature.h"
 				>
 			</File>
 			<File
 				RelativePath="..\include\classias\lbfgs.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\classias\linear.h"
 				>
 			</File>
 			<File
@@ -189,7 +189,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\include\classias\model.h"
+				>
+			</File>
+			<File
 				RelativePath="..\include\classias\quark.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\classias\ranker.h"
 				>
 			</File>
 		</Filter>

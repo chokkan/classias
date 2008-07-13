@@ -91,6 +91,7 @@ train_al(option& opt)
     data_type data;
     int num_groups = 0;
     std::ostream& os = opt.os;
+    std::string negative_labels;
 
 	// Report the start time.
     os << "Start time: " << timestamp << std::endl;
@@ -100,11 +101,13 @@ train_al(option& opt)
     os << "Reading the data set" << std::endl;
     sw.start();
     num_groups = read_dataset(data, opt);
+    negative_labels = set_positive_labels(data, opt);
     sw.stop();
     os << "Number of instances: " << data.size() << std::endl;
     os << "Number of groups: " << num_groups << std::endl;
     os << "Number of attributes: " << data.attributes.size() << std::endl;
     os << "Number of labels: " << data.labels.size() << std::endl;
+    os << "Negative labels: " << negative_labels << std::endl;
     os << "Seconds required: " << sw.get() << std::endl;
     os << std::endl;
 
@@ -117,7 +120,7 @@ train_al(option& opt)
     os << "Seconds required: " << sw.get() << std::endl;
     os << std::endl;
 
-    data.num_labels = data.labels.size();
+    data.features.set_num_labels(data.labels.size());
 
     // Start training.
     if (opt.cross_validation) {

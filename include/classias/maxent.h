@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include "lbfgs.h"
+#include "evaluation.h"
 
 namespace classias
 {
@@ -33,6 +34,8 @@ protected:
     typedef typename data_type::instance_type instance_type;
     /// A type representing a candidate for an instance.
     typedef typename instance_type::candidate_type candidate_type;
+    /// A type representing a label.
+    typedef typename instance_type::label_type label_type;
     /// A type providing a read-only random-access iterator for instances.
     typedef typename data_type::const_iterator const_iterator;
 
@@ -58,6 +61,8 @@ protected:
 
     /// A data set for training.
     const data_type* m_data;
+    /// The number of labels.
+    label_type m_num_labels;
     /// An output stream to which this object outputs log messages.
     std::ostream* m_os;
     /// An internal variable (previous timestamp).
@@ -70,12 +75,6 @@ public:
         m_mexps = 0;
         m_weights = 0;
         m_scores = 0;
-
-        m_holdout = -1;
-        m_maxiter = 1000;
-        m_epsilon = 1e-5;
-        m_c1 = 0;
-        m_c2 = 0;
 
         clear();
     }
@@ -96,7 +95,14 @@ public:
         m_weights = 0;
         m_scores = 0;
 
+        m_holdout = -1;
+        m_maxiter = 1000;
+        m_epsilon = 1e-5;
+        m_c1 = 0;
+        m_c2 = 0;
+
         m_data = NULL;
+        m_num_labels = 0;
         m_os = NULL;
     }
 
@@ -166,14 +172,16 @@ public:
 
             // Compute score[i] for each candidate #i.
             for (i = 0, itc = iti->begin();itc != iti->end();++i, ++itc) {
-                m_scores[i] = itc->inner_product(x);
-                if (itc->is_true()) logp = m_scores[i];
-                norm = logsumexp(norm, m_scores[i], (i == 0));
+                m_scores[itc->label] = itc->inner_product(x);
+                if (itc->label == iti->label) {
+                    logp = m_scores[itc->label];
+                }
+                norm = logsumexp(norm, m_scores[itc->label], (i == 0));
             }
 
             // Accumulate the model expectations of attributes.
-            for (i = 0, itc = iti->begin();itc != iti->end();++i, ++itc) {
-                itc->add(m_mexps, std::exp(m_scores[i] - norm));
+            for (itc = iti->begin();itc != iti->end();++itc) {
+                itc->add(m_mexps, std::exp(m_scores[itc->label] - norm));
             }
 
             // Accumulate the loss for predicting the instance.
@@ -258,7 +266,7 @@ public:
         int holdout = -1
         )
     {
-        size_t M = 0;
+        label_type M = 0;
         const size_t K = data.num_features();
 
         // Initialize feature expectations and weights.
@@ -295,23 +303,24 @@ public:
             // Compute the observation expectations.
             typename instance_type::const_iterator itc;
             for (itc = iti->begin();itc != iti->end();++itc) {
-                if (itc->is_true()) {
+                if (itc->label == iti->label) {
                     // m_oexps[k] += 1.0 * (*itc)[k].
                     itc->add(m_oexps, 1.0);
                 }
-            }
 
-            // Store the maximum number of candidates.
-            if (M < iti->size()) {
-                M = iti->size();
+                // Store the maximum identifier of labels.
+                if (M < itc->label) {
+                    M = itc->label;
+                }
             }
         }
 
         // Initialze the variables used by callback functions.
         m_os = &os;
         m_data = &data;
+        m_num_labels = M+1;
         m_clk_prev = clock();
-        m_scores = new double[M];
+        m_scores = new double[m_num_labels];
 
         // Call the L-BFGS solver.
         int ret = lbfgs_solve((const int)K, m_weights, NULL, m_epsilon, m_c1);
@@ -330,7 +339,7 @@ public:
     {
         std::ostream& os = *m_os;
         const data_type& data = *m_data;
-        int num_correct = 0, num_total = 0;
+        confusion_matrix matrix(m_num_labels);
 
         // Loop over instances.
         for (const_iterator iti = data.begin();iti != data.end();++iti) {
@@ -353,19 +362,13 @@ public:
                 }
             }
 
-            // Update the 2x2 confusion matrix.
-            if (itc_max->is_true()) {
-                ++num_correct;
-            }
-            ++num_total;
+            // Update the confusion matrix.
+            matrix(iti->label, itc_max->label)++;
         }
 
         // Report accuracy, precision, recall, and f1 score.
-        double accuracy = 0.;
-        if (0 < num_total) {
-            accuracy = num_correct / (double)num_total;
-        }
-        os << "Accuracy: " << accuracy << " (" << num_correct << "/" << num_total << ")" << std::endl;
+        matrix.output_accuracy(os);
+        matrix.output_micro(os, data.positive_labels.begin(), data.positive_labels.end());
     }
 
 protected:

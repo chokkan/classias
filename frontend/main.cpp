@@ -6,6 +6,7 @@
 #include "option.h"
 #include "optparse.h"
 #include "util.h"
+#include "tokenize.h"
 
 #define	APPLICATION_S	"Classias"
 #define	VERSION_S		"0.1"
@@ -55,6 +56,16 @@ public:
         ON_OPTION_WITH_ARG(SHORTOPT('m') || LONGOPT("model"))
             model = arg;
 
+        ON_OPTION_WITH_ARG(SHORTOPT('n') || LONGOPT("negative"))
+            negatives.clear();
+            std::string labels = arg;
+            tokenizer field(labels, ' ');
+            while (field.next()) {
+                if (!field->empty()) {
+                    negatives.insert(*field);
+                }
+            }
+
         ON_OPTION_WITH_ARG(SHORTOPT('a') || LONGOPT("algorithm"))
             if (strcmp(arg, "MaxEnt") == 0) {
             } else {
@@ -83,48 +94,47 @@ static void usage(std::ostream& os, const char *argv0)
 {
     os << "USAGE: " << argv0 << " [OPTIONS] [DATA1] [DATA2] ..." << std::endl;
     os << "  DATA    file(s) corresponding to a data set for training or tagging;" << std::endl;
-    os << "          if multiple N files are specified, this tool assumes a data set" << std::endl;
-    os << "          to be split into N groups and assigns a group number (1...N) to" << std::endl;
-    os << "          instances in each file; if no file is specified, the tool reads" << std::endl;
-    os << "          a data set from STDIN" << std::endl;
+    os << "          if multiple N files are specified, this tool assumes a data set to" << std::endl;
+    os << "          be split into N groups and assigns a group number (1...N) to the" << std::endl;
+    os << "          instances in each file; if no file is specified, the tool reads a" << std::endl;
+    os << "          data set from STDIN" << std::endl;
     os << std::endl;
     os << "COMMANDS:" << std::endl;
     os << "  -l, --learn           train a model from the training set" << std::endl;
     os << "  -t, --tag             tag the data with the model (specified by -m option)" << std::endl;
-    os << "  -h, --help            show this message and exit" << std::endl;
+    os << "  -h, --help            show the help message and exit" << std::endl;
     os << std::endl;
     os << "COMMON OPTIONS:" << std::endl;
-    os << "  -f, --task=TYPE       specify a task type (DEFAULT='classification'):" << std::endl;
-    os << "      b, binary             an instance consists of an attribute vector;" << std::endl;
+    os << "  -f, --task=TYPE       specify a task type (DEFAULT='multiclass'):" << std::endl;
+    os << "      b, binary             an instance is represented by an attribute vector," << std::endl;
+    os << "                            which is identical to a feature vector;" << std::endl;
     os << "                            an instance label is boolean, 0 or 1;" << std::endl;
-    os << "                            features are identical to attributes" << std::endl;
-    os << "      m, multiclass         an instance consists of an attribute vector;" << std::endl;
+    os << "      m, multiclass         an instance is represented by an attribute vector;" << std::endl;
     os << "                            an instance label is chosen from all of the labels" << std::endl;
     os << "                            found in the training set; features are represented" << std::endl;
     os << "                            by Cartesian products of attributes and labels" << std::endl;
-    os << "      s, selection          an instance consists of an attribute vector;" << std::endl;
+    os << "      s, selection          this is identical to 'multiclass' except that" << std::endl;
     os << "                            an instance label is chosen from candidate labels" << std::endl;
-    os << "                            specified by the instance; features are represented" << std::endl;
-    os << "                            by Cartesian products of attributes and labels" << std::endl;
+    os << "                            specified for each instance" << std::endl;
     os << "      r, ranking            an instance consists of candidates each of which" << std::endl;
-    os << "                            has an attribute vector; a candidate that yields" << std::endl;
-    os << "                            the highest score is chosen; features are identical" << std::endl;
+    os << "                            has an attribute vector; features are identical" << std::endl;
     os << "                            to attributes" << std::endl;
     os << "  -m, --model=FILE      store/load a model to/from FILE (DEFAULT='')" << std::endl;
+    os << "  -n, --negative=LABELS assume LABELS as negative labels (DEFAULT='-1 O')" << std::endl;
     os << std::endl;
     os << "TRAINING OPTIONS:" << std::endl;
-    os << "  -a, --algorithm=NAME  specify a training algorithm (DEFAULT='MaxEnt')" << std::endl;
-    os << "      MaxEnt                maximum entropy modeling for task types MSR;" << std::endl;
-    os << "                            logistic regression for task type B" << std::endl;
+    os << "  -a, --algorithm=NAME  specify a training algorithm (DEFAULT='maxent')" << std::endl;
+    os << "      maxent                maximum entropy modeling (for MSR)" << std::endl;
+    os << "      logress               logistic regression (for B)" << std::endl;
 //    os << "      MLE                   maximum likelihood estimation (MLE) without" << std::endl;
 //    os << "                            regularization" << std::endl;
 //    os << "      L1                    maximum a posterior (MAP) estimation with L1 norm" << std::endl;
 //    os << "                            of parameters (L1 regularization; Laplacian prior)" << std::endl;
 //    os << "      L2                    maximum a posterior (MAP) estimation with L2 norm" << std::endl;
 //    os << "                            of parameters (L2 regularization; Gaussian prior)" << std::endl;
-    os << "  -p, --set=NAME=VALUE  set the parameter NAME to VALUE" << std::endl;
-    os << "  -g, --split=N         split the instances into N groups; this option is useful" << std::endl;
-    os << "                        for holdout evaluation and cross validation" << std::endl;
+    os << "  -p, --set=NAME=VALUE  set the algorithm-specific parameter NAME to VALUE" << std::endl;
+    os << "  -g, --split=N         split the instances into N groups; this option is" << std::endl;
+    os << "                        useful for holdout evaluation and cross validation" << std::endl;
     os << "  -e, --holdout=M       use the M-th data for holdout evaluation and the rest" << std::endl;
     os << "                        for training" << std::endl;
     os << "  -x, --cross-validate  repeat holdout evaluations for M in {1, ..., N}" << std::endl;

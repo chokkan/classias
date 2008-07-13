@@ -68,12 +68,16 @@ typedef double lbfgsfloatval_t;
 
 /**
  * Return values of lbfgs().
+ * 
+ *  Roughly speaking, a negative value indicates an error.
  */
 enum {
-    /** False value. */
-    LBFGSFALSE = 0,
-    /** True value. */
-    LBFGSTRUE,
+    /** L-BFGS reaches convergence. */
+    LBFGS_SUCCESS = 0,
+    LBFGS_CONVERGENCE = 0,
+    LBFGS_STOP,
+    /** The initial variables already minimize the objective function. */
+    LBFGS_ALREADY_MINIMIZED,
 
     /** Unknown error. */
     LBFGSERR_UNKNOWNERROR = -1024,
@@ -89,6 +93,12 @@ enum {
     LBFGSERR_INVALID_N_SSE,
     /** The array x must be aligned to 16 (for SSE). */
     LBFGSERR_INVALID_X_SSE,
+    /** Invalid parameter lbfgs_parameter_t::epsilon specified. */
+    LBFGSERR_INVALID_EPSILON,
+    /** Invalid parameter lbfgs_parameter_t::past specified. */
+    LBFGSERR_INVALID_TESTPERIOD,
+    /** Invalid parameter lbfgs_parameter_t::delta specified. */
+    LBFGSERR_INVALID_DELTA,
     /** Invalid parameter lbfgs_parameter_t::linesearch specified. */
     LBFGSERR_INVALID_LINESEARCH,
     /** Invalid parameter lbfgs_parameter_t::max_step specified. */
@@ -105,6 +115,8 @@ enum {
     LBFGSERR_INVALID_MAXLINESEARCH,
     /** Invalid parameter lbfgs_parameter_t::orthantwise_c specified. */
     LBFGSERR_INVALID_ORTHANTWISE,
+    /** Invalid parameter lbfgs_parameter_t::orthantwise_start specified. */
+    LBFGSERR_INVALID_ORTHANTWISE_START,
     /** The line-search step went out of the interval of uncertainty. */
     LBFGSERR_OUTOFINTERVAL,
     /** A logic error occurred; alternatively, the interval of uncertainty
@@ -167,6 +179,9 @@ typedef struct {
      *  \c 1e-5.
      */
     lbfgsfloatval_t epsilon;
+
+    int             past;
+    lbfgsfloatval_t delta;
 
     /**
      * The maximum number of iterations.
@@ -241,15 +256,31 @@ typedef struct {
     /**
      * Coeefficient for the L1 norm of variables.
      *  This parameter should be set to zero for standard minimization
-     *  problems. Setting this parameter to a positive value minimizes the
-     *  objective function F(x) combined with the L1 norm |x| of the variables,
-     *  {F(x) + C |x|}. This parameter is the coeefficient for the |x|, i.e.,
-     *  C. As the L1 norm |x| is not differentiable at zero, the library
-     *  modify function and gradient evaluations from a client program
-     *  suitably; a client program thus have only to return the function value
-     *  F(x) and gradients G(x) as usual. The default value is zero.
+     *  problems. Setting this parameter to a positive value activates
+     *  Orthant-Wise Limited-memory Quasi-Newton (OWL-QN) method, which
+     *  minimizes the objective function F(x) combined with the L1 norm |x|
+     *  of the variables, {F(x) + C |x|}. This parameter is the coeefficient
+     *  for the |x|, i.e., C. As the L1 norm |x| is not differentiable at
+     *  zero, the library modifies function and gradient evaluations from
+     *  a client program suitably; a client program thus have only to return
+     *  the function value F(x) and gradients G(x) as usual. The default value
+     *  is zero.
      */
     lbfgsfloatval_t orthantwise_c;
+
+    /**
+     * Start index for computing L1 norm of the variables.
+     *  This parameter is valid only for OWL-QN method
+     *  (i.e., \ref orthantwise_c != 0). This parameter b (0 <= b < N)
+     *  specifies the index number from which the library computes the
+     *  L1 norm of the variables x,
+     *      |x| := |x_{b}| + |x_{b+1}| + ... + |x_{N}| .
+     *  In other words, variables x_1, ..., x_{b-1} are not used for
+     *  computing the L1 norm. Setting b (0 < b < N), one can protect
+     *  variables, x_1, ..., x_{b-1} (e.g., a bias term of logistic
+     *  regression) from being regularized. The default value is zero.
+     */
+    int             orthantwise_start;
 } lbfgs_parameter_t;
 
 
@@ -480,15 +511,29 @@ Among the various ports of L-BFGS, this library provides several features:
 This library is used by:
 - <a href="http://www.chokkan.org/software/crfsuite/">CRFsuite: A fast implementation of Conditional Random Fields (CRFs)</a>
 - <a href="http://www.public.iastate.edu/~gdancik/mlegp/">mlegp: an R package for maximum likelihood estimates for Gaussian processes</a>
+- <a href="http://infmath.uibk.ac.at/~matthiasf/imaging2/">imaging2: the imaging2 class library</a>
+- <a href="http://search.cpan.org/~laye/Algorithm-LBFGS-0.16/">Algorithm::LBFGS - Perl extension for L-BFGS</a>
 
 @section download Download
 
-- <a href="http://www.chokkan.org/software/dist/liblbfgs-1.4.tar.gz">Source code</a>
+- <a href="http://www.chokkan.org/software/dist/liblbfgs-1.5.tar.gz">Source code</a>
 
 libLBFGS is distributed under the term of the
 <a href="http://opensource.org/licenses/mit-license.php">MIT license</a>.
 
 @section changelog History
+- Version 1.5 (2008-07-10):
+    - Configurable starting index for L1-norm computation. A member variable
+      ::lbfgs_parameter_t::orthantwise_start was added to specify the index
+      number from which the library computes the L1 norm of the variables.
+      This is useful to prevent some variables from being regularized by the
+      OW-LQN method.
+    - Fixed a zero-division error when the initial variables have already
+      been a minimizer (reported by Takashi Imamichi). In this case, the
+      library returns ::LBFGS_ALREADY_MINIMIZED status code.
+    - Defined ::LBFGS_SUCCESS status code as zero; removed unused constants,
+      LBFGSFALSE and LBFGSTRUE.
+    - Fixed a compile error in an implicit down-cast.
 - Version 1.4 (2008-04-25):
     - Configurable line search algorithms. A member variable
       ::lbfgs_parameter_t::linesearch was added to choose either MoreThuente

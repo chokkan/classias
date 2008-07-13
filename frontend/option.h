@@ -2,13 +2,15 @@
 #define __OPTION_H__
 
 #include <vector>
+#include <set>
 #include <string>
 
 class option
 {
 public:
-    typedef std::vector<std::string> files_type;
-    typedef std::vector<std::string> params_type;
+    typedef std::vector<std::string>    files_type;
+    typedef std::vector<std::string>    params_type;
+    typedef std::set<std::string>       labels_type;
 
     enum {
         TYPE_NONE = 0,          /// Default type.
@@ -35,6 +37,7 @@ public:
 
     int         type;
     std::string model;
+    labels_type negatives;
 
     std::string algorithm;
     params_type params;
@@ -51,6 +54,8 @@ public:
         algorithm("MaxEnt"),        
         split(0), holdout(-1), cross_validation(false)
     {
+        negatives.insert("-1");
+        negatives.insert("O");
     }
 };
 

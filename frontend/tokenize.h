@@ -28,6 +28,9 @@
 #ifndef __TOKENIZE_H__
 #define __TOKENIZE_H__
 
+#include <iostream>
+#include <string>
+
 template <class char_type>
 class basic_tokenizer
 {
@@ -88,5 +91,57 @@ public:
 };
 
 typedef basic_tokenizer<char> tokenizer;
+
+template <class handler_base>
+class basic_parser :
+    public handler_base
+{
+public:
+    basic_parser()
+    {
+    }
+
+    virtual ~basic_parser()
+    {
+    }
+
+    int parse(std::istream& is)
+    {
+        int lines = 0;
+
+        for (;;) {
+            // Read a line.
+            std::string line;
+            std::getline(is, line);
+            if (is.eof()) {
+                break;
+            }
+            ++lines;
+
+            // Skip an empty line.
+            if (line.empty()) {
+                continue;
+            }
+
+            // Find a comment line.
+            if (line.compare(0, 1, "#") == 0) {
+                handler_base::comment(line, lines);
+                continue;
+            }
+
+            // Notify a start of tokens.
+            handler_base::start_tokens(line, lines);
+
+            // Split the line with tab characters.
+            tokenizer field(line, '\t');
+            while (field.next()) {
+                handler_base::token(*field, line);
+            }
+
+            // Notify an end of tokens.
+            handler_base::end_tokens(line, lines);
+        }
+    }
+};
 
 #endif/*__TOKENIZE_H__*/
