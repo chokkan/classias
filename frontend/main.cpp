@@ -12,8 +12,8 @@
 #define	VERSION_S		"0.1"
 #define	COPYRIGHT_S		"Copyright (c) 2008 Naoaki Okazaki"
 
-int selector_train(option& opt);
-int multiclass_train(option& opt);
+//int selector_train(option& opt);
+//int multiclass_train(option& opt);
 int ranker_train(option& opt);
 int biclass_train(option& opt);
 
@@ -116,9 +116,10 @@ static void usage(std::ostream& os, const char *argv0)
     os << "      s, selection          this is identical to 'multiclass' except that" << std::endl;
     os << "                            an instance label is chosen from candidate labels" << std::endl;
     os << "                            specified for each instance" << std::endl;
-    os << "      r, ranking            an instance consists of candidates each of which" << std::endl;
-    os << "                            has an attribute vector; features are identical" << std::endl;
-    os << "                            to attributes" << std::endl;
+    os << "      r, ranking            an instance consists of candidates; each candidate" << std::endl;
+    os << "                            has an attribute vector and label; a label must be" << std::endl;
+    os << "                            either 'TP', 'TN', 'FP', or 'FN'; features are" << std::endl;
+    os << "                            identical to attributes" << std::endl;
     os << "  -m, --model=FILE      store/load a model to/from FILE (DEFAULT='')" << std::endl;
     os << "  -n, --negative=LABELS assume LABELS as negative labels (DEFAULT='-1 O')" << std::endl;
     os << std::endl;
@@ -186,10 +187,10 @@ int main(int argc, char *argv[])
                 //ret = biclass_train(opt);
                 break;
             case option::TYPE_MULTICLASS:
-                ret = multiclass_train(opt);
+                //ret = multiclass_train(opt);
                 break;
             case option::TYPE_SELECTOR:
-                ret = selector_train(opt);
+                //ret = selector_train(opt);
                 break;
             case option::TYPE_RANKER:
                 ret = ranker_train(opt);

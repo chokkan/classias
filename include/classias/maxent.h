@@ -172,16 +172,16 @@ public:
 
             // Compute score[i] for each candidate #i.
             for (i = 0, itc = iti->begin();itc != iti->end();++i, ++itc) {
-                m_scores[itc->label] = itc->inner_product(x);
-                if (itc->label == iti->label) {
-                    logp = m_scores[itc->label];
+                m_scores[i] = itc->inner_product(x);
+                if (itc->is_true()) {
+                    logp = m_scores[i];
                 }
-                norm = logsumexp(norm, m_scores[itc->label], (i == 0));
+                norm = logsumexp(norm, m_scores[i], (i == 0));
             }
 
             // Accumulate the model expectations of attributes.
-            for (itc = iti->begin();itc != iti->end();++itc) {
-                itc->add(m_mexps, std::exp(m_scores[itc->label] - norm));
+            for (i = 0, itc = iti->begin();itc != iti->end();++i, ++itc) {
+                itc->add(m_mexps, std::exp(m_scores[i] - norm));
             }
 
             // Accumulate the loss for predicting the instance.
@@ -303,15 +303,14 @@ public:
             // Compute the observation expectations.
             typename instance_type::const_iterator itc;
             for (itc = iti->begin();itc != iti->end();++itc) {
-                if (itc->label == iti->label) {
+                if (itc->is_true()) {
                     // m_oexps[k] += 1.0 * (*itc)[k].
                     itc->add(m_oexps, 1.0);
                 }
+            }
 
-                // Store the maximum identifier of labels.
-                if (M < itc->label) {
-                    M = itc->label;
-                }
+            if (M < iti->size()) {
+                M = iti->size();
             }
         }
 
@@ -349,6 +348,7 @@ public:
             }
 
             // Compute the score for each candidate #i.
+            label_type reflabel = -1;
             value_type score_max = -DBL_MAX;
             typename instance_type::const_iterator itc;
             typename instance_type::const_iterator itc_max = iti->end();
@@ -360,10 +360,15 @@ public:
                     score_max = score;
                     itc_max = itc;
                 }
+
+                // Store the reference label.
+                if (itc->is_true()) {
+                    reflabel = itc->label;
+                }
             }
 
             // Update the confusion matrix.
-            matrix(iti->label, itc_max->label)++;
+            matrix(reflabel, itc_max->label)++;
         }
 
         // Report accuracy, precision, recall, and f1 score.

@@ -35,7 +35,7 @@ train_maxent(
 
 template <class data_type>
 static int
-train_a(option& opt)
+train(option& opt)
 {
     stopwatch sw;
     data_type data;
@@ -82,71 +82,5 @@ train_a(option& opt)
 
     return 0;
 }
-
-template <class data_type>
-static int
-train_al(option& opt)
-{
-    stopwatch sw;
-    data_type data;
-    int num_groups = 0;
-    std::ostream& os = opt.os;
-    std::string negative_labels;
-
-	// Report the start time.
-    os << "Start time: " << timestamp << std::endl;
-    os << std::endl;
-
-    // Read the source data.
-    os << "Reading the data set" << std::endl;
-    sw.start();
-    num_groups = read_dataset(data, opt);
-    negative_labels = set_positive_labels(data, opt);
-    sw.stop();
-    os << "Number of instances: " << data.size() << std::endl;
-    os << "Number of groups: " << num_groups << std::endl;
-    os << "Number of attributes: " << data.attributes.size() << std::endl;
-    os << "Number of labels: " << data.labels.size() << std::endl;
-    os << "Negative labels: " << negative_labels << std::endl;
-    os << "Seconds required: " << sw.get() << std::endl;
-    os << std::endl;
-
-    // Generate features for the data.
-    os << "Generating features for the data set." << std::endl;
-    sw.start();
-    classias::generate_sparse_features(data.features, data.begin(), data.end());
-    sw.stop();
-    os << "Number of features: " << data.features.size() << std::endl;
-    os << "Seconds required: " << sw.get() << std::endl;
-    os << std::endl;
-
-    data.features.set_num_labels(data.labels.size());
-
-    // Start training.
-    if (opt.cross_validation) {
-        // Training with cross validation
-        for (int i = 0;i < num_groups;++i) {
-            os << "Cross validation (" << (i + 1) << "/" << num_groups << ")" << std::endl;
-            sw.start();
-            train_maxent(data, i, opt);
-            sw.stop();
-            os << "Seconds required: " << sw.get() << std::endl;
-            os << std::endl;
-        }
-    } else {
-        sw.start();
-        train_maxent(data, -1, opt);
-        sw.stop();
-        os << "Seconds required: " << sw.get() << std::endl;
-        os << std::endl;
-    }
-
-	// Report the finish time.
-    os << "Finish time: " << timestamp << std::endl;
-    os << std::endl;
-
-    return 0;
-}
-
 
 #endif/*__TRAIN_H__*/

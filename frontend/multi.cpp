@@ -51,13 +51,15 @@
 
 template <
     class instance_type,
-    class attribute_quark_type
+    class attribute_quark_type,
+    class label_quark_type
 >
 static void
 read_line(
     const std::string& line,
     instance_type& instance,
     attribute_quark_type& attrs,
+    label_quark_type& labels,
     int lines = 0
     )
 {
@@ -74,17 +76,25 @@ read_line(
         throw invalid_data("an empty label found", lines);
     }
 
-    // Set the binary class.
-    bool is_true = (*field == "+1" || *field == "1");
+    // Extract the label in the first token if any.
+    std::string label;
+    std::string::size_type pos = field->find(' ');
+    if (pos != field->npos) {
+        label = std::string(*field, pos+1);
+    }
 
-    // Move to the label.
-    if (!field.next()) {
-        throw invalid_data("no field in the line", lines);
+    // Set the binary class.
+    bool torf = ((*field)[0] != '-');
+
+    // Set the label.
+    if (label.empty()) {
+        label = *field;
     }
 
     // Create a new candidate.
     candidate_type& cand = instance.new_element();
-    cand.label = is_true ? 1 : 0;
+    cand.torf = torf;
+    cand.label = labels(label);
 
     // Set attributes for the instance.
     while (field.next()) {
@@ -136,7 +146,7 @@ read_stream(
             // End of a new instance.
         } else {
             // A new candidate.
-            read_line(line, data.back(), data.attributes, lines);
+            read_line(line, data.back(), data.attributes, data.labels, lines);
         }
     }
 }
@@ -169,5 +179,5 @@ output_model(
 
 int ranker_train(option& opt)
 {
-    return train_a<classias::srdata>(opt);
+    return train<classias::srdata>(opt);
 }

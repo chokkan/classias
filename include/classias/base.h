@@ -15,8 +15,8 @@ namespace classias
 /**
  * Sparse attribute vector.
  *
- *  This class implements a sparse attribute vector as an linear array of
- *  elements (pairs of attribute names and values).
+ *  This class implements a sparse attribute vector as a linear array of
+ *  elements, pairs of attribute names and values.
  *
  *  @param  name_base       The type of attribute names.
  *  @param  value_base      The type of attribute values.
@@ -139,7 +139,7 @@ public:
     }
 
     /**
-     * Compute the inner product with a vector.
+     * Compute the inner product with another vector.
      *  @param  v           The vector.
      *  @retval double      The inner product.
      */
@@ -161,6 +161,39 @@ public:
         }
     }
 };
+
+/**
+ * A candidate.
+ * */
+template <
+    class attributes_tmpl,
+    class label_tmpl
+>
+class candidate_base : 
+    public attributes_tmpl
+{
+public:
+    typedef attributes_tmpl attributes_type;
+    typedef label_tmpl label_type;
+
+    bool torf;
+    label_type label;
+
+    candidate_base() : torf(false), label(0)
+    {
+    }
+
+    virtual ~candidate_base()
+    {
+    }
+
+    inline bool is_true() const
+    {
+        return torf;
+    }
+};
+
+
 
 /**
  * Candidate class.
@@ -335,336 +368,6 @@ public:
     }
 };
 
-/**
- * Labaled candidate class.
- */
-template <class instance_tmpl>
-class labeled_candidate_base
-{
-public:
-    typedef instance_tmpl instance_type;
-    typedef typename instance_type::attributes_type attributes_type;
-    typedef typename instance_type::label_type label_type;
-
-    const instance_type* instance;
-    label_type label;
-
-    labeled_candidate_base()
-        : instance(NULL), label(-1)
-    {
-    }
-
-    labeled_candidate_base(
-        const instance_type* inst
-        )
-        : instance(inst), label(-1)
-    {
-    }
-
-    labeled_candidate_base(
-        const instance_type* inst,
-        label_type l
-        )
-        : instance(inst), label(l)
-    {
-    }
-
-    labeled_candidate_base(
-        const labeled_candidate_base& rho
-        )
-    {
-        operator=(rho);
-    }
-
-    inline labeled_candidate_base& operator=(
-        const labeled_candidate_base& rho
-        )
-    {
-        instance = rho.instance;
-        label = rho.label;
-        return *this;
-    }
-
-    template <class vector_type>
-    inline double inner_product(const vector_type& v) const
-    {
-        double s = 0.;
-        typename attributes_type::const_iterator it;
-        for (it = instance->attributes.begin();it != instance->attributes.end();++it) {
-            int fid = instance->ptr_features->to_value(it->first, label, -1);
-            if (0 <= fid) {
-                s += (double)v[fid] * (double)it->second;
-            }
-        }
-        return s;
-    }
-
-    template <class vector_type>
-    inline void add(vector_type& v, double scale) const
-    {
-        typename attributes_type::const_iterator it;
-        for (it = instance->attributes.begin();it != instance->attributes.end();++it) {
-            int fid = instance->ptr_features->to_value(it->first, label, -1);
-            if (0 <= fid) {
-                v[fid] += scale * (double)it->second;
-            }
-        }
-    }
-};
-
-template <
-    class attributes_tmpl,
-    class label_tmpl,
-    class features_tmpl
->
-class classification_instance_base :
-    public group_base
-{
-public:
-    typedef attributes_tmpl attributes_type;
-    typedef label_tmpl label_type;
-    typedef features_tmpl features_type;
-    typedef classification_instance_base<attributes_type, label_type, features_type> instance_type;
-
-    typedef labeled_candidate_base<instance_type> candidate_type;
-
-    attributes_type attributes;
-    label_type label;
-
-public:
-    const features_type* ptr_features;
-
-    class candidate_iterator
-    {
-    public:
-        candidate_type candidate;
-
-        candidate_iterator()
-        {
-        }
-
-        candidate_iterator(const instance_type& inst, label_type label)
-            : candidate(&inst, label)
-        {
-        }
-
-        inline candidate_iterator& operator=(const candidate_iterator& x)
-        {
-            candidate = x.candidate;
-            return *this;
-        }
-
-        inline candidate_type& operator*() const
-        {
-            return candidate;
-        }
-
-        inline const candidate_type* operator->() const
-        {
-            return &candidate;
-        }
-
-        inline candidate_iterator& operator++()
-        {
-            candidate.label++;
-            return *this;
-        }
-
-        inline candidate_iterator& operator--()
-        {
-            candidate.label--;
-            return *this;
-        }
-
-        inline bool operator==(const candidate_iterator& x)
-        {
-            return (candidate.label == x.candidate.label);
-        }
-
-        inline bool operator!=(const candidate_iterator& x)
-        {
-            return !operator==(x);
-        }
-    };
-
-    typedef candidate_iterator const_iterator;
-
-public:
-    classification_instance_base() : ptr_features(NULL)
-    {
-    }
-
-    classification_instance_base(const features_type* features)
-        : ptr_features(features)
-    {
-    }
-
-    virtual ~classification_instance_base()
-    {
-    }
-
-    inline const_iterator begin() const
-    {
-        return candidate_iterator(*this, 0);
-    }
-
-    inline const_iterator end() const
-    {
-        return candidate_iterator(*this, ptr_features->get_num_labels());
-    }
-
-    inline label_type size() const
-    {
-        return ptr_features->get_num_labels();
-    }
-};
-
-
-template <
-    class attributes_tmpl,
-    class label_tmpl,
-    class features_tmpl
->
-class selection_instance_base :
-    public group_base
-{
-public:
-    typedef attributes_tmpl attributes_type;
-    typedef label_tmpl label_type;
-    typedef features_tmpl features_type;
-    typedef selection_instance_base<attributes_type, label_type, features_type> instance_type;
-
-    typedef labeled_candidate_base<instance_type> candidate_type;
-
-    typedef candidates_base<label_type> labels_type;
-    typedef typename labels_type::const_iterator labels_iterator;
-
-    attributes_type attributes;
-    label_type label;
-    labels_type candidates;
-
-public:
-    const features_type* ptr_features;
-
-public:
-    class iterator
-    {
-    public:
-        labels_iterator it;
-        labels_iterator last;
-        candidate_type candidate;
-
-        iterator()
-        {
-        }
-
-        iterator(const instance_type& inst, labels_iterator iter, labels_iterator end)
-            : candidate(&inst), it(iter), last(end)
-        {
-            set();
-        }
-
-        inline void set()
-        {
-            candidate.label = (it != last ? *it : -1);
-        }
-
-        inline iterator& operator=(const iterator& x)
-        {
-            it = x.it;
-            last = x.last;
-            candidate = x.candidate;
-            return *this;
-        }
-
-        inline candidate_type& operator*() const
-        {
-            return candidate;
-        }
-
-        inline const candidate_type* operator->() const
-        {
-            return &candidate;
-        }
-
-        inline iterator& operator++()
-        {
-            ++it;
-            set();
-            return *this;
-        }
-
-        inline iterator& operator--()
-        {
-            --it;
-            set();
-            return *this;
-        }
-
-        inline bool operator==(const iterator& x)
-        {
-            return (it == x.it);
-        }
-
-        inline bool operator!=(const iterator& x)
-        {
-            return !operator==(x);
-        }
-    };
-
-    typedef iterator const_iterator;
-
-    selection_instance_base() : ptr_features(NULL)
-    {
-    }
-
-    selection_instance_base(const features_type* features)
-        : ptr_features(features)
-    {
-    }
-
-    virtual ~selection_instance_base()
-    {
-    }
-
-    inline const_iterator begin() const
-    {
-        return const_iterator(*this, candidates.begin(), candidates.end());
-    }
-
-    inline const_iterator end() const
-    {
-        return const_iterator(*this, candidates.end(), candidates.end());
-    }
-
-    inline label_type size() const
-    {
-        return (label_type)candidates.size();
-    }
-};
-
-template <
-    class attributes_tmpl,
-    class label_tmpl
->
-class ranking_candidate_base : 
-    public attributes_tmpl
-{
-public:
-    typedef attributes_tmpl attributes_type;
-    typedef label_tmpl label_type;
-
-    label_type label;
-
-    ranking_candidate_base() : label(0)
-    {
-    }
-
-    virtual ~ranking_candidate_base()
-    {
-    }
-};
-
 template <class candidate_tmpl>
 class ranking_instance_base :
     public candidates_base<candidate_tmpl>,
@@ -677,9 +380,7 @@ public:
     typedef typename candidate_type::attributes_type attributes_type;
     typedef typename candidate_type::label_type label_type;
 
-    label_type label;
-
-    ranking_instance_base() : label(0)
+    ranking_instance_base()
     {
     }
 
@@ -693,7 +394,7 @@ template <
     class attribute_quark_tmpl,
     class label_quark_tmpl
 >
-class ranking_data_base
+class data_base
 {
 public:
     typedef instance_tmpl instance_type;
@@ -714,11 +415,11 @@ public:
     label_quark_type labels;
     positive_labels_type positive_labels;
 
-    ranking_data_base()
+    data_base()
     {
     }
 
-    virtual ~ranking_data_base()
+    virtual ~data_base()
     {
     }
 
@@ -779,89 +480,14 @@ public:
     }
 };
 
-template <
-    class instance_tmpl,
-    class attribute_quark_tmpl,
-    class label_quark_tmpl,
-    class features_tmpl
->
-class classification_data_base :
-    public ranking_data_base<instance_tmpl, attribute_quark_tmpl, label_quark_tmpl>
-{
-public:
-    typedef instance_tmpl instance_type;
-    typedef attribute_quark_tmpl attribute_quark_type;
-    typedef label_quark_tmpl label_quark_type;
-    typedef features_tmpl features_type;
-
-    typedef ranking_data_base<instance_tmpl, attribute_quark_tmpl, label_quark_tmpl> base_type;
-
-    typedef typename base_type::label_type label_type;
-    typedef typename base_type::size_type size_type;
-
-    features_type features;
-
-    classification_data_base()
-    {
-    }
-
-    virtual ~classification_data_base()
-    {
-    }
-
-    inline instance_type& new_element()
-    {
-        this->instances.push_back(instance_type(&features));
-        return this->back();
-    }
-
-    inline size_type num_features() const
-    {
-        return features.size();
-    }
-};
-
-class attribute_label_features : public quark2_base<int, int>
-{
-public:
-    typedef int label_type;
-    label_type m_num_labels;
-
-    attribute_label_features()
-    {
-    }
-
-    virtual ~attribute_label_features()
-    {
-    }
-
-    void set_num_labels(label_type num_labels)
-    {
-        m_num_labels = num_labels;
-    }
-
-    label_type get_num_labels() const
-    {
-        return m_num_labels;
-    }
-};
-
 typedef sparse_attributes_base<int, double> sparse_attributes;
 
-typedef ranking_candidate_base<sparse_attributes, int> rcandidate;
-typedef ranking_candidate_base<sparse_attributes, int> binstance;
-typedef ranking_instance_base<rcandidate> rinstance;
-typedef selection_instance_base<sparse_attributes, int, attribute_label_features> sinstance;
-typedef classification_instance_base<sparse_attributes, int, attribute_label_features> cinstance;
+typedef candidate_base<sparse_attributes, int> binstance;
+typedef data_base<binstance, quark, quark> sbdata;
 
-/// Data type for a binary classifier.
-typedef ranking_data_base<binstance, quark, quark> sbdata;
-/// Data type for a ranker.
-typedef ranking_data_base<rinstance, quark, quark> srdata;
-/// Data type for a multiclass classifier.
-typedef classification_data_base<cinstance, quark, quark, attribute_label_features> scdata;
-/// Data type for a selector.
-typedef classification_data_base<sinstance, quark, quark, attribute_label_features> ssdata;
+typedef candidate_base<sparse_attributes, int> rcandidate;
+typedef ranking_instance_base<rcandidate> rinstance;
+typedef data_base<rinstance, quark, quark> srdata;
 
 };
 
