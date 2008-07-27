@@ -8,6 +8,7 @@
 
 #include "lbfgs.h"
 #include "evaluation.h"
+#include "parameters.h"
 
 namespace classias
 {
@@ -48,21 +49,39 @@ protected:
     /// An array [M] of scores for candidate labels.
     value_type *m_scores;
 
+    /// A data set for training.
+    const data_type* m_data;
     /// A group number used for holdout evaluation.
     int m_holdout;
-    /// Maximum number of iterations.
-    int m_maxiter;
-    /// Epsilon.
-    value_type m_epsilon;
+
+    /// Parameters interface.
+    parameter_exchange m_params;
+    /// Regularization type.
+    std::string m_regularization;
+    /// Regularization sigma;
+    value_type m_regularization_sigma;
+    /// Regularization start index.
+    int m_regularization_end;
+    /// The number of memories in L-BFGS.
+    int m_lbfgs_num_memories;
+    /// L-BFGS epsilon for convergence.
+    value_type m_lbfgs_epsilon;
+    /// Number of iterations for stopping criterion.
+    int m_lbfgs_stop;
+    /// The delta threshold for stopping criterion.
+    value_type m_lbfgs_delta;
+    /// Maximum number of L-BFGS iterations.
+    int m_lbfgs_maxiter;
+    /// Line search algorithm.
+    std::string m_lbfgs_linesearch;
+    /// The maximum number of trials for the line search algorithm.
+    int m_lbfgs_max_linesearch;
+
     /// L1-regularization constant.
     value_type m_c1;
     /// L2-regularization constant.
     value_type m_c2;
 
-    /// A data set for training.
-    const data_type* m_data;
-    /// The number of labels.
-    label_type m_num_labels;
     /// An output stream to which this object outputs log messages.
     std::ostream* m_os;
     /// An internal variable (previous timestamp).
@@ -95,47 +114,41 @@ public:
         m_weights = 0;
         m_scores = 0;
 
-        m_holdout = -1;
-        m_maxiter = 1000;
-        m_epsilon = 1e-5;
-        m_c1 = 0;
-        m_c2 = 0;
-
         m_data = NULL;
-        m_num_labels = 0;
         m_os = NULL;
+        m_holdout = -1;
+
+        // Initialize the parameters.
+        m_params.init("regularization", &m_regularization, "L2",
+            "Regularization method (prior):\n"
+            "{'': no regularization, 'L1': L1-regularization, 'L2': L2-regularization}");
+        m_params.init("regularization.sigma", &m_regularization_sigma, 5.0,
+            "Regularization coefficient (sigma).");
+        m_params.init("regularization.end", &m_regularization_end, -1,
+            "The index number of features at which L1/L2 norm computations stop. A negative\n"
+            "value computes L1/L2 norm with all features.");
+        m_params.init("lbfgs.num_memories", &m_lbfgs_num_memories, 6,
+            "The number of corrections to approximate the inverse hessian matrix.");
+        m_params.init("lbfgs.epsilon", &m_lbfgs_epsilon, 1e-5,
+            "Epsilon for testing the convergence of the log likelihood.");
+        m_params.init("lbfgs.stop", &m_lbfgs_stop, 10,
+            "The duration of iterations to test the stopping criterion.");
+        m_params.init("lbfgs.delta", &m_lbfgs_delta, 1e-5,
+            "The threshold for the stopping criterion; an L-BFGS iteration stops when the\n"
+            "improvement of the log likelihood over the last ${lbfgs.stop} iterations is\n"
+            "no greater than this threshold.");
+        m_params.init("lbfgs.max_iterations", &m_lbfgs_maxiter, INT_MAX,
+            "The maximum number of L-BFGS iterations.");
+        m_params.init("lbfgs.linesearch", &m_lbfgs_linesearch, "MoreThuente",
+            "The line search algorithm used in L-BFGS updates:\n"
+            "{'MoreThuente': More and Thuente's method, 'Backtracking': backtracking}");
+        m_params.init("lbfgs.max_linesearch", &m_lbfgs_max_linesearch, 20,
+            "The maximum number of trials for the line search algorithm.");
     }
 
-    static bool parse_param(const std::string& param, const std::string& name, std::string& value)
+    parameter_exchange& params()
     {
-        if (param.compare(0, name.length(), name) == 0) {
-            value = param.substr(name.length());
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    bool set(const std::string& param)
-    {
-        std::string str;
-
-        if (parse_param(param, "regularization.l1=", str)) {
-            double d = std::atoi(str.c_str());
-            m_c1 = (d <= 0.) ? 0. : 1.0 / d;
-            return true;
-        } else if (parse_param(param, "regularization.l2=", str)) {
-            double d = std::atoi(str.c_str());
-            m_c2 = (d <= 0.) ? 0. : 1.0 / d;
-            return true;
-        } else if (parse_param(param, "lbfgs.maxiter=", str)) {
-            int i = std::atoi(str.c_str());
-            m_maxiter = i;
-            return true;
-        } else if (parse_param(param, "lbfgs.epsilon=", str)) {
-            m_epsilon = std::atoi(str.c_str());
-            return true;
-        }
+        return m_params;
     }
 
     const value_type* get_weights() const
@@ -173,15 +186,15 @@ public:
             // Compute score[i] for each candidate #i.
             for (i = 0, itc = iti->begin();itc != iti->end();++i, ++itc) {
                 m_scores[i] = itc->inner_product(x);
-                if (itc->is_true()) {
+                if (itc->get_truth()) {
                     logp = m_scores[i];
                 }
                 norm = logsumexp(norm, m_scores[i], (i == 0));
             }
 
-            // Accumulate the model expectations of attributes.
+            // Accumulate the model expectations of features.
             for (i = 0, itc = iti->begin();itc != iti->end();++i, ++itc) {
-                itc->add(m_mexps, std::exp(m_scores[i] - norm));
+                itc->add_to(m_mexps, std::exp(m_scores[i] - norm));
             }
 
             // Accumulate the loss for predicting the instance.
@@ -196,7 +209,7 @@ public:
         // Apply L2 regularization if necessary.
         if (m_c2 != 0.) {
             value_type norm = 0.;
-            for (int i = 0;i < n;++i) {
+            for (int i = 0;i < m_regularization_end;++i) {
                 g[i] += (m_c2 * x[i]);
                 norm += x[i] * x[i];
             }
@@ -252,11 +265,6 @@ public:
         os << std::endl;
         os.flush();
 
-        // Check for the maximum number of iterations.
-        if (m_maxiter < k) {
-            return 1;
-        }
-
         return 0;
     }
 
@@ -280,17 +288,26 @@ public:
         }
         m_holdout = holdout;
 
+        // Set the internal parameters.
+        if (m_regularization == "L1" || m_regularization == "l1") {
+            m_c1 = 1.0 / m_regularization_sigma;
+            m_c2 = 0.;
+        } else if (m_regularization == "L2" || m_regularization == "l2") {
+            m_c1 = 0.;
+            m_c2 = 1.0 / (m_regularization_sigma * m_regularization_sigma);
+        } else {
+            m_c1 = 0.;
+            m_c2 = 0.;
+        }
+
+        // Set the default value of m_regularization_end.
+        if (m_regularization_end < 0) {
+            m_regularization_end = K;
+        }
+
         // Report the training parameters.
         os << "Training a maximum entropy model" << std::endl;
-        if (m_c1 != 0.) {
-            os << "L1 regularization: " << m_c1 << std::endl;
-        }
-        if (m_c2 != 0.) {
-            os << "L2 regularization: " << m_c2 << std::endl;
-        }
-        if (0 <= m_holdout) {
-            os << "Holdout group: " << (m_holdout+1) << std::endl;
-        }
+        m_params.show(os);
         os << std::endl;
 
         // Compute observation expectations of the features.
@@ -303,9 +320,9 @@ public:
             // Compute the observation expectations.
             typename instance_type::const_iterator itc;
             for (itc = iti->begin();itc != iti->end();++itc) {
-                if (itc->is_true()) {
+                if (itc->get_truth()) {
                     // m_oexps[k] += 1.0 * (*itc)[k].
-                    itc->add(m_oexps, 1.0);
+                    itc->add_to(m_oexps, 1.0);
                 }
             }
 
@@ -317,19 +334,27 @@ public:
         // Initialze the variables used by callback functions.
         m_os = &os;
         m_data = &data;
-        m_num_labels = M+1;
         m_clk_prev = clock();
-        m_scores = new double[m_num_labels];
+        m_scores = new double[M];
 
         // Call the L-BFGS solver.
-        int ret = lbfgs_solve((const int)K, m_weights, NULL, m_epsilon, m_c1);
+        int ret = lbfgs_solve(
+            (const int)K,
+            m_weights,
+            NULL,
+            m_lbfgs_num_memories,
+            m_lbfgs_epsilon,
+            m_lbfgs_stop,
+            m_lbfgs_delta,
+            m_lbfgs_maxiter,
+            m_lbfgs_linesearch,
+            m_lbfgs_max_linesearch,
+            m_c1,
+            m_regularization_end
+            );
 
         // Report the result from the L-BFGS solver.
-        if (ret == 0) {
-            os << "L-BFGS resulted in convergence" << std::endl;
-        } else {
-            os << "L-BFGS terminated with error code (" << ret << ")" << std::endl;
-        }
+        lbfgs_output_status(os, ret);
 
         return ret;
     }
@@ -338,7 +363,7 @@ public:
     {
         std::ostream& os = *m_os;
         const data_type& data = *m_data;
-        confusion_matrix matrix(m_num_labels);
+        confusion_matrix matrix(data.labels.size());
 
         // Loop over instances.
         for (const_iterator iti = data.begin();iti != data.end();++iti) {
@@ -362,13 +387,13 @@ public:
                 }
 
                 // Store the reference label.
-                if (itc->is_true()) {
-                    reflabel = itc->label;
+                if (itc->get_truth()) {
+                    reflabel = itc->get_label();
                 }
             }
 
             // Update the confusion matrix.
-            matrix(reflabel, itc_max->label)++;
+            matrix(reflabel, itc_max->get_label())++;
         }
 
         // Report accuracy, precision, recall, and f1 score.

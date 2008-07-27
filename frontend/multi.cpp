@@ -1,5 +1,5 @@
 /*
- *		Ranker.
+ *		Data I/O for multi-candidate classification.
  *
  * Copyright (c) 2008, Naoaki Okazaki
  * All rights reserved.
@@ -35,31 +35,28 @@
 #include <config.h>
 #endif/*HAVE_CONFIG_H*/
 
-#include <algorithm>
-#include <fstream>
 #include <iostream>
 #include <string>
-#include <ctime>
-#include <iterator>
 
 #include <classias/base.h>
+#include <classias/maxent.h>
 
 #include "option.h"
 #include "tokenize.h"
-#include "util.h"
 #include "train.h"
 
 template <
     class instance_type,
-    class attribute_quark_type,
+    class features_quark_type,
     class label_quark_type
 >
 static void
 read_line(
     const std::string& line,
     instance_type& instance,
-    attribute_quark_type& attrs,
+    features_quark_type& features,
     label_quark_type& labels,
+    const option& opt,
     int lines = 0
     )
 {
@@ -84,7 +81,7 @@ read_line(
     }
 
     // Set the binary class.
-    bool torf = ((*field)[0] != '-');
+    bool truth = ((*field)[0] != '-');
 
     // Set the label.
     if (label.empty()) {
@@ -93,16 +90,16 @@ read_line(
 
     // Create a new candidate.
     candidate_type& cand = instance.new_element();
-    cand.torf = torf;
-    cand.label = labels(label);
+    cand.set_truth(truth);
+    cand.set_label(labels(label));
 
-    // Set attributes for the instance.
+    // Set featuress for the instance.
     while (field.next()) {
         if (!field->empty()) {
             double value;
             std::string name;
             get_name_value(*field, name, value);
-            cand.append(attrs(name), value);
+            cand.append(features(name), value);
         }
     }
 }
@@ -114,11 +111,15 @@ static void
 read_stream(
     std::istream& is,
     data_type& data,
+    const option& opt,
     int group = 0
     )
 {
     int lines = 0;
     typedef typename data_type::instance_type instance_type;
+    typedef typename data_type::feature_type feature_type;
+    typedef typename data_type::iterator data_iterator;
+    typedef typename instance_type::iterator instance_iterator;
 
     for (;;) {
         // Read a line.
@@ -139,45 +140,54 @@ read_stream(
             continue;
         }
 
-        if (line.compare(0, 3, "BOI") == 0) {
+        if (line.compare(0, 4, "@BOI") == 0) {
             // Start of a new instance.
             data.new_element();
-        } else if (line.compare(0, 3, "EOI") == 0) {
+        } else if (line.compare(0, 4, "@EOI") == 0) {
             // End of a new instance.
         } else {
             // A new candidate.
-            read_line(line, data.back(), data.attributes, data.labels, lines);
+            read_line(line, data.back(), data.features, data.labels, opt, lines);
+        }
+    }
+
+    // Set the end index of the user features.
+    data.set_user_feature_end(data.features.size());
+
+    // Generate a bias feature if necessary.
+    if (opt.generate_bias) {
+        // Insert the bias feature to each instance.
+        for (data_iterator iti = data.begin();iti != data.end();++iti) {
+            for (instance_iterator itc = iti->begin();itc != iti->end();++itc) {
+                // A bias feature for the candidate label.
+                std::string name = "@bias@" + data.labels.to_item(itc->get_label());
+                itc->append(data.features(name), 1.0);
+            }
         }
     }
 }
 
-template <
-    class data_type,
-    class value_type
->
-static void
-output_model(
-    data_type& data,
-    const value_type* weights,
-    const option& opt
-    )
+int multi_train(option& opt)
 {
-    typedef typename data_type::attribute_quark_type attribute_quark_type;
-    typedef typename attribute_quark_type::value_type attribute_type;
-    const attribute_quark_type& attributes = data.attributes;
-
-    // Open a model file for writing.
-    std::ofstream os(opt.model.c_str());
-
-    for (attribute_type i = 0;i < attributes.size();++i) {
-        value_type w = weights[i];
-        if (w != 0.) {
-            os << w << '\t' << attributes.to_item(i) << std::endl;
-        }
+    // Branches for training algorithms.
+    if (opt.algorithm == "maxent") {
+        return train<
+            classias::srdata,
+            classias::trainer_maxent<classias::srdata, double>
+        >(opt);
+    } else {
+        throw invalid_algorithm(opt.algorithm);
     }
+
+    return 0;
 }
 
-int ranker_train(option& opt)
+bool multi_usage(option& opt)
 {
-    return train<classias::srdata>(opt);
+    if (opt.algorithm == "maxent") {
+        classias::trainer_maxent<classias::srdata, double> tr;
+        tr.params().help(opt.os);
+        return true;
+    }
+    return false;
 }

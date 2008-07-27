@@ -180,11 +180,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\binary.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\main.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\multi_rank.cpp"
+				RelativePath=".\multi.cpp"
 				>
 			</File>
 		</Filter>

@@ -1,6 +1,8 @@
 #ifndef __CLASSIAS_LBFGS_H__
 #define __CLASSIAS_LBFGS_H__
 
+#include <string>
+
 namespace classias
 {
 
@@ -18,8 +20,21 @@ public:
     }
 
     int lbfgs_solve(
-        const int n, double *x, double *ptr_fx, double epsilon, double c1
+        const int n,
+        double *x,
+        double *ptr_fx,
+        int m,
+        double epsilon,
+        int stop,
+        double delta,
+        int maxiter,
+        std::string linesearch,
+        int maxlinesearch,
+        double c1,
+        int l1_end
         );
+
+    void lbfgs_output_status(std::ostream& os, int status);
 
     virtual double lbfgs_evaluate(
         const double *x, double *g, const int n, const double step

@@ -7,32 +7,146 @@
 #include <vector>
 
 #include "quark.h"
-#include "feature.h"
 
 namespace classias
 {
 
 /**
- * Sparse attribute vector.
+ * Truth class.
  *
- *  This class implements a sparse attribute vector as a linear array of
- *  elements, pairs of attribute names and values.
+ *  This class implements the base interface indicating whether an inherited
+ *  object presents a true instance/candidate.
+ */
+class truth_base
+{
+protected:
+    /// The type representing the truth.
+    typedef bool truth_type;
+    /// The truth value.
+    truth_type m_truth;
+
+public:
+    /**
+     * Constructs the object.
+     */
+    truth_base() : m_truth(false)
+    {
+    }
+
+    /**
+     * Constructs the object.
+     *  @param  truth           The truth.
+     */
+    truth_base(const truth_type& truth) : m_truth(truth)
+    {
+    }
+
+    /**
+     * Destructs the object.
+     */
+    virtual ~truth_base()
+    {
+    }
+
+    /**
+     * Set the truth.
+     *  @param  truth       The truth.
+     */
+    inline void set_truth(truth_type truth)
+    {
+        m_truth = truth;
+    }
+
+    /**
+     * Get the truth.
+     *  @retval truth_type  The truth.
+     */
+    inline int get_truth() const
+    {
+        return m_truth;
+    }
+};
+
+
+
+/**
+ * Group number class.
  *
- *  @param  name_base       The type of attribute names.
- *  @param  value_base      The type of attribute values.
+ * The class implements the base interface for instances with group numbers.
+ */
+class group_base
+{
+protected:
+    /// A type representing a group number.
+    typedef int group_type;
+    /// The group number.
+    group_type m_group;
+
+public:
+    /**
+     * Constructs the object.
+     */
+    group_base() : m_group(0)
+    {
+    }
+
+    /**
+     * Constructs the object.
+     *  @param  group           The group number.
+     */
+    group_base(const group_type& group) : m_group(group)
+    {
+    }
+
+    /**
+     * Destructs the object.
+     */
+    virtual ~group_base()
+    {
+    }
+
+    /**
+     * Set the group number.
+     *  @param  group       The group number.
+     */
+    inline void set_group(int group)
+    {
+        m_group = group;
+    }
+
+    /**
+     * Get the group number.
+     *  @retval int         The group number.
+     */
+    inline int get_group() const
+    {
+        return m_group;
+    }
+};
+
+
+
+/**
+ * Sparse vector.
+ *
+ *  This class implements a sparse vector as a linear array of elements, pairs
+ *  of names and values.
+ *
+ *  @param  name_base       The type of element names.
+ *  @param  value_base      The type of element values.
  */
 template <class name_base, class value_base>
-class sparse_attributes_base
+class sparse_vector_base
 {
 public:
-    /// A type representing an attribute identifier.
+    /// A type representing an element name.
     typedef name_base name_type;
-    /// A type representing an attribute value.
+    /// A type representing an element value.
     typedef value_base value_type;
-    /// A type representing an attribute element, a pair of (name, value).
-    typedef std::pair<name_type, value_type> attribute_type;
+    /// A type representing an element, a pair of (name, value).
+    typedef std::pair<name_type, value_type> element_type;
     /// A type providing a container of (name, value) pairs.
-    typedef std::vector<attribute_type> container_type;
+    typedef std::vector<element_type> container_type;
     /// A type counting the number of pairs in a container.
     typedef typename container_type::size_type size_type;
     /// A type providing a random-access iterator.
@@ -46,21 +160,21 @@ protected:
 
 public:
     /**
-     * Constructs an attribute vector.
+     * Constructs a sparse vector.
      */
-    sparse_attributes_base()
+    sparse_vector_base()
     {
     }
 
     /**
-     * Destructs the attribute vector.
+     * Destructs the sparse vector.
      */
-    virtual ~sparse_attributes_base()
+    virtual ~sparse_vector_base()
     {
     }
 
     /**
-     * Erases all the attributes of the vector.
+     * Erases all the elements of the vector.
      */
     inline void clear()
     {
@@ -68,8 +182,8 @@ public:
     }
 
     /**
-     * Tests if the attribute vector is empty.
-     *  @retval bool        \c true if the attribute vector is empty,
+     * Tests if the sparse vector is empty.
+     *  @retval bool        \c true if the sparse vector is empty,
      *                      \c false otherwise.
      */
     inline bool empty() const
@@ -78,8 +192,8 @@ public:
     }
 
     /**
-     * Returns the number of attributes in the vector.
-     *  @retval size_type   The current size of the attribute vector.
+     * Returns the number of elements in the vector.
+     *  @retval size_type   The current size of the sparse vector.
      */
     inline size_type size() const
     {
@@ -87,10 +201,10 @@ public:
     }
 
     /**
-     * Returns a random-access iterator to the first attribute.
+     * Returns a random-access iterator to the first element.
      *  @retval iterator    A random-access iterator (for read/write)
-     *                      addressing the first attribute in the vector or
-     *                      to the location succeeding an empty attributes.
+     *                      addressing the first element in the vector or
+     *                      to the location succeeding an empty element.
      */
     inline iterator begin()
     {
@@ -98,10 +212,10 @@ public:
     }
 
     /**
-     * Returns a random-access iterator to the first attribute.
+     * Returns a random-access iterator to the first element.
      *  @retval iterator    A random-access iterator (for read-only)
-     *                      addressing the first attribute in the vector or
-     *                      to the location succeeding an empty attributes. 
+     *                      addressing the first element in the vector or
+     *                      to the location succeeding an empty element. 
      */
     inline const_iterator begin() const
     {
@@ -109,9 +223,9 @@ public:
     }
 
     /**
-     * Returns a random-access iterator pointing just beyond the last attribute.
+     * Returns a random-access iterator pointing just beyond the last element.
      *  @retval iterator    A random-access iterator (for read/write)
-     *                      addressing the end of the attributes.
+     *                      addressing the end of the element.
      */
     inline iterator end()
     {
@@ -119,9 +233,9 @@ public:
     }
 
     /**
-     * Returns a random-access iterator pointing just beyond the last attribute.
+     * Returns a random-access iterator pointing just beyond the last element.
      *  @retval iterator    A random-access iterator (for read-only)
-     *                      addressing the end of the attributes.
+     *                      addressing the end of the element.
      */
     inline const_iterator end() const
     {
@@ -129,13 +243,13 @@ public:
     }
 
     /**
-     * Adds an attribute (name, value) to the end of the vector.
-     *  @param  name        The attribute name.
-     *  @param  value       The value of the attribute.
+     * Adds an element (name, value) to the end of the vector.
+     *  @param  name        The element name.
+     *  @param  value       The element value.
      */
     inline void append(const name_type& name, const value_type& value)
     {
-        cont.push_back(attribute_type(name, value));
+        cont.push_back(element_type(name, value));
     }
 
     /**
@@ -153,8 +267,13 @@ public:
         return s;
     }
 
+    /**
+     * Add the scaled value to another vector.
+     *  @param  v           The vector to which this function adds the value.
+     *  @param  scale       The scale factor.
+     */
     template <class vector_type>
-    inline void add(vector_type& v, const double scale) const
+    inline void add_to(vector_type& v, const double scale) const
     {
         for (const_iterator it = begin();it != end();++it) {
             v[it->first] += scale * (double)it->second;
@@ -162,49 +281,81 @@ public:
     }
 };
 
+
+
 /**
- * A candidate.
- * */
+ * Ranking candidate.
+ *
+ *  This class represents a ranking candidate that consists of a feature
+ *  vector, truth, and label.
+ *
+ *  @param  features_tmpl   The type of feature vector.
+ *  @param  label_tmpl      The type of candidate label.
+ */
 template <
-    class attributes_tmpl,
+    class features_tmpl,
     class label_tmpl
 >
 class candidate_base : 
-    public attributes_tmpl
+    public features_tmpl,
+    public truth_base
 {
 public:
-    typedef attributes_tmpl attributes_type;
+    /// The type of a feature vector.
+    typedef features_tmpl features_type;
+    /// The type of a candidate label.
     typedef label_tmpl label_type;
 
-    bool torf;
-    label_type label;
+    /// The candidate label.
+    label_type m_label;
 
-    candidate_base() : torf(false), label(0)
+    /**
+     * Constructs a candidate.
+     */
+    candidate_base() : m_label(0)
     {
     }
 
+    /**
+     * Destructs a candidate.
+     */
     virtual ~candidate_base()
     {
     }
 
-    inline bool is_true() const
+    /**
+     * Set the candidate label.
+     *  @param  label       The candidate label.
+     */
+    inline void set_label(label_type label)
     {
-        return torf;
+        m_label = label;
+    }
+
+    /**
+     * Get the candidate label.
+     *  @retval  label_type The candidate label.
+     */
+    inline label_type get_label() const
+    {
+        return m_label;
     }
 };
 
 
 
 /**
- * Candidate class.
+ * Ranking candidates.
+ *
+ *  This class implements a linear array of ranking candidates.
  */
 template <class candidate_base>
 class candidates_base
 {
 public:
-    /// A type representing an attributes.
+    /// A type representing an features.
     typedef candidate_base candidate_type;
-    /// A type providing a container of attributes of all candidates.
+    /// A type providing a container of features of all candidates.
     typedef std::vector<candidate_type> candidates_type;
     /// A type counting the number of candidates in the instance.
     typedef typename candidates_type::size_type size_type;
@@ -310,6 +461,10 @@ public:
         candidates.push_back(candidate);
     }
 
+    /**
+     * Create a new candidate.
+     *  @retval candidate_type& The reference to the new candidate.
+     */
     inline candidate_type& new_element()
     {
         candidates.push_back(candidate_type());
@@ -317,177 +472,285 @@ public:
     }
 };
 
+
+
 /**
- * Group number class.
+ * Binary instance.
+ *
+ *  This class implements a binary-classification instance that consists of
+ *  a feature vector, truth, and group number.
+ *
+ *  @param  features_tmpl   The type of feature vector.
  */
-class group_base
+template <class features_tmpl>
+class binary_instance_base :
+    public features_tmpl,
+    public truth_base,
+    public group_base
 {
-protected:
-    typedef int group_type;
-    group_type m_group;
-
 public:
+    /// The type of a feature vector.
+    typedef features_tmpl features_type;
+
     /**
-     * Constructs the object.
+     * Constructs an object.
      */
-    group_base() : m_group(0)
+    binary_instance_base()
     {
     }
 
     /**
-     * Constructs the object.
-     *  @param  group           The group number.
+     * Destructs an object.
      */
-    group_base(const group_type& group) : m_group(group)
+    virtual ~binary_instance_base()
     {
-    }
-
-    /**
-     * Destructs the object.
-     */
-    virtual ~group_base()
-    {
-    }
-
-    /**
-     * Set the group number.
-     *  @param  group       The group number.
-     */
-    inline void set_group(int group)
-    {
-        m_group = group;
-    }
-
-    /**
-     * Get the group number.
-     *  @retval int         The group number.
-     */
-    inline int get_group() const
-    {
-        return m_group;
     }
 };
 
+
+
+/**
+ * Multi-candidate instance.
+ *  
+ *  This class implements a multi-candidate instance that consists of
+ *  an array of candidates and group number.
+
+ */
 template <class candidate_tmpl>
 class ranking_instance_base :
     public candidates_base<candidate_tmpl>,
     public group_base
 {
 public:
+    /// The type of a candidate.
     typedef candidate_tmpl candidate_type;
+    /// The type of multiple candidates.
     typedef candidates_base<candidate_tmpl> candidates_type;
-
-    typedef typename candidate_type::attributes_type attributes_type;
+    /// The type of a feature vector.
+    typedef typename candidate_type::features_type features_type;
+    /// The type of a candidate label.
     typedef typename candidate_type::label_type label_type;
 
+    /**
+     * Constructs an object.
+     */
     ranking_instance_base()
     {
     }
 
+    /**
+     * Destructs an object.
+     */
     virtual ~ranking_instance_base()
     {
     }
 };
 
+
+
+/**
+ * Data set for binary-classification instances.
+ *
+ *  This class provides a data set for binary classification.
+ *
+ *  @param  instance_tmpl       The type of an instance.
+ *  @param  features_quark_tmpl The type of a feature quark.
+ */
 template <
     class instance_tmpl,
-    class attribute_quark_tmpl,
-    class label_quark_tmpl
+    class features_quark_tmpl
 >
-class data_base
+class binary_data_base
 {
 public:
+    /// The type of an instance.
     typedef instance_tmpl instance_type;
-    typedef attribute_quark_tmpl attribute_quark_type;
-    typedef label_quark_tmpl label_quark_type;
+    /// The type of a feature vector.
+    typedef features_quark_tmpl features_quark_type;
+    /// The type of a feature.
+    typedef typename features_quark_type::value_type feature_type;
 
-    typedef typename instance_type::label_type label_type;
-
+    /// A type providing a container of instances.
     typedef std::vector<instance_type> instances_type;
+    /// A type counting the number of pairs in a container.
     typedef typename instances_type::size_type size_type;
+    /// A type providing a random-access iterator.
     typedef typename instances_type::iterator iterator;
+    /// A type providing a read-only random-access iterator.
     typedef typename instances_type::const_iterator const_iterator;
 
-    typedef std::vector<label_type> positive_labels_type;
-
+    /// A container of instances.
     instances_type instances;
-    attribute_quark_type attributes;
-    label_quark_type labels;
-    positive_labels_type positive_labels;
+    /// A feature quark.
+    features_quark_type features;
+    /// The start index of features.
+    feature_type feature_end_index;
 
-    data_base()
+    /**
+     * Constructs the object.
+     */
+    binary_data_base() : feature_end_index(0)
     {
     }
 
-    virtual ~data_base()
+    /**
+     * Destructs the object.
+     */
+    virtual ~binary_data_base()
     {
     }
 
+    /**
+     * Erases all the instances of the data.
+     */
     inline void clear()
     {
         instances.clear();
     }
 
+    /**
+     * Tests if the data is empty.
+     *  @retval bool        \c true if the data is empty,
+     *                      \c false otherwise.
+     */
     inline bool empty() const
     {
         return instances.empty();
     }
 
+    /**
+     * Returns the number of instances in the data.
+     *  @retval size_type   The current size of the data.
+     */
     inline size_type size() const
     {
         return instances.size();
     }
 
+    /**
+     * Returns a random-access iterator to the first instance.
+     *  @retval iterator    A random-access iterator (for read/write)
+     *                      addressing the first instance in the data or
+     *                      to the location succeeding an empty instance.
+     */
     inline iterator begin()
     {
         return instances.begin();
     }
 
+    /**
+     * Returns a random-access iterator to the first instance.
+     *  @retval iterator    A random-access iterator (for read-only)
+     *                      addressing the first instance in the data or
+     *                      to the location succeeding an empty instance.
+     */
     inline const_iterator begin() const
     {
         return instances.begin();
     }
 
+    /**
+     * Returns a random-access iterator pointing just beyond the last instance.
+     *  @retval iterator    A random-access iterator (for read/write)
+     *                      addressing the end of the instance.
+     */
     inline iterator end()
     {
         return instances.end();
     }
 
+    /**
+     * Returns a random-access iterator pointing just beyond the last instance.
+     *  @retval iterator    A random-access iterator (for read-only)
+     *                      addressing the end of the instance.
+     */
     inline const_iterator end() const
     {
         return instances.end();
     }
 
+    /**
+     * Returns the reference to the last instance.
+     *  @retval instance_type&  The reference pointing to the last instance
+     *                          in the data.
+     */
     inline instance_type& back()
     {
         return instances.back();
     }
 
+    /**
+     * Create a new instance.
+     *  @retval instance_type&  The reference to the new instance.
+     */
     inline instance_type& new_element()
     {
         instances.push_back(instance_type());
-        return back();
+        return this->back();
     }
 
+    inline void set_user_feature_end(feature_type index)
+    {
+        feature_end_index = index;
+    }
+
+    inline feature_type get_user_feature_end() const
+    {
+        return feature_end_index;
+    }
+
+    /**
+     * Returns the number of features in the data.
+     *  @retval size_type   The number of features.
+     */
     inline size_type num_features() const
     {
-        return attributes.size();
-    }
-
-    inline size_type num_labels() const
-    {
-        return labels.size();
+        return features.size();
     }
 };
 
-typedef sparse_attributes_base<int, double> sparse_attributes;
 
-typedef candidate_base<sparse_attributes, int> binstance;
-typedef data_base<binstance, quark, quark> sbdata;
+
+/**
+ * Data set for ranking instances.
+ *
+ *  This class provides a data set for ranking instances.
+ *
+ *  @param  instance_tmpl       The type of an instance.
+ *  @param  features_quark_tmpl The type of a feature quark.
+ *  @param  label_quark_tmpl    The type of a label quark.
+ */
+template <
+    class instance_tmpl,
+    class features_quark_tmpl,
+    class label_quark_tmpl
+>
+class ranking_data_base : public binary_data_base<instance_tmpl, features_quark_tmpl>
+{
+public:
+    typedef label_quark_tmpl label_quark_type;
+    typedef typename label_quark_type::value_type label_type;
+    typedef std::vector<label_type> positive_labels_type;
+
+    label_quark_type labels;
+    positive_labels_type positive_labels;
+
+    ranking_data_base()
+    {
+    }
+
+    virtual ~ranking_data_base()
+    {
+    }
+};
+
+typedef sparse_vector_base<int, double> sparse_attributes;
+typedef binary_instance_base<sparse_attributes> binstance;
+typedef binary_data_base<binstance, quark> sbdata;
 
 typedef candidate_base<sparse_attributes, int> rcandidate;
 typedef ranking_instance_base<rcandidate> rinstance;
-typedef data_base<rinstance, quark, quark> srdata;
+typedef ranking_data_base<rinstance, quark, quark> srdata;
 
 };
 

@@ -2,38 +2,71 @@
 #define __TRAIN_H__
 
 #include <vector>
+#include "util.h"
 
-#include <classias/feature.h>
-#include <classias/maxent.h>
-
-template <class data_type>
-static int
-train_maxent(
+template <
+    class trainer_type,
+    class data_type>
+static void
+set_parameters(
+    trainer_type& trainer,
     data_type& data,
-    int holdout,
     const option& opt
     )
 {
-    typedef typename classias::trainer_maxent<data_type> trainer_type;
-    trainer_type trainer;
-
-    // Set parameters.
     typename option::params_type::const_iterator itp;
+    classias::parameter_exchange& params = trainer.params();
     for (itp = opt.params.begin();itp != opt.params.end();++itp) {
-        trainer.set(*itp);
+        std::string name, value;
+        std::string::size_type pos = itp->find('=');
+        if (pos != itp->npos) {
+            name = std::string(*itp, 0, pos);
+            value = itp->substr(pos+1);
+        } else {
+            name = *itp;
+        }
+        params.set(name, value);
     }
 
-    trainer.train(data, opt.os, holdout);
-
-    if (holdout == -1 && !opt.model.empty()) {
-        output_model(data, trainer.get_weights(), opt);
+    // Try to set the end index of the regularization.
+    try {
+        params.set("regularization.end", (int)data.get_user_feature_end());
+    } catch (classias::unknown_parameter& e) {
+        // Continue if the trainer does not support this parameter.
     }
-
-    return 0;
 }
 
+template <
+    class data_type,
+    class value_type
+>
+static void
+output_model(
+    data_type& data,
+    const value_type* weights,
+    const option& opt
+    )
+{
+    typedef typename data_type::features_quark_type features_quark_type;
+    typedef typename features_quark_type::value_type features_type;
+    const features_quark_type& features = data.features;
 
-template <class data_type>
+    // Open a model file for writing.
+    std::ofstream os(opt.model.c_str());
+
+    // Store the feature weights.
+    for (features_type i = 0;i < features.size();++i) {
+        value_type w = weights[i];
+        if (w != 0.) {
+            os << w << '\t' << features.to_item(i) << std::endl;
+        }
+    }
+}
+
+template <
+    class data_type,
+    class trainer_type
+>
 static int
 train(option& opt)
 {
@@ -53,7 +86,7 @@ train(option& opt)
     sw.stop();
     os << "Number of instances: " << data.size() << std::endl;
     os << "Number of groups: " << num_groups << std::endl;
-    os << "Number of attributes: " << data.attributes.size() << std::endl;
+    os << "Number of featuress: " << data.num_features() << std::endl;
     os << "Seconds required: " << sw.get() << std::endl;
     os << std::endl;
 
@@ -61,19 +94,33 @@ train(option& opt)
     if (opt.cross_validation) {
         // Training with cross validation
         for (int i = 0;i < num_groups;++i) {
+            // Set training parameters.
+            trainer_type trainer;
+            set_parameters(trainer, data, opt);
+
             os << "Cross validation (" << (i + 1) << "/" << num_groups << ")" << std::endl;
             sw.start();
-            train_maxent(data, i, opt);
+            trainer.train(data, opt.os, i);
             sw.stop();
             os << "Seconds required: " << sw.get() << std::endl;
             os << std::endl;
         }
     } else {
+        // Set training parameters.
+        trainer_type trainer;
+        set_parameters(trainer, data, opt);
+
+        // Start training.
         sw.start();
-            train_maxent(data, -1, opt);
+        trainer.train(data, opt.os, -1);
         sw.stop();
         os << "Seconds required: " << sw.get() << std::endl;
         os << std::endl;
+
+        // Store the model.
+        if (!opt.model.empty()) {
+            output_model(data, trainer.get_weights(), opt);
+        }
     }
 
 	// Report the finish time.

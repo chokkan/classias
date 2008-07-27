@@ -5,9 +5,9 @@
 #include <ctime>
 #include <sstream>
 #include <string>
-#include <stdexcept>
+#include <exception>
 
-class invalid_data
+class invalid_data : public std::exception
 {
 protected:
     std::string message;
@@ -40,33 +40,12 @@ public:
     }
 };
 
-class invalid_model
+class invalid_algorithm : public std::domain_error
 {
-protected:
-    std::string message;
-
 public:
-    invalid_model(const char *const& msg) : message(msg)
+    explicit invalid_algorithm(const std::string& msg)
+        : std::domain_error(msg)
     {
-    }
-
-    invalid_model(const invalid_model& rho)
-    {
-        message = rho.message;
-    }
-
-    invalid_model& operator=(const invalid_model& rho)
-    {
-        message = rho.message;
-    }
-
-    virtual ~invalid_model()
-    {
-    }
-
-    virtual const char *what() const
-    {
-        return message.c_str();
     }
 };
 
@@ -127,14 +106,14 @@ read_data(
     if (opt.files.empty()) {
         // Read the data from STDIN.
         os << "STDIN" << std::endl;
-        read_stream(std::cin, data, 0);
+        read_stream(std::cin, data, opt, 0);
     } else {
         // Read the data from files.
         for (int i = 0;i < (int)opt.files.size();++i) {
             std::ifstream ifs(opt.files[i].c_str());
             if (!ifs.fail()) {
                 os << "File (" << i+1 << "/" << opt.files.size() << ") : " << opt.files[i] << std::endl;
-                read_stream(ifs, data, i);
+                read_stream(ifs, data, opt, i);
             }
             ifs.close();
         }
@@ -231,9 +210,9 @@ generate_features(
         for (it = data.begin();it != data.end();++it) {
             for (size_t i = 0;i < it->num_candidates(L);++i) {
                 int l = it->candidate(i);
-                const typename data_type::attributes_type& cont = it->content(i);
+                const typename data_type::featuress_type& cont = it->content(i);
                 if (it->label == l) {
-                    typename data_type::attributes_type::const_iterator itc;
+                    typename data_type::featuress_type::const_iterator itc;
                     for (itc = cont.begin();itc != cont.end();++itc) {
                         features.assign(itc->first, it->label);
                     }

@@ -30,13 +30,36 @@ __lbfgs_progress(
     return 0;
 }
 
-int lbfgs_solver::lbfgs_solve(const int n, double *x, double *ptr_fx, double epsilon, double c1)
+int lbfgs_solver::lbfgs_solve(
+    const int n,
+    double *x,
+    double *ptr_fx,
+    int m,
+    double epsilon,
+    int stop,
+    double delta,
+    int maxiter,
+    std::string linesearch,
+    int maxlinesearch,
+    double c1,
+    int l1_end
+    )
 {
     // Set L-BFGS parameters.
     lbfgs_parameter_t param;
     lbfgs_parameter_init(&param);
+    param.m = m;
     param.epsilon = epsilon;
+    param.past = stop;
+    param.delta = delta;
+    param.max_iterations = maxiter;
+    if (linesearch == "Backtracking") {
+        param.linesearch = LBFGS_LINESEARCH_BACKTRACKING;
+    }
+    param.max_linesearch = maxlinesearch;
     param.orthantwise_c = c1;
+    param.orthantwise_start = 0;
+    param.orthantwise_end = l1_end;
 
     // Call L-BFGS routine.
     return lbfgs(
@@ -49,5 +72,17 @@ int lbfgs_solver::lbfgs_solve(const int n, double *x, double *ptr_fx, double eps
         &param
         );
 }
+
+void lbfgs_solver::lbfgs_output_status(std::ostream& os, int status)
+{
+    if (status == LBFGS_CONVERGENCE) {
+        os << "L-BFGS resulted in convergence" << std::endl;
+    } else if (status == LBFGS_STOP) {
+        os << "L-BFGS terminated with the stopping criteria" << std::endl;
+    } else {
+        os << "L-BFGS terminated with error code (" << status << ")" << std::endl;
+    }
+}
+
 
 };
