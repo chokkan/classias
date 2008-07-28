@@ -11,6 +11,8 @@
 namespace classias
 {
 
+
+
 /**
  * Truth class.
  *
@@ -69,6 +71,8 @@ public:
 
 
 
+
+
 /**
  * Group number class.
  *
@@ -123,6 +127,8 @@ public:
         return m_group;
     }
 };
+
+
 
 
 
@@ -283,6 +289,8 @@ public:
 
 
 
+
+
 /**
  * Ranking candidate.
  *
@@ -296,7 +304,7 @@ template <
     class features_tmpl,
     class label_tmpl
 >
-class candidate_base : 
+class multi_candidate_base : 
     public features_tmpl,
     public truth_base
 {
@@ -312,14 +320,14 @@ public:
     /**
      * Constructs a candidate.
      */
-    candidate_base() : m_label(0)
+    multi_candidate_base() : m_label(0)
     {
     }
 
     /**
      * Destructs a candidate.
      */
-    virtual ~candidate_base()
+    virtual ~multi_candidate_base()
     {
     }
 
@@ -344,17 +352,19 @@ public:
 
 
 
+
+
 /**
  * Ranking candidates.
  *
  *  This class implements a linear array of ranking candidates.
  */
-template <class candidate_base>
+template <class multi_candidate_base>
 class candidates_base
 {
 public:
     /// A type representing an features.
-    typedef candidate_base candidate_type;
+    typedef multi_candidate_base candidate_type;
     /// A type providing a container of features of all candidates.
     typedef std::vector<candidate_type> candidates_type;
     /// A type counting the number of candidates in the instance.
@@ -509,6 +519,8 @@ public:
 
 
 
+
+
 /**
  * Multi-candidate instance.
  *  
@@ -517,7 +529,7 @@ public:
 
  */
 template <class candidate_tmpl>
-class ranking_instance_base :
+class multi_instance_base :
     public candidates_base<candidate_tmpl>,
     public group_base
 {
@@ -534,14 +546,14 @@ public:
     /**
      * Constructs an object.
      */
-    ranking_instance_base()
+    multi_instance_base()
     {
     }
 
     /**
      * Destructs an object.
      */
-    virtual ~ranking_instance_base()
+    virtual ~multi_instance_base()
     {
     }
 };
@@ -711,6 +723,8 @@ public:
 
 
 
+
+
 /**
  * Data set for ranking instances.
  *
@@ -725,7 +739,7 @@ template <
     class features_quark_tmpl,
     class label_quark_tmpl
 >
-class ranking_data_base : public binary_data_base<instance_tmpl, features_quark_tmpl>
+class multi_data_base : public binary_data_base<instance_tmpl, features_quark_tmpl>
 {
 public:
     typedef label_quark_tmpl label_quark_type;
@@ -735,22 +749,23 @@ public:
     label_quark_type labels;
     positive_labels_type positive_labels;
 
-    ranking_data_base()
+    multi_data_base()
     {
     }
 
-    virtual ~ranking_data_base()
+    virtual ~multi_data_base()
     {
     }
 };
 
 typedef sparse_vector_base<int, double> sparse_attributes;
-typedef binary_instance_base<sparse_attributes> binstance;
-typedef binary_data_base<binstance, quark> sbdata;
 
-typedef candidate_base<sparse_attributes, int> rcandidate;
-typedef ranking_instance_base<rcandidate> rinstance;
-typedef ranking_data_base<rinstance, quark, quark> srdata;
+typedef binary_instance_base<sparse_attributes> binstance;
+typedef binary_data_base<binstance, quark> bdata;
+
+typedef multi_candidate_base<sparse_attributes, int> mcandidate;
+typedef multi_instance_base<mcandidate> minstance;
+typedef multi_data_base<minstance, quark, quark> mdata;
 
 };
 

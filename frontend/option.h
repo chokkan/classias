@@ -29,7 +29,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* $Id:$ */
+/* $Id$ */
 
 #ifndef __OPTION_H__
 #define __OPTION_H__
@@ -49,11 +49,14 @@ public:
         TYPE_NONE = 0,          /// Default type.
         TYPE_BINARY,            /// Binary classification.
         TYPE_MULTI,             /// Multi-candidate ranker.
+        TYPE_CLASSIFICATION,    /// Classification.
+        TYPE_SELECTION          /// Selection.
     };
 
     enum {
         MODE_NONE = 0,          /// No mode.
         MODE_TRAIN,             /// Training mode.
+        MODE_CONVERT,           /// Conversion mode.
         MODE_TAG,               /// Tagging mode.
         MODE_HELP,              /// Usage mode.
         MODE_HELP_ALGORITHM,    /// Algorithm-specific usage.

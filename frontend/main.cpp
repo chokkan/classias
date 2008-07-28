@@ -29,7 +29,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* $Id:$ */
+/* $Id$ */
 
 #ifdef  HAVE_CONFIG_H
 #include <config.h>
@@ -49,6 +49,7 @@ int binary_train(option& opt);
 bool binary_usage(option& opt);
 int multi_train(option& opt);
 bool multi_usage(option& opt);
+int classification_convert(option& opt);
 
 class optionparser : public option, public optparse
 {
@@ -65,6 +66,9 @@ public:
         ON_OPTION(SHORTOPT('l') || LONGOPT("learn"))
             mode = MODE_TRAIN;
 
+        ON_OPTION(SHORTOPT('c') || LONGOPT("convert"))
+            mode = MODE_CONVERT;
+
         ON_OPTION(SHORTOPT('t') || LONGOPT("tag"))
             mode = MODE_TAG;
 
@@ -79,6 +83,10 @@ public:
                 type = TYPE_BINARY;
             } else if (strcmp(arg, "multi") == 0 || strcmp(arg, "m") == 0) {
                 type = TYPE_MULTI;
+            } else if (strcmp(arg, "classification") == 0 || strcmp(arg, "c") == 0) {
+                type = TYPE_CLASSIFICATION;
+            } else if (strcmp(arg, "selection") == 0 || strcmp(arg, "s") == 0) {
+                type = TYPE_SELECTION;
             } else {
                 std::stringstream ss;
                 ss << "unknown task type specified: " << arg;
@@ -91,10 +99,10 @@ public:
         ON_OPTION_WITH_ARG(LONGOPT("negative"))
             negatives.clear();
             std::string labels = arg;
-            tokenizer field(labels, ' ');
-            while (field.next()) {
-                if (!field->empty()) {
-                    negatives.insert(*field);
+            tokenizer values(labels, ' ');
+            for (tokenizer::iterator itv = values.begin();itv != values.end();++itv) {
+                if (!itv->empty()) {
+                    negatives.insert(*itv);
                 }
             }
 
@@ -137,6 +145,7 @@ static void usage(std::ostream& os, const char *argv0)
     os << std::endl;
     os << "COMMANDS:" << std::endl;
     os << "  -l, --learn           train a model from the training set" << std::endl;
+    os << "  -c, --convert         convert the classification data" << std::endl;
     os << "  -t, --tag             tag the data with the model (specified by -m option)" << std::endl;
     os << "  -h, --help            show the help message and exit" << std::endl;
     os << "  -H, --help-parameters show the help message of parameters for the algorithm" << std::endl;
@@ -222,6 +231,9 @@ int main(int argc, char *argv[])
                 ret = multi_train(opt);
                 break;
             }
+        } else if (opt.mode == option::MODE_CONVERT) {
+            ret = classification_convert(opt);
+
         } else if (opt.mode == option::MODE_TAG) {
 
         }

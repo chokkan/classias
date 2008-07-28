@@ -63,29 +63,30 @@ read_line(
     typedef typename instance_type::candidate_type candidate_type;
 
     // Split the line with tab characters.
-    tokenizer field(line, '\t');
-    if (!field.next()) {
+    tokenizer values(line, '\t');
+    tokenizer::iterator itv = values.begin();
+    if (itv == values.end()) {
         throw invalid_data("no field found in the line", lines);
     }
 
     // Make sure that the first token (class) is not empty.
-    if (field->empty()) {
+    if (itv->empty()) {
         throw invalid_data("an empty label found", lines);
     }
 
     // Extract the label in the first token if any.
     std::string label;
-    std::string::size_type pos = field->find(' ');
-    if (pos != field->npos) {
-        label = std::string(*field, pos+1);
+    std::string::size_type pos = itv->find(' ');
+    if (pos != itv->npos) {
+        label = std::string(*itv, pos+1);
     }
 
     // Set the binary class.
-    bool truth = ((*field)[0] != '-');
+    bool truth = ((*itv)[0] != '-');
 
     // Set the label.
     if (label.empty()) {
-        label = *field;
+        label = *itv;
     }
 
     // Create a new candidate.
@@ -94,11 +95,11 @@ read_line(
     cand.set_label(labels(label));
 
     // Set featuress for the instance.
-    while (field.next()) {
-        if (!field->empty()) {
+    for (++itv;itv != values.end();++itv) {
+        if (!itv->empty()) {
             double value;
             std::string name;
-            get_name_value(*field, name, value);
+            get_name_value(*itv, name, value);
             cand.append(features(name), value);
         }
     }
@@ -140,11 +141,9 @@ read_stream(
             continue;
         }
 
-        if (line.compare(0, 4, "@BOI") == 0) {
+        if (line.compare(0, 9, "@instance") == 0) {
             // Start of a new instance.
             data.new_element();
-        } else if (line.compare(0, 4, "@EOI") == 0) {
-            // End of a new instance.
         } else {
             // A new candidate.
             read_line(line, data.back(), data.features, data.labels, opt, lines);
@@ -172,8 +171,8 @@ int multi_train(option& opt)
     // Branches for training algorithms.
     if (opt.algorithm == "maxent") {
         return train<
-            classias::srdata,
-            classias::trainer_maxent<classias::srdata, double>
+            classias::mdata,
+            classias::trainer_maxent<classias::mdata, double>
         >(opt);
     } else {
         throw invalid_algorithm(opt.algorithm);
@@ -185,7 +184,7 @@ int multi_train(option& opt)
 bool multi_usage(option& opt)
 {
     if (opt.algorithm == "maxent") {
-        classias::trainer_maxent<classias::srdata, double> tr;
+        classias::trainer_maxent<classias::mdata, double> tr;
         tr.params().help(opt.os);
         return true;
     }

@@ -149,7 +149,7 @@ public:
         return associate(x, y);
     }
 
-    inline bool exists(const item0_type& x, const item1_base& y)
+    inline bool exists(const item0_type& x, const item1_base& y) const
     {
         return m_fwd.find(elem_type(x, y)) != m_fwd.end();
     }

@@ -184,6 +184,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\convert.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\main.cpp"
 				>
 			</File>
