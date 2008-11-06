@@ -12,7 +12,7 @@ dnl Initialization for autoconf
 dnl ------------------------------------------------------------------
 AC_PREREQ(2.59)
 AC_INIT
-AC_CONFIG_SRCDIR([frontend/main.cpp])
+AC_CONFIG_SRCDIR([frontend/train/main.cpp])
 
 
 dnl ------------------------------------------------------------------
@@ -45,7 +45,7 @@ AC_PROG_LN_S
 dnl ------------------------------------------------------------------
 dnl Initialization for variables
 dnl ------------------------------------------------------------------
-CFLAGS="${ac_save_CFLAGS}"
+CPPFLAGS="${ac_save_CPPFLAGS}"
 LDFLAGS="${ac_save_LDFLAGS}"
 INCLUDES="-I\$(top_srcdir) -I\$(top_srcdir)/include -I\$(srcdir)"
 
@@ -107,19 +107,19 @@ AC_CHECK_LIB(m, rand)
 AC_ARG_WITH(
 	liblbfgs,
 	[AS_HELP_STRING([--with-liblbfgs=DIR],[liblbfgs directory])],
-	[CFLAGS="-I${withval}/include ${CFLAGS}"; LDFLAGS="-L${withval}/lib ${LDFLAGS}"]
+	[INCLUDES="-I${withval}/include ${INCLUDES}"; LDFLAGS="-L${withval}/lib ${LDFLAGS}"]
 )
 AC_CHECK_LIB(lbfgs, lbfgs)
 
 dnl ------------------------------------------------------------------
 dnl Export variables
 dnl ------------------------------------------------------------------
-AC_SUBST(CFLAGS)
+AC_SUBST(CPPFLAGS)
 AC_SUBST(LDFLAGS)
 AC_SUBST(INCLUDES)
 
 dnl ------------------------------------------------------------------
 dnl Output the configure results.
 dnl ------------------------------------------------------------------
-AC_CONFIG_FILES(Makefile lib/Makefile include/Makefile frontend/Makefile win32/Makefile)
+AC_CONFIG_FILES(Makefile lib/Makefile include/Makefile frontend/Makefile frontend/train/Makefile win32/Makefile)
 AC_OUTPUT

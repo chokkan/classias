@@ -133,7 +133,7 @@ class label_base
 {
 public:
     /// The type representing the label.
-    typedef typename label_tmpl label_type;
+    typedef label_tmpl label_type;
 protected:
     /// The label value.
     label_type m_label;
@@ -692,6 +692,7 @@ class attribute_instance_base :
 {
 public:
     typedef attributes_tmpl attributes_type;
+    typedef typename label_base<label_tmpl>::label_type label_type;
     typedef typename attributes_type::identifier_type attribute_name_type;
     typedef traits_tmpl traits_type;
     typedef attribute_instance_base<attributes_type, label_type, traits_type> instance_type;

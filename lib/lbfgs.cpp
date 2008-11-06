@@ -1,3 +1,4 @@
+#include <iostream>
 #include <classias/base.h>
 #include <classias/lbfgs.h>
 #include <lbfgs.h>
