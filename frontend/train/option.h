@@ -46,20 +46,16 @@ public:
     typedef std::set<std::string>       labels_type;
 
     enum {
-        TYPE_NONE = 0,          /// Default type.
-        TYPE_BINARY,            /// Binary classification.
-        TYPE_MULTI,             /// Multi-candidate ranker.
-        TYPE_CLASSIFICATION,    /// Classification.
-        TYPE_SELECTION          /// Selection.
+        MODE_NORMAL = 0,        /// Normal mode.
+        MODE_HELP,              /// Usage mode.
+        MODE_HELP_ALGORITHM,    /// Algorithm-specific usage.
     };
 
     enum {
-        MODE_NONE = 0,          /// No mode.
-        MODE_TRAIN,             /// Training mode.
-        MODE_CONVERT,           /// Conversion mode.
-        MODE_TAG,               /// Tagging mode.
-        MODE_HELP,              /// Usage mode.
-        MODE_HELP_ALGORITHM,    /// Algorithm-specific usage.
+        TYPE_NONE = 0,          /// Default type.
+        TYPE_BINARY,            /// Binary classification.
+        TYPE_MULTI,             /// Multi-candidate ranker.
+        TYPE_ATTRIBUTE,         /// Attribute-label classification.
     };
 
     std::istream&   is;
@@ -69,8 +65,8 @@ public:
     files_type  files;
 
     int         mode;
-
     int         type;
+
     std::string model;
     labels_type negatives;
 
@@ -86,7 +82,7 @@ public:
         std::ostream& _os = std::cout,
         std::ostream& _es = std::cerr
         ) : is(_is), os(_os), es(_es),
-        mode(MODE_NONE), type(TYPE_NONE), model(""),
+        mode(MODE_NORMAL), type(TYPE_NONE), model(""),
         algorithm("maxent"),        
         split(0), holdout(-1), cross_validation(false),
         generate_bias(false)

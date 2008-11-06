@@ -10,9 +10,9 @@ classias_SOURCES = \
 	tokenize.h \
 	util.h \
 	train.h \
-	multi_rank.cpp \
-	multi_select.cpp \
-	multi_classify.cpp \
+	attribute.cpp \
+	binary.cpp \
+	multi.cpp \
 	main.cpp
 
 #classias_CPPFLAGS =

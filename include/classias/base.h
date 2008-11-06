@@ -21,25 +21,35 @@ namespace classias
  */
 class truth_base
 {
-protected:
+public:
     /// The type representing the truth.
     typedef bool truth_type;
+
+protected:
     /// The truth value.
     truth_type m_truth;
 
 public:
     /**
-     * Constructs the object.
+     * Constructs an object.
      */
     truth_base() : m_truth(false)
     {
     }
 
     /**
-     * Constructs the object.
-     *  @param  truth           The truth.
+     * Constructs an object initialized by the specified value.
+     *  @param  truth       The truth value used to initialize the object.
      */
     truth_base(const truth_type& truth) : m_truth(truth)
+    {
+    }
+
+    /**
+     * Constructs an object that is a copy of some other object.
+     *  @param  rho         The original object used to initialize the object.
+     */
+    truth_base(const truth_base& rho) : m_truth(rho.m_truth)
     {
     }
 
@@ -51,8 +61,49 @@ public:
     }
 
     /**
-     * Set the truth.
-     *  @param  truth       The truth.
+     * Assigns a new truth value to the object.
+     *  @param  rho         The source object.
+     *  @retval truth_base& The reference to this object.
+     */
+    truth_base& operator=(const truth_base& rho)
+    {
+        m_truth = rho.m_truth;
+        return *this;
+    }
+
+    /**
+     * Tests the equality of two truth objects.
+     *  @param  x           A truth object.
+     *  @param  y           Another truth object.
+     *  @retval bool        \c true if the values of two objects are identical,
+     *                      \c false otherwise.
+     */
+    inline friend bool operator==(
+        const truth_base& x,
+        const truth_base& y
+        )
+    {
+        return (x.m_truth == y.m_truth);
+    }
+
+    /**
+     * Tests the inequality of two truth objects.
+     *  @param  x           A truth object.
+     *  @param  y           Another truth object.
+     *  @retval bool        \c true if the values of two objects are not
+     *                      identical, \c false otherwise.
+     */
+    inline friend bool operator!=(
+        const truth_base& x,
+        const truth_base& y
+        )
+    {
+        return (x.m_truth != y.m_truth);
+    }
+
+    /**
+     * Assigns a new truth value to the object.
+     *  @param  truth       The truth value.
      */
     inline void set_truth(truth_type truth)
     {
@@ -60,16 +111,123 @@ public:
     }
 
     /**
-     * Get the truth.
-     *  @retval truth_type  The truth.
+     * Obtains the current truth value.
+     *  @retval truth_type  The current value.
      */
-    inline int get_truth() const
+    inline truth_type get_truth() const
     {
         return m_truth;
     }
 };
 
 
+
+/**
+ * Label class.
+ *
+ *  This class implements the base interface to represent a label of an
+ *  instance/candidate.
+ */
+template <class label_tmpl>
+class label_base
+{
+public:
+    /// The type representing the label.
+    typedef typename label_tmpl label_type;
+protected:
+    /// The label value.
+    label_type m_label;
+
+public:
+    /**
+     * Constructs the object.
+     */
+    label_base()
+    {
+    }
+
+    /**
+     * Constructs an object initialized by the specified value.
+     *  @param  label       The label used to initialize the object.
+     */
+    label_base(const label_type& label) : m_label(label)
+    {
+    }
+
+    /**
+     * Constructs an object that is a copy of some other object.
+     *  @param  rho         The original object used to initialize the object.
+     */
+    label_base(const label_base& rho) : m_label(rho.m_label)
+    {
+    }
+
+    /**
+     * Assigns a new label to the object.
+     *  @param  rho         The source object.
+     *  @retval label_base& The reference to this object.
+     */
+    label_base& operator=(const label_base& rho)
+    {
+        m_label = rho.m_label;
+        return *this;
+    }
+
+    /**
+     * Destructs the object.
+     */
+    virtual ~label_base()
+    {
+    }
+
+    /**
+     * Tests the equality of two labelsl.
+     *  @param  x           A label.
+     *  @param  y           Another label.
+     *  @retval bool        \c true if the two labels are identical, \c false
+     *                      otherwise.
+     */
+    inline friend bool operator==(
+        const label_base& x,
+        const label_base& y
+        )
+    {
+        return (x.m_label == y.m_label);
+    }
+
+    /**
+     * Tests the inequality of two labels.
+     *  @param  x           A label.
+     *  @param  y           Another label.
+     *  @retval bool        \c true if the two labels are not identical,
+     *                      \c false otherwise.
+     */
+    inline friend bool operator!=(
+        const label_base& x,
+        const label_base& y
+        )
+    {
+        return (x.m_label != y.m_label);
+    }
+
+    /**
+     * Assigns a new label to the object.
+     *  @param  label       The label.
+     */
+    inline void set_label(const label_type& label)
+    {
+        m_label = label;
+    }
+
+    /**
+     * Obtains the current label.
+     *  @retval label_type  The current label.
+     */
+    inline const label_type& get_label() const
+    {
+        return m_label;
+    }
+};
 
 
 
@@ -80,9 +238,11 @@ public:
  */
 class group_base
 {
-protected:
+public:
     /// A type representing a group number.
     typedef int group_type;
+
+protected:
     /// The group number.
     group_type m_group;
 
@@ -95,11 +255,30 @@ public:
     }
 
     /**
-     * Constructs the object.
-     *  @param  group           The group number.
+     * Constructs an object initialized by the specified number.
+     *  @param  group       The group number used to initialize the object.
      */
     group_base(const group_type& group) : m_group(group)
     {
+    }
+
+    /**
+     * Constructs an object that is a copy of some other object.
+     *  @param  rho         The original object used to initialize the object.
+     */
+    group_base(const group_base& rho) : m_group(rho.m_group)
+    {
+    }
+
+    /**
+     * Assigns a new group number to the object.
+     *  @param  rho         The source object.
+     *  @retval group_base& The reference to this object.
+     */
+    group_base& operator=(const group_base& rho)
+    {
+        m_group = rho.m_group;
+        return *this;
     }
 
     /**
@@ -110,19 +289,49 @@ public:
     }
 
     /**
-     * Set the group number.
+     * Tests the equality of two group numbers.
+     *  @param  x           A group object.
+     *  @param  y           Another group object.
+     *  @retval bool        \c true if the two group numbers are identical,
+     *                      \c false otherwise.
+     */
+    inline friend bool operator==(
+        const group_base& x,
+        const group_base& y
+        )
+    {
+        return (x.m_group == y.m_group);
+    }
+
+    /**
+     * Tests the inequality of two groups.
+     *  @param  x           A group object.
+     *  @param  y           Another group object.
+     *  @retval bool        \c true if the two group numbers are not identical,
+     *                      \c false otherwise.
+     */
+    inline friend bool operator!=(
+        const group_base& x,
+        const group_base& y
+        )
+    {
+        return (x.m_group != y.m_group);
+    }
+
+    /**
+     * Assigns a new group number to the object.
      *  @param  group       The group number.
      */
-    inline void set_group(int group)
+    inline void set_group(group_type group)
     {
         m_group = group;
     }
 
     /**
-     * Get the group number.
-     *  @retval int         The group number.
+     * Obtains the current group number.
+     *  @retval group_type  The current group number.
      */
-    inline int get_group() const
+    inline group_type get_group() const
     {
         return m_group;
     }
@@ -130,28 +339,26 @@ public:
 
 
 
-
-
 /**
  * Sparse vector.
  *
  *  This class implements a sparse vector as a linear array of elements, pairs
- *  of names and values.
+ *  of identifiers and values.
  *
- *  @param  name_base       The type of element names.
+ *  @param  identifier_base The type of element identifier.
  *  @param  value_base      The type of element values.
  */
-template <class name_base, class value_base>
+template <class identifier_base, class value_base>
 class sparse_vector_base
 {
 public:
-    /// A type representing an element name.
-    typedef name_base name_type;
+    /// A type representing an element identifier.
+    typedef identifier_base identifier_type;
     /// A type representing an element value.
     typedef value_base value_type;
-    /// A type representing an element, a pair of (name, value).
-    typedef std::pair<name_type, value_type> element_type;
-    /// A type providing a container of (name, value) pairs.
+    /// A type representing an element, a pair of (identifier, value).
+    typedef std::pair<identifier_type, value_type> element_type;
+    /// A type providing a container of (identifier, value) pairs.
     typedef std::vector<element_type> container_type;
     /// A type counting the number of pairs in a container.
     typedef typename container_type::size_type size_type;
@@ -161,7 +368,7 @@ public:
     typedef typename container_type::const_iterator const_iterator;
 
 protected:
-    /// A container of (name, value) pairs.
+    /// A container of (identifier, value) pairs.
     container_type cont;
 
 public:
@@ -250,12 +457,12 @@ public:
 
     /**
      * Adds an element (name, value) to the end of the vector.
-     *  @param  name        The element name.
+     *  @param  id          The element identifier.
      *  @param  value       The element value.
      */
-    inline void append(const name_type& name, const value_type& value)
+    inline void append(const identifier_type& id, const value_type& value)
     {
-        cont.push_back(element_type(name, value));
+        cont.push_back(element_type(id, value));
     }
 
     /**
@@ -290,6 +497,299 @@ public:
 
 
 
+/**
+ * Labaled candidate class.
+ */
+template <class instance_tmpl, class label_tmpl>
+class labeled_candidate_base
+{
+public:
+    typedef instance_tmpl instance_type;
+    typedef label_tmpl label_type;
+    typedef typename instance_type::attributes_type attributes_type;
+    typedef typename attributes_type::identifier_type attribute_identifier_type;
+
+    const instance_type* m_instance;
+    attribute_identifier_type m_offset;
+    label_type m_label;
+
+    labeled_candidate_base()
+        : m_instance(NULL), m_offset(0), m_label(0)
+    {
+    }
+
+    labeled_candidate_base(const instance_type* inst)
+        : m_instance(inst), m_offset(0), m_label(0)
+    {
+    }
+
+    labeled_candidate_base(
+        const instance_type* inst,
+        const label_type& label
+        )
+        : m_instance(inst), m_offset(0), m_label(label)
+    {
+        set_label(label);
+    }
+
+    labeled_candidate_base(
+        const labeled_candidate_base& rho
+        )
+    {
+        operator=(rho);
+    }
+
+    inline labeled_candidate_base& operator=(
+        const labeled_candidate_base& rho
+        )
+    {
+        m_instance = rho.m_instance;
+        m_label = rho.m_label;
+        return *this;
+    }
+
+    inline friend bool operator==(
+        const labeled_candidate_base& x,
+        const labeled_candidate_base& y
+        )
+    {
+        return (x.m_instance == y.m_instance && x.m_label == y.m_label);
+    }
+
+    inline friend bool operator!=(
+        const labeled_candidate_base& x,
+        const labeled_candidate_base& y
+        )
+    {
+        return !operator==(x, y);
+    }
+
+    /**
+     * Set the label.
+     *  @param  label       The label.
+     */
+    inline void set_label(const label_type& label)
+    {
+        m_offset = m_instance->m_traits->num_attributes() * label;
+        m_label = label;
+    }
+
+    inline const label_type& get_label() const
+    {
+        return m_label;
+    }
+
+    /**
+     * Get the truth.
+     *  @retval truth_type  The truth.
+     */
+    inline bool get_truth() const
+    {
+        if (m_instance != NULL) {
+            return (get_label() == m_instance->get_label());
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Compute the inner product with another vector.
+     *  @param  v           The vector.
+     *  @retval double      The inner product.
+     */
+    template <class vector_type>
+    inline double inner_product(const vector_type& v) const
+    {
+        double s = 0.;
+        typedef typename attributes_type::const_iterator const_iterator;
+        const attributes_type& attributes = m_instance->attributes;
+        for (const_iterator it = attributes.begin();it != attributes.end();++it) {
+            s += (double)v[m_offset + it->first] * (double)it->second;
+        }
+        return s;
+    }
+
+    /**
+     * Add the scaled value to another vector.
+     *  @param  v           The vector to which this function adds the value.
+     *  @param  scale       The scale factor.
+     */
+    template <class vector_type>
+    inline void add_to(vector_type& v, const double scale) const
+    {
+        typedef typename attributes_type::const_iterator const_iterator;
+        const attributes_type& attributes = m_instance->attributes;
+        for (const_iterator it = attributes.begin();it != attributes.end();++it) {
+            v[m_offset + it->first] += scale * (double)it->second;
+        }
+    }
+};
+
+
+
+
+
+
+
+class data_traits
+{
+public:
+    enum {
+        DT_NONE,
+        DT_BINARY,
+        DT_MULTI,
+        DT_ATTRIBUTE,
+    };
+
+protected:
+    int m_data_type;
+    int m_num_labels;
+    int m_num_attributes;
+    int m_num_features;
+
+public:
+    data_traits() :
+        m_data_type(DT_NONE),
+        m_num_labels(0), m_num_attributes(0),
+        m_num_features(0)
+    {
+    }
+
+    virtual ~data_traits()
+    {
+    }
+
+    int data_type() const
+    {
+        return m_data_type;
+    }
+
+    int num_labels() const
+    {
+        return m_num_labels;
+    }
+
+    int num_attributes() const
+    {
+        return m_num_attributes;
+    }
+
+    int num_features() const
+    {
+        return m_num_features;
+    }
+};
+
+
+template <
+    class attributes_tmpl,
+    class label_tmpl,
+    class traits_tmpl
+>
+class attribute_instance_base :
+    public group_base,
+    public label_base<label_tmpl>
+{
+public:
+    typedef attributes_tmpl attributes_type;
+    typedef typename attributes_type::identifier_type attribute_name_type;
+    typedef traits_tmpl traits_type;
+    typedef attribute_instance_base<attributes_type, label_type, traits_type> instance_type;
+
+    typedef labeled_candidate_base<instance_type, label_type> candidate_type;
+
+    attributes_type attributes;
+
+public:
+    const traits_type* m_traits;
+
+    class candidate_iterator
+    {
+    public:
+        candidate_type candidate;
+
+        candidate_iterator()
+        {
+        }
+
+        candidate_iterator(
+            const instance_type* instance,
+            label_type l)
+            : candidate(instance, l)
+        {
+        }
+
+        inline candidate_iterator& operator=(const candidate_iterator& rho)
+        {
+            candidate = rho.candidate;
+            return *this;
+        }
+
+        inline candidate_type& operator*() const
+        {
+            return candidate;
+        }
+
+        inline const candidate_type* operator->() const
+        {
+            return &candidate;
+        }
+
+        inline candidate_iterator& operator++()
+        {
+            candidate.set_label(candidate.get_label()+1);
+            return *this;
+        }
+
+        inline candidate_iterator& operator--()
+        {
+            candidate.set_label(candidate.get_label()-1);
+            return *this;
+        }
+
+        inline bool operator==(const candidate_iterator& x)
+        {
+            return (candidate == x.candidate);
+        }
+
+        inline bool operator!=(const candidate_iterator& x)
+        {
+            return !operator==(x);
+        }
+    };
+
+    typedef candidate_iterator const_iterator;
+
+public:
+    attribute_instance_base() : m_traits(NULL)
+    {
+    }
+
+    attribute_instance_base(const traits_type* traits)
+        : m_traits(traits)
+    {
+    }
+
+    virtual ~attribute_instance_base()
+    {
+    }
+
+    inline const_iterator begin() const
+    {
+        return candidate_iterator(this, 0);
+    }
+
+    inline const_iterator end() const
+    {
+        return candidate_iterator(this, m_traits->num_labels());
+    }
+
+    inline label_type size() const
+    {
+        return m_traits->num_labels();
+    }
+};
+
 
 /**
  * Ranking candidate.
@@ -306,21 +806,17 @@ template <
 >
 class multi_candidate_base : 
     public features_tmpl,
-    public truth_base
+    public truth_base,
+    public label_base<label_tmpl>
 {
 public:
     /// The type of a feature vector.
     typedef features_tmpl features_type;
-    /// The type of a candidate label.
-    typedef label_tmpl label_type;
-
-    /// The candidate label.
-    label_type m_label;
 
     /**
      * Constructs a candidate.
      */
-    multi_candidate_base() : m_label(0)
+    multi_candidate_base()
     {
     }
 
@@ -329,24 +825,6 @@ public:
      */
     virtual ~multi_candidate_base()
     {
-    }
-
-    /**
-     * Set the candidate label.
-     *  @param  label       The candidate label.
-     */
-    inline void set_label(label_type label)
-    {
-        m_label = label;
-    }
-
-    /**
-     * Get the candidate label.
-     *  @retval  label_type The candidate label.
-     */
-    inline label_type get_label() const
-    {
-        return m_label;
     }
 };
 
@@ -758,6 +1236,27 @@ public:
     }
 };
 
+
+template <
+    class instance_tmpl,
+    class attributes_quark_tmpl,
+    class label_quark_tmpl
+>
+class attribute_data_base :
+    public multi_data_base<instance_tmpl, attributes_quark_tmpl, label_quark_tmpl>
+{
+public:
+    attribute_data_base()
+    {
+    }
+
+    virtual ~attribute_data_base()
+    {
+    }
+};
+
+
+
 typedef sparse_vector_base<int, double> sparse_attributes;
 
 typedef binary_instance_base<sparse_attributes> binstance;
@@ -766,6 +1265,9 @@ typedef binary_data_base<binstance, quark> bdata;
 typedef multi_candidate_base<sparse_attributes, int> mcandidate;
 typedef multi_instance_base<mcandidate> minstance;
 typedef multi_data_base<minstance, quark, quark> mdata;
+
+typedef attribute_instance_base<sparse_attributes, int, data_traits> ainstance;
+typedef attribute_data_base<ainstance, quark, quark> adata;
 
 };
 

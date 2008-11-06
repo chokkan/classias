@@ -45,6 +45,19 @@
 #include "tokenize.h"
 #include "train.h"
 
+/*
+<line>          ::= <comment> | <boi> | <candidate> | <br>
+<comment>       ::= "#" <string> <br>
+<boi>           ::= "@instance" <br>
+<instance>      ::= <class> [ <label> ] ("\t" <feature>)+ <br>
+<class>         ::= "-" | "+"
+<label>         ::= <name>
+<feature>       ::= <name> [ ":" <weight> ]
+<name>          ::= <string>
+<weight>        ::= <numeric>
+<br>            ::= "\n"
+*/
+
 template <
     class instance_type,
     class features_quark_type,
@@ -74,17 +87,18 @@ read_line(
         throw invalid_data("an empty label found", lines);
     }
 
-    // Extract the label in the first token if any.
-    std::string label;
-    std::string::size_type pos = itv->find(' ');
-    if (pos != itv->npos) {
-        label = std::string(*itv, pos+1);
+    // Set the truth value for this candidate.
+    bool truth = false;
+    if (itv->compare(0, 1, "+")) {
+        truth = true;
+    } else if (itv->compare(0, 1, "-")) {
+        truth = false;
+    } else {
+        throw invalid_data("a class label must begins with either '+' or '-'", lines);
     }
 
-    // Set the binary class.
-    bool truth = ((*itv)[0] != '-');
-
-    // Set the label.
+    // Obtain the label.
+    std::string label(*itv, 1);
     if (label.empty()) {
         label = *itv;
     }
@@ -177,12 +191,11 @@ int multi_train(option& opt)
     } else {
         throw invalid_algorithm(opt.algorithm);
     }
-
-    return 0;
 }
 
 bool multi_usage(option& opt)
 {
+    // Branches for training algorithms.
     if (opt.algorithm == "maxent") {
         classias::trainer_maxent<classias::mdata, double> tr;
         tr.params().help(opt.os);

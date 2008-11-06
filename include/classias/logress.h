@@ -326,7 +326,7 @@ public:
         int positive_labels[] = {1};
         confusion_matrix matrix(2);
 
-        // For each classification_instance_base in the data_base.
+        // For each attribute_instance_base in the data_base.
         for (const_iterator iti = m_data->begin();iti != m_data->end();++iti) {
             // Skip instances for training.
             if (iti->get_group() != m_holdout) {

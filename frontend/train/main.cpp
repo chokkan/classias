@@ -1,5 +1,5 @@
 /*
- *		Classias frontend.
+ *		Frontend for training.
  *
  * Copyright (c) 2008, Naoaki Okazaki
  * All rights reserved.
@@ -36,20 +36,18 @@
 #endif/*HAVE_CONFIG_H*/
 
 #include <iostream>
-#include "option.h"
-#include "optparse.h"
-#include "util.h"
-#include "tokenize.h"
+#include <classias/version.h>
+#include <optparse.h>
+#include <tokenize.h>
 
-#define	APPLICATION_S	"Classias"
-#define	VERSION_S		"0.2"
-#define	COPYRIGHT_S		"Copyright (c) 2008 Naoaki Okazaki"
+#include "option.h"
 
 int binary_train(option& opt);
 bool binary_usage(option& opt);
 int multi_train(option& opt);
 bool multi_usage(option& opt);
-int classification_convert(option& opt);
+int attribute_train(option& opt);
+bool attribute_usage(option& opt);
 
 class optionparser : public option, public optparse
 {
@@ -63,47 +61,17 @@ public:
     }
 
     BEGIN_OPTION_MAP_INLINE()
-        ON_OPTION(SHORTOPT('l') || LONGOPT("learn"))
-            mode = MODE_TRAIN;
-
-        ON_OPTION(SHORTOPT('c') || LONGOPT("convert"))
-            mode = MODE_CONVERT;
-
-        ON_OPTION(SHORTOPT('t') || LONGOPT("tag"))
-            mode = MODE_TAG;
-
-        ON_OPTION(SHORTOPT('h') || LONGOPT("help"))
-            mode = MODE_HELP;
-
-        ON_OPTION(SHORTOPT('H') || LONGOPT("help-parameters"))
-            mode = MODE_HELP_ALGORITHM;
-
-        ON_OPTION_WITH_ARG(SHORTOPT('f') || LONGOPT("task"))
+        ON_OPTION_WITH_ARG(SHORTOPT('f') || LONGOPT("format"))
             if (strcmp(arg, "binary") == 0 || strcmp(arg, "b") == 0) {
                 type = TYPE_BINARY;
             } else if (strcmp(arg, "multi") == 0 || strcmp(arg, "m") == 0) {
                 type = TYPE_MULTI;
-            } else if (strcmp(arg, "classification") == 0 || strcmp(arg, "c") == 0) {
-                type = TYPE_CLASSIFICATION;
-            } else if (strcmp(arg, "selection") == 0 || strcmp(arg, "s") == 0) {
-                type = TYPE_SELECTION;
+            } else if (strcmp(arg, "attribute") == 0 || strcmp(arg, "a") == 0) {
+                type = TYPE_ATTRIBUTE;
             } else {
                 std::stringstream ss;
-                ss << "unknown task type specified: " << arg;
+                ss << "unknown data format specified: " << arg;
                 throw invalid_value(ss.str());
-            }
-
-        ON_OPTION_WITH_ARG(SHORTOPT('m') || LONGOPT("model"))
-            model = arg;
-
-        ON_OPTION_WITH_ARG(LONGOPT("negative"))
-            negatives.clear();
-            std::string labels = arg;
-            tokenizer values(labels, ' ');
-            for (tokenizer::iterator itv = values.begin();itv != values.end();++itv) {
-                if (!itv->empty()) {
-                    negatives.insert(*itv);
-                }
             }
 
         ON_OPTION_WITH_ARG(SHORTOPT('a') || LONGOPT("algorithm"))
@@ -116,11 +84,14 @@ public:
             }
             algorithm = arg;
 
+        ON_OPTION_WITH_ARG(SHORTOPT('p') || LONGOPT("set"))
+            params.push_back(arg);
+
         ON_OPTION(SHORTOPT('b') || LONGOPT("generate-bias"))
             generate_bias = true;
 
-        ON_OPTION_WITH_ARG(SHORTOPT('p') || LONGOPT("set"))
-            params.push_back(arg);
+        ON_OPTION_WITH_ARG(SHORTOPT('m') || LONGOPT("model"))
+            model = arg;
 
         ON_OPTION_WITH_ARG(SHORTOPT('g') || LONGOPT("split"))
             split = atoi(arg);
@@ -131,53 +102,66 @@ public:
         ON_OPTION(SHORTOPT('x') || LONGOPT("cross-validate"))
             cross_validation = true;
 
+        ON_OPTION_WITH_ARG(SHORTOPT('n') || LONGOPT("negative"))
+            negatives.clear();
+            std::string labels = arg;
+            tokenizer values(labels, ' ');
+            for (tokenizer::iterator itv = values.begin();itv != values.end();++itv) {
+                if (!itv->empty()) {
+                    negatives.insert(*itv);
+                }
+            }
+
+        ON_OPTION(SHORTOPT('h') || LONGOPT("help"))
+            mode = MODE_HELP;
+
+        ON_OPTION(SHORTOPT('H') || LONGOPT("help-parameters"))
+            mode = MODE_HELP_ALGORITHM;
+
     END_OPTION_MAP()
 };
 
 static void usage(std::ostream& os, const char *argv0)
 {
     os << "USAGE: " << argv0 << " [OPTIONS] [DATA1] [DATA2] ..." << std::endl;
-    os << "  DATA    file(s) corresponding to a data set for the processing;" << std::endl;
-    os << "          if multiple N files are specified, this tool assumes a data set to" << std::endl;
-    os << "          be split into N groups and assigns a group number (1...N) to the" << std::endl;
-    os << "          instances in each file; if no file is specified, the tool reads a" << std::endl;
-    os << "          data set from STDIN" << std::endl;
+    os << "This utility trains a model from training data set(s)." << std::endl;
     os << std::endl;
-    os << "COMMANDS:" << std::endl;
-    os << "  -l, --learn           train a model from the training set" << std::endl;
-    os << "  -c, --convert         convert the classification data" << std::endl;
-    os << "  -t, --tag             tag the data with the model (specified by -m option)" << std::endl;
-    os << "  -h, --help            show the help message and exit" << std::endl;
-    os << "  -H, --help-parameters show the help message of parameters for the algorithm" << std::endl;
-    os << "                        specified by the -a option" << std::endl;
+    os << "  DATA    file(s) corresponding to a data set for training; if multiple N files" << std::endl;
+    os << "          are specified, this utility assumes a data set to be split into N" << std::endl;
+    os << "          groups and sets a group number (1...N) to the instances in each file;" << std::endl;
+    os << "          if no file is specified, the tool reads a data set from STDIN" << std::endl;
     os << std::endl;
-    os << "COMMON OPTIONS:" << std::endl;
-    os << "  -f, --task=TYPE       specify a task type (DEFAULT='multi'):" << std::endl;
-    os << "      b, binary             an instance consists of a feature vector and a" << std::endl;
-    os << "                            boolean class, +1 or -1" << std::endl;
-    os << "      m, multi              an instance consists of multiple candidates each of" << std::endl;
-    os << "                            which has an feature vector, boolean class, and" << std::endl;
-    os << "                            label (optional)" << std::endl;
-    os << "  -m, --model=FILE      store/load a model to/from FILE (DEFAULT=''); if the" << std::endl;
-    os << "                        value is empty, this tool does not store/load a model" << std::endl;
-    os << "      --negative=LABELS specify negative LABELS (separated by space characters)" << std::endl;
-    os << "                        (DEFAULT='-1 O'); this tool assumes LABELS as negative" << std::endl;
-    os << "                        instances when computing precision/recall/f1-score" << std::endl;
-    os << std::endl;
-    os << "TRAINING OPTIONS:" << std::endl;
+    os << "OPTIONS:" << std::endl;
+    os << "  -f, --format=FORMAT   specify a task type (DEFAULT='attribute'):" << std::endl;
+    os << "      b, binary             an instance consists of a boolean class, +1 or -1," << std::endl;
+    os << "                            and features separated by TAB characters" << std::endl;
+    os << "      m, multi              an instance begins with an instance directive line" << std::endl;
+    os << "                            '@instance' followed by lines that correspond to" << std::endl;
+    os << "                            multiple candidates for the instance; a candidate" << std::endl;
+    os << "                            line consists of a class label and features" << std::endl;
+    os << "                            separated by TAB characters" << std::endl;
     os << "  -a, --algorithm=NAME  specify a training algorithm (DEFAULT='maxent')" << std::endl;
-    os << "      maxent                maximum entropy model (for multi)" << std::endl;
-    os << "      logress               logistic regression model (for binary)" << std::endl;
-    os << "  -b, --generate-bias   generate bias features automatically" << std::endl;
+    os << "      maxent                maximum entropy (for multi)" << std::endl;
+    os << "      logress               logistic regression (for binary)" << std::endl;
     os << "  -p, --set=NAME=VALUE  set the algorithm-specific parameter NAME to VALUE;" << std::endl;
-    os << "                        enter '-h' or '--help' followed by the algorithm name" << std::endl;
-    os << "                        to see the documentation for the parameters" << std::endl;
+    os << "                        use '-H' or '--help-parameters' with the algorithm name" << std::endl;
+    os << "                        specified by '-a' or '--algorithm' to see the usage of" << std::endl;
+    os << "                        the algorithm-specific parameters" << std::endl;
+    os << "  -b, --generate-bias   insert bias features automatically" << std::endl;
+    os << "  -m, --model=FILE      store the model to FILE (DEFAULT=''); if the value is" << std::endl;
+    os << "                        empty, this utility does not store the model" << std::endl;
     os << "  -g, --split=N         split the instances into N groups; this option is" << std::endl;
     os << "                        useful for holdout evaluation and cross validation" << std::endl;
     os << "  -e, --holdout=M       use the M-th data for holdout evaluation and the rest" << std::endl;
     os << "                        for training" << std::endl;
     os << "  -x, --cross-validate  repeat holdout evaluations for #i in {1, ..., N}" << std::endl;
     os << "                        (N-fold cross validation)" << std::endl;
+    os << "  -n, --negative=LABELS specify negative LABELS (separated by SPACE characters)" << std::endl;
+    os << "                        (DEFAULT='-1 O'); this utility assumes instances with" << std::endl;
+    os << "                        LABELS as negatives when computing the preformance" << std::endl;
+    os << "  -h, --help            show this help message and exit" << std::endl;
+    os << "  -H, --help-parameters show the help message of algorithm-specific parameters;" << std::endl;
+    os << "                        specify an algorithm with '-a' or '--algorithm' option" << std::endl;
     os << std::endl;
 }
 
@@ -192,7 +176,10 @@ int main(int argc, char *argv[])
     std::ostream& es = opt.es;
 
     // Show the copyright information.
-    es << APPLICATION_S " " VERSION_S "  " COPYRIGHT_S << std::endl;
+    es << CLASSIAS_NAME " ";
+    es << CLASSIAS_MAJOR_VERSION << "." << CLASSIAS_MINOR_VERSION << " ";
+    es << "trainer ";
+    es << CLASSIAS_COPYRIGHT << std::endl;
     es << std::endl;
 
     // Parse the command-line options.
@@ -211,7 +198,7 @@ int main(int argc, char *argv[])
         usage(os, argv[0]);
         return ret;
     } else if (opt.mode == option::MODE_HELP_ALGORITHM) {
-        multi_usage(opt) || binary_usage(opt);
+        multi_usage(opt) || binary_usage(opt) || attribute_usage(opt);
         return ret;
     }
 
@@ -222,20 +209,16 @@ int main(int argc, char *argv[])
 
     // Branch for tasks.
     try {
-        if (opt.mode == option::MODE_TRAIN) {
-            switch (opt.type) {
-            case option::TYPE_BINARY:
-                ret = binary_train(opt);
-                break;
-            case option::TYPE_MULTI:
-                ret = multi_train(opt);
-                break;
-            }
-        } else if (opt.mode == option::MODE_CONVERT) {
-            ret = classification_convert(opt);
-
-        } else if (opt.mode == option::MODE_TAG) {
-
+        switch (opt.type) {
+        case option::TYPE_BINARY:
+            ret = binary_train(opt);
+            break;
+        case option::TYPE_MULTI:
+            ret = multi_train(opt);
+            break;
+        case option::TYPE_ATTRIBUTE:
+            ret = attribute_train(opt);
+            break;
         }
     } catch (const std::exception& e) {
         es << "ERROR: " << typeid(e).name() << ": " << e.what() << std::endl;
