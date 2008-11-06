@@ -1,10 +1,10 @@
 # $Id: Makefile.am 17 2008-11-06 07:52:40Z naoaki $
 
-bin_PROGRAMS = classias
+bin_PROGRAMS = classias-train
 #man_MANS = classias.1
 #EXTRA_DIST = ${man_MANS}
 
-classias_SOURCES = \
+classias_train_SOURCES = \
 	option.h \
 	optparse.h \
 	tokenize.h \
@@ -18,8 +18,8 @@ classias_SOURCES = \
 #classias_CPPFLAGS =
 
 AM_CFLAGS = @CFLAGS@
-INCLUDES = @INCLUDES@
+INCLUDES = @INCLUDES@ -I../include
 AM_LDFLAGS = @LDFLAGS@
 
 #trankin_CFLAGS = -I$(top_builddir)/lib/crf/include
-classias_LDADD = $(top_builddir)/lib/libclassias.la
+classias_train_LDADD = $(top_builddir)/lib/libclassias.la

@@ -30,11 +30,11 @@ public:
         message = rho.message;
     }
 
-    virtual ~invalid_data()
+    virtual ~invalid_data() throw()
     {
     }
 
-    virtual const char *what() const
+    virtual const char *what() const throw()
     {
         return message.c_str();
     }
