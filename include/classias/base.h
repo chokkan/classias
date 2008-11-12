@@ -231,6 +231,109 @@ public:
 
 
 
+class weight_base
+{
+public:
+    /// The type representing the weight.
+    typedef double weight_type;
+
+protected:
+    /// The truth value.
+    weight_type m_weight;
+
+public:
+    /**
+     * Constructs an object.
+     */
+    weight_base() : m_weight(1.)
+    {
+    }
+
+    /**
+     * Constructs an object initialized by the specified value.
+     *  @param  truth       The truth value used to initialize the object.
+     */
+    weight_base(const weight_type& weight) : m_weight(weight)
+    {
+    }
+
+    /**
+     * Constructs an object that is a copy of some other object.
+     *  @param  rho         The original object used to initialize the object.
+     */
+    weight_base(const weight_base& rho) : m_weight(rho.m_weight)
+    {
+    }
+
+    /**
+     * Destructs the object.
+     */
+    virtual ~weight_base()
+    {
+    }
+
+    /**
+     * Assigns a new truth value to the object.
+     *  @param  rho         The source object.
+     *  @retval truth_base& The reference to this object.
+     */
+    weight_base& operator=(const weight_base& rho)
+    {
+        m_weight = rho.m_weight;
+        return *this;
+    }
+
+    /**
+     * Tests the equality of two truth objects.
+     *  @param  x           A truth object.
+     *  @param  y           Another truth object.
+     *  @retval bool        \c true if the values of two objects are identical,
+     *                      \c false otherwise.
+     */
+    inline friend bool operator==(
+        const weight_base& x,
+        const weight_base& y
+        )
+    {
+        return (x.m_weight == y.m_weight);
+    }
+
+    /**
+     * Tests the inequality of two truth objects.
+     *  @param  x           A truth object.
+     *  @param  y           Another truth object.
+     *  @retval bool        \c true if the values of two objects are not
+     *                      identical, \c false otherwise.
+     */
+    inline friend bool operator!=(
+        const weight_base& x,
+        const weight_base& y
+        )
+    {
+        return (x.m_weight != y.m_weight);
+    }
+
+    /**
+     * Assigns a new truth value to the object.
+     *  @param  truth       The truth value.
+     */
+    inline void set_weight(weight_type weight)
+    {
+        m_weight = weight;
+    }
+
+    /**
+     * Obtains the current truth value.
+     *  @retval truth_type  The current value.
+     */
+    inline weight_type get_weight() const
+    {
+        return m_weight;
+    }
+};
+
+
+
 /**
  * Group number class.
  *
@@ -975,6 +1078,7 @@ template <class features_tmpl>
 class binary_instance_base :
     public features_tmpl,
     public truth_base,
+    public weight_base,
     public group_base
 {
 public:
@@ -1010,6 +1114,7 @@ public:
 template <class candidate_tmpl>
 class multi_instance_base :
     public candidates_base<candidate_tmpl>,
+    public weight_base,
     public group_base
 {
 public:

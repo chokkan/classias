@@ -136,6 +136,21 @@ split_data(
 }
 
 template <class data_type>
+static void
+balance_instances(
+    data_type& data
+    )
+{
+    double 
+    int i = 0;
+    typename data_type::iterator it;
+    for (it = data.begin();it != data.end();++it, ++i) {
+        it->set_group(i % opt.split);
+    }
+    return opt.split;
+}
+
+template <class data_type>
 static int
 read_dataset(
     data_type& data,

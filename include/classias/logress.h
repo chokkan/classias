@@ -158,6 +158,7 @@ public:
         for (iti = m_data->begin();iti != m_data->end();++iti) {
             value_type z = 0.;
             value_type d = 0.;
+            value_type logp = 0.;
 
             // Exclude instances for holdout evaluation.
             if (iti->get_group() == m_holdout) {
@@ -170,7 +171,7 @@ public:
             if (z < -50.) {
                 if (iti->get_truth()) {
                     d = 1.;
-                    loss -= z;
+                    logp = +z;
                 } else {
                     d = 0.;
                 }
@@ -179,21 +180,23 @@ public:
                     d = 0.;
                 } else {
                     d = -1.;
-                    loss += z;
+                    logp = -z;
                 }
             } else {
                 double p = 1.0 / (1.0 + std::exp(-z));
                 if (iti->get_truth()) {
                     d = 1.0 - p;
-                    loss -= std::log(p);
+                    logp = std::log(p);
                 } else {
                     d = -p;
-                    loss -= std::log(1-p);                
+                    logp = std::log(1-p);                
                 }
             }
 
+
+            loss -= iti->get_weight() * logp;
             // Update the gradients for the weights.
-            iti->add_to(g, -d);
+            iti->add_to(g, -d * iti->get_weight());
         }
 
 	    // L2 regularization.
