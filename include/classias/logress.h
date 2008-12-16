@@ -322,9 +322,10 @@ public:
         lbfgs_output_status(os, ret);
 
         if (holdout != -1 || false_analysis) {
-            *m_os << "***** FINAL *****" << std::endl;
+            os << std::endl;
+            os << "***** FINAL *****" << std::endl;
             holdout_evaluation(false_analysis);
-            *m_os << std::endl;
+            os << std::endl;
         }
 
         return ret;

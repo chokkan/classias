@@ -100,7 +100,7 @@ train(option& opt)
 
             os << "Cross validation (" << (i + 1) << "/" << num_groups << ")" << std::endl;
             sw.start();
-            trainer.train(data, opt.os, i);
+            trainer.train(data, opt.os, i, opt.false_analysis);
             sw.stop();
             os << "Seconds required: " << sw.get() << std::endl;
             os << std::endl;
