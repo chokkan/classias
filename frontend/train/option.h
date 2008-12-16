@@ -75,6 +75,7 @@ public:
     int         split;
     int         holdout;
     bool        cross_validation;
+    bool        false_analysis;
     bool        generate_bias;
 
     option(
@@ -85,6 +86,7 @@ public:
         mode(MODE_NORMAL), type(TYPE_NONE), model(""),
         algorithm("maxent"),        
         split(0), holdout(-1), cross_validation(false),
+        false_analysis(false),
         generate_bias(false)
     {
         negatives.insert("-1");

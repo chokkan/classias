@@ -65,6 +65,7 @@ read_line(
     const std::string& line,
     instance_type& instance,
     features_quark_type& features,
+    const std::string& comment,
     const option& opt,
     int lines = 0
     )
@@ -92,6 +93,11 @@ read_line(
         throw invalid_data("a class label must be either '+1' or '-1'", lines);
     }
 
+    // Set the comment of this instance.
+    if (!comment.empty()) {
+        instance.set_comment(comment);
+    }
+
     // Set featuress for the instance.
     for (++itv;itv != values.end();++itv) {
         if (!itv->empty()) {
@@ -115,6 +121,7 @@ read_stream(
     )
 {
     int lines = 0;
+    std::string comment;
     typedef typename data_type::instance_type instance_type;
     typedef typename data_type::feature_type feature_type;
     typedef typename data_type::iterator iterator;
@@ -135,11 +142,13 @@ read_stream(
 
         // Skip a comment line.
         if (line.compare(0, 1, "#") == 0) {
+            comment += line;
             continue;
         }
 
         // A new candidate.
-        read_line(line, data.new_element(), data.features, opt, lines);
+        read_line(line, data.new_element(), data.features, comment, opt, lines);
+        comment.clear();
     }
 
     // Set the end index of the user features.

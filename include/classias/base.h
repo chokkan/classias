@@ -442,6 +442,110 @@ public:
 
 
 
+class comment_base
+{
+public:
+    /// A type representing a comment.
+    typedef std::string comment_type;
+
+protected:
+    /// The comment.
+    comment_type m_comment;
+
+public:
+    /**
+     * Constructs the object.
+     */
+    comment_base()
+    {
+    }
+
+    /**
+     * Constructs an object initialized by the specified comment.
+     *  @param  comment     The comment used to initialize the object.
+     */
+    comment_base(const comment_type& comment) : m_comment(comment)
+    {
+    }
+
+    /**
+     * Constructs an object that is a copy of some other object.
+     *  @param  rho         The original object used to initialize the object.
+     */
+    comment_base(const comment_base& rho) : m_comment(rho.m_comment)
+    {
+    }
+
+    /**
+     * Assigns a new comment to the object.
+     *  @param  rho             The source object.
+     *  @retval comment_base&   The reference to this object.
+     */
+    comment_base& operator=(const comment_base& rho)
+    {
+        m_comment = rho.m_comment;
+        return *this;
+    }
+
+    /**
+     * Destructs the object.
+     */
+    virtual ~comment_base()
+    {
+    }
+
+    /**
+     * Tests the equality of two comments.
+     *  @param  x           A comment object.
+     *  @param  y           Another comment object.
+     *  @retval bool        \c true if the two comments are identical,
+     *                      \c false otherwise.
+     */
+    inline friend bool operator==(
+        const comment_base& x,
+        const comment_base& y
+        )
+    {
+        return (x.m_comment == y.m_comment);
+    }
+
+    /**
+     * Tests the inequality of two comment.
+     *  @param  x           A comment object.
+     *  @param  y           Another comment object.
+     *  @retval bool        \c true if the two comments are not identical,
+     *                      \c false otherwise.
+     */
+    inline friend bool operator!=(
+        const comment_base& x,
+        const comment_base& y
+        )
+    {
+        return (x.m_comment != y.m_comment);
+    }
+
+    /**
+     * Assigns a new comment to the object.
+     *  @param  comment     The comment.
+     */
+    inline void set_comment(const comment_type& comment)
+    {
+        m_comment = comment;
+    }
+
+    /**
+     * Obtains the current comment.
+     *  @retval group_type  The current comment.
+     */
+    inline const comment_type& get_comment() const
+    {
+        return m_comment;
+    }
+};
+
+
+
+    
 /**
  * Sparse vector.
  *
@@ -1079,7 +1183,8 @@ class binary_instance_base :
     public features_tmpl,
     public truth_base,
     public weight_base,
-    public group_base
+    public group_base,
+    public comment_base
 {
 public:
     /// The type of a feature vector.
@@ -1115,7 +1220,8 @@ template <class candidate_tmpl>
 class multi_instance_base :
     public candidates_base<candidate_tmpl>,
     public weight_base,
-    public group_base
+    public group_base,
+    public comment_base
 {
 public:
     /// The type of a candidate.

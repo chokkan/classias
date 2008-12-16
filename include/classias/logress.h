@@ -264,7 +264,8 @@ public:
     int train(
         const data_type& data,
         std::ostream& os,
-        int holdout = -1
+        int holdout = -1,
+        bool false_analysis = false
         )
     {
         const size_t K = data.num_features();
@@ -320,14 +321,24 @@ public:
         // Report the result from the L-BFGS solver.
         lbfgs_output_status(os, ret);
 
+        if (holdout != -1 || false_analysis) {
+            *m_os << "***** FINAL *****" << std::endl;
+            holdout_evaluation(false_analysis);
+            *m_os << std::endl;
+        }
+
         return ret;
     }
 
-    void holdout_evaluation()
+    void holdout_evaluation(bool false_analysis = false)
     {
         std::ostream& os = *m_os;
         int positive_labels[] = {1};
         confusion_matrix matrix(2);
+
+        if (false_analysis) {
+            os << "False analysis:" << std::endl;
+        }
 
         // For each attribute_instance_base in the data_base.
         for (const_iterator iti = m_data->begin();iti != m_data->end();++iti) {
@@ -339,11 +350,17 @@ public:
             // Compute the logit.
             value_type z = iti->inner_product(m_weights);
 
+            // Obtain the label index of the reference and the model.
+            int rl = (iti->get_truth() ? 1 : 0);
+            int ml = (z <= 0. ? 0 : 1);
+
+            if (false_analysis) {
+                os << iti->get_comment();
+                os << z << std::endl;
+            }
+
             // Classify the instance.
-            matrix(
-                (iti->get_truth() ? 1 : 0),
-                (z <= 0. ? 0 : 1)
-                )++;
+            matrix(rl, ml)++;
         }
 
         matrix.output_accuracy(os);

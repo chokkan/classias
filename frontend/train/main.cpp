@@ -102,6 +102,9 @@ public:
         ON_OPTION(SHORTOPT('x') || LONGOPT("cross-validate"))
             cross_validation = true;
 
+        ON_OPTION(SHORTOPT('f') || LONGOPT("false-analysis"))
+            false_analysis = true;
+
         ON_OPTION_WITH_ARG(SHORTOPT('n') || LONGOPT("negative"))
             negatives.clear();
             std::string labels = arg;
@@ -132,7 +135,7 @@ static void usage(std::ostream& os, const char *argv0)
     os << "          if no file is specified, the tool reads a data set from STDIN" << std::endl;
     os << std::endl;
     os << "OPTIONS:" << std::endl;
-    os << "  -f, --format=FORMAT   specify a task type (DEFAULT='attribute'):" << std::endl;
+    os << "  -t, --type=TYPE       specify a task type (DEFAULT='attribute'):" << std::endl;
     os << "      b, binary             an instance consists of a boolean class, +1 or -1," << std::endl;
     os << "                            and features separated by TAB characters" << std::endl;
     os << "      m, multi              an instance begins with an instance directive line" << std::endl;
@@ -156,6 +159,7 @@ static void usage(std::ostream& os, const char *argv0)
     os << "                        for training" << std::endl;
     os << "  -x, --cross-validate  repeat holdout evaluations for #i in {1, ..., N}" << std::endl;
     os << "                        (N-fold cross validation)" << std::endl;
+    os << "  -f, --false-analysis  output false instances" << std::endl;
     os << "  -n, --negative=LABELS specify negative LABELS (separated by SPACE characters)" << std::endl;
     os << "                        (DEFAULT='-1 O'); this utility assumes instances with" << std::endl;
     os << "                        LABELS as negatives when computing the preformance" << std::endl;
