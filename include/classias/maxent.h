@@ -271,7 +271,8 @@ public:
     int train(
         const data_type& data,
         std::ostream& os,
-        int holdout = -1
+        int holdout = -1,
+        bool false_analysis = false
         )
     {
         label_type M = 0;
