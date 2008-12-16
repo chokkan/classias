@@ -323,7 +323,7 @@ public:
 
         if (holdout != -1 || false_analysis) {
             os << std::endl;
-            os << "***** FINAL *****" << std::endl;
+            os << "***** Final model *****" << std::endl;
             holdout_evaluation(false_analysis);
             os << std::endl;
         }
@@ -338,7 +338,7 @@ public:
         confusion_matrix matrix(2);
 
         if (false_analysis) {
-            os << "False analysis:" << std::endl;
+            os << "=== False analysis ===" << std::endl;
         }
 
         // For each attribute_instance_base in the data_base.
@@ -356,12 +356,18 @@ public:
             int ml = (z <= 0. ? 0 : 1);
 
             if (false_analysis) {
-                os << iti->get_comment();
-                os << z << std::endl;
+                if (rl != ml) {
+                    os << iti->get_comment() << std::endl;
+                    os << (ml == 0 ? "-1" : "+1") << '\t' << z << std::endl;
+                }
             }
 
             // Classify the instance.
             matrix(rl, ml)++;
+        }
+
+        if (false_analysis) {
+            os << "===" << std::endl;
         }
 
         matrix.output_accuracy(os);
