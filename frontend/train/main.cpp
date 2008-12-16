@@ -61,7 +61,7 @@ public:
     }
 
     BEGIN_OPTION_MAP_INLINE()
-        ON_OPTION_WITH_ARG(SHORTOPT('f') || LONGOPT("format"))
+        ON_OPTION_WITH_ARG(SHORTOPT('t') || LONGOPT("type"))
             if (strcmp(arg, "binary") == 0 || strcmp(arg, "b") == 0) {
                 type = TYPE_BINARY;
             } else if (strcmp(arg, "multi") == 0 || strcmp(arg, "m") == 0) {
