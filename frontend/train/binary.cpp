@@ -85,10 +85,8 @@ read_line(
     // Set the class label of this instance.
     if (*itv == "+1" || *itv == "1") {
         instance.set_truth(true);
-        instance.set_weight(11.3927);
     } else if (*itv == "-1") {
         instance.set_truth(false);
-        instance.set_weight(1.1054);
     } else {
         throw invalid_data("a class label must be either '+1' or '-1'", lines);
     }
