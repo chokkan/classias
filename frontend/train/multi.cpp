@@ -89,9 +89,9 @@ read_line(
 
     // Set the truth value for this candidate.
     bool truth = false;
-    if (itv->compare(0, 1, "+")) {
+    if (itv->compare(0, 1, "+") == 0) {
         truth = true;
-    } else if (itv->compare(0, 1, "-")) {
+    } else if (itv->compare(0, 1, "-") == 0) {
         truth = false;
     } else {
         throw invalid_data("a class label must begins with either '+' or '-'", lines);
