@@ -364,6 +364,7 @@ public:
     {
         std::ostream& os = *m_os;
         const data_type& data = *m_data;
+        accuracy acc;
         confusion_matrix matrix(data.labels.size());
 
         // Loop over instances.
@@ -374,7 +375,7 @@ public:
             }
 
             // Compute the score for each candidate #i.
-            label_type reflabel = -1;
+            label_type true_label = -1;
             value_type score_max = -DBL_MAX;
             typename instance_type::const_iterator itc;
             typename instance_type::const_iterator itc_max = iti->end();
@@ -389,16 +390,21 @@ public:
 
                 // Store the reference label.
                 if (itc->get_truth()) {
-                    reflabel = itc->get_label();
+                    true_label = itc->get_label();
                 }
             }
 
+            // Update the accuracy.
+            acc.set(itc_max->get_truth());
+
             // Update the confusion matrix.
-            matrix(reflabel, itc_max->get_label())++;
+            if (true_label != -1) {
+                matrix(true_label, itc_max->get_label())++;
+            }
         }
 
         // Report accuracy, precision, recall, and f1 score.
-        matrix.output_accuracy(os);
+        acc.output(os);
         matrix.output_micro(os, data.positive_labels.begin(), data.positive_labels.end());
     }
 

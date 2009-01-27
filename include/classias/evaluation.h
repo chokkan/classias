@@ -6,6 +6,34 @@
 namespace classias
 {
 
+class accuracy
+{
+protected:
+    int c;
+    int n;
+
+public:
+    accuracy() : n(0), c(0)
+    {
+    }
+
+    virtual ~accuracy()
+    {
+    }
+
+    inline void set(bool b)
+    {
+        if (b) ++c;
+        ++n;
+    }
+
+    void output(std::ostream& os) const
+    {
+        double acc = (0 < n ? c / (double)n : 0);
+        os << "Accuracy: " << acc << " (" << c << "/" << n << ")" << std::endl;
+    }
+};
+
 class confusion_matrix
 {
 protected:

@@ -887,7 +887,7 @@ public:
     }
 };
 
-
+/*
 template <
     class attributes_tmpl,
     class label_tmpl,
@@ -997,7 +997,7 @@ public:
         return m_traits->num_labels();
     }
 };
-
+*/
 
 /**
  * Ranking candidate.
@@ -1446,6 +1446,11 @@ public:
     virtual ~multi_data_base()
     {
     }
+
+    void append_positive_label(label_type l)
+    {
+        positive_labels.push_back(l);
+    }
 };
 
 
@@ -1478,8 +1483,10 @@ typedef multi_candidate_base<sparse_attributes, int> mcandidate;
 typedef multi_instance_base<mcandidate> minstance;
 typedef multi_data_base<minstance, quark, quark> mdata;
 
+/*
 typedef attribute_instance_base<sparse_attributes, int, data_traits> ainstance;
 typedef attribute_data_base<ainstance, quark, quark> adata;
+*/
 
 };
 

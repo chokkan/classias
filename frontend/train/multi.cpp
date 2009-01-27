@@ -46,11 +46,12 @@
 #include "train.h"
 
 /*
-<line>          ::= <comment> | <boi> | <candidate> | <br>
+<line>          ::= <comment> | <boi> | <eoi> | <candidate> | <br>
 <comment>       ::= "#" <string> <br>
-<boi>           ::= "@instance" <br>
+<boi>           ::= "@boi" <br>
+<eoi>           ::= "@eoi" <br>
 <instance>      ::= <class> [ <label> ] ("\t" <feature>)+ <br>
-<class>         ::= "-" | "+"
+<class>         ::= "F" | "T"
 <label>         ::= <name>
 <feature>       ::= <name> [ ":" <weight> ]
 <name>          ::= <string>
@@ -89,19 +90,16 @@ read_line(
 
     // Set the truth value for this candidate.
     bool truth = false;
-    if (itv->compare(0, 1, "+") == 0) {
+    if (itv->compare(0, 1, "T") == 0) {
         truth = true;
-    } else if (itv->compare(0, 1, "-") == 0) {
+    } else if (itv->compare(0, 1, "F") == 0) {
         truth = false;
     } else {
-        throw invalid_data("a class label must begins with either '+' or '-'", lines);
+        throw invalid_data("a class label must begins with either 'T' or 'F'", lines);
     }
 
     // Obtain the label.
-    std::string label(*itv, 1);
-    if (label.empty()) {
-        label = *itv;
-    }
+    std::string label(*itv);
 
     // Create a new candidate.
     candidate_type& cand = instance.new_element();
@@ -155,14 +153,21 @@ read_stream(
             continue;
         }
 
-        if (line.compare(0, 9, "@instance") == 0) {
+        if (line.compare(0, 4, "@boi") == 0) {
             // Start of a new instance.
             data.new_element();
+
+        } else if (line.compare(0, 4, "@eoi") == 0) {
+
+        } else if (line.compare(0, 9, "@negative") == 0) {
+            // 
         } else {
             // A new candidate.
             read_line(line, data.back(), data.features, data.labels, opt, lines);
         }
     }
+
+    data.append_positive_label(data.labels("TP"));
 
     // Set the end index of the user features.
     data.set_user_feature_end(data.features.size());

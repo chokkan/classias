@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
         usage(os, argv[0]);
         return ret;
     } else if (opt.mode == option::MODE_HELP_ALGORITHM) {
-        multi_usage(opt) || binary_usage(opt) || attribute_usage(opt);
+        multi_usage(opt) || binary_usage(opt)/* || attribute_usage(opt)*/;
         return ret;
     }
 
@@ -220,9 +220,10 @@ int main(int argc, char *argv[])
         case option::TYPE_MULTI:
             ret = multi_train(opt);
             break;
-        case option::TYPE_ATTRIBUTE:
+/*        case option::TYPE_ATTRIBUTE:
             ret = attribute_train(opt);
             break;
+            */
         }
     } catch (const std::exception& e) {
         es << "ERROR: " << typeid(e).name() << ": " << e.what() << std::endl;
