@@ -70,6 +70,9 @@ read_line(
     int lines = 0
     )
 {
+    double value;
+    std::string name;
+
     // Split the line with tab characters.
     tokenizer values(line, '\t');
     tokenizer::iterator itv = values.begin();
@@ -82,14 +85,20 @@ read_line(
         throw invalid_data("an empty label found", lines);
     }
 
+    // Parse the instance label.
+    get_name_value(*itv, name, value);
+
     // Set the class label of this instance.
-    if (*itv == "+1" || *itv == "1") {
+    if (name == "+1" || name == "1") {
         instance.set_truth(true);
     } else if (*itv == "-1") {
         instance.set_truth(false);
     } else {
         throw invalid_data("a class label must be either '+1' or '-1'", lines);
     }
+
+    // Set the instance weight.
+    instance.set_weight(value);
 
     // Set the comment of this instance.
     if (!comment.empty()) {
@@ -99,8 +108,6 @@ read_line(
     // Set featuress for the instance.
     for (++itv;itv != values.end();++itv) {
         if (!itv->empty()) {
-            double value;
-            std::string name;
             get_name_value(*itv, name, value);
             instance.append(features(name), value);
         }
