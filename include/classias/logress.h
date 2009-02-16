@@ -282,6 +282,7 @@ public:
         if (m_regularization == "L1" || m_regularization == "l1") {
             m_c1 = 1.0 / m_regularization_sigma;
             m_c2 = 0.;
+            m_lbfgs_linesearch = "Backtracking";
         } else if (m_regularization == "L2" || m_regularization == "l2") {
             m_c1 = 0.;
             m_c2 = 1.0 / (m_regularization_sigma * m_regularization_sigma);
