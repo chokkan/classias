@@ -91,7 +91,7 @@ read_line(
     // Set the class label of this instance.
     if (name == "+1" || name == "1") {
         instance.set_truth(true);
-    } else if (*itv == "-1") {
+    } else if (name == "-1") {
         instance.set_truth(false);
     } else {
         throw invalid_data("a class label must be either '+1' or '-1'", lines);
