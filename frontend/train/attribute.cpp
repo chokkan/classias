@@ -29,7 +29,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* $Id:$ */
+/* $Id$ */
 
 #ifdef  HAVE_CONFIG_H
 #include <config.h>
@@ -38,7 +38,7 @@
 #include <iostream>
 #include <string>
 
-#include <classias/base.h>
+#include <classias/classias.h>
 #include <classias/maxent.h>
 
 #include "option.h"

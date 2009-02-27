@@ -169,7 +169,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\include\classias\classias.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\classias\data.h"
+				>
+			</File>
+			<File
 				RelativePath="..\include\classias\evaluation.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\classias\instance.h"
 				>
 			</File>
 			<File
@@ -194,6 +206,10 @@
 			</File>
 			<File
 				RelativePath="..\include\classias\quark.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\classias\traits.h"
 				>
 			</File>
 			<File

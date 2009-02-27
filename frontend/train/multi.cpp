@@ -38,7 +38,7 @@
 #include <iostream>
 #include <string>
 
-#include <classias/base.h>
+#include <classias/classias.h>
 #include <classias/maxent.h>
 
 #include "option.h"
