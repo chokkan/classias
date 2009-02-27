@@ -543,19 +543,29 @@ public:
     }
 };
 
-class feature_data_traits
+template <
+    class attribute_tmpl,
+    class label_tmpl,
+    class feature_tmpl
+>
+class feature_data_traits_base
 {
+public:
+    typedef attribute_tmpl attribute_type;
+    typedef label_tmpl label_type;
+    typedef feature_tmpl feature_type;
+
 public:
     int m_num_labels;
     int m_num_attributes;
 
 public:
-    feature_data_traits() :
+    feature_data_traits_base() :
         m_num_labels(0), m_num_attributes(0)
     {
     }
 
-    virtual ~feature_data_traits()
+    virtual ~feature_data_traits_base()
     {
     }
 
@@ -583,21 +593,45 @@ public:
     {
         m_num_attributes = num_attributes;
     }
+
+    inline bool needs_generate()
+    {
+        return false;
+    }
+
+    inline void generate(const attribute_type& a, const label_type& l)
+    {
+    }
+
+    inline feature_type get_feature(const attribute_type& a, const label_type& l)
+    {
+        return a;
+    }
 };
 
-class attribute_data_traits
+template <
+    class attribute_tmpl,
+    class label_tmpl,
+    class feature_tmpl
+>
+class dense_data_traits_base
 {
+public:
+    typedef attribute_tmpl attribute_type;
+    typedef label_tmpl label_type;
+    typedef feature_tmpl feature_type;
+
 public:
     int m_num_labels;
     int m_num_attributes;
 
 public:
-    attribute_data_traits() :
+    dense_data_traits_base() :
         m_num_labels(0), m_num_attributes(0)
     {
     }
 
-    virtual ~attribute_data_traits()
+    virtual ~dense_data_traits_base()
     {
     }
 
@@ -624,6 +658,90 @@ public:
     void set_num_attributes(int num_attributes)
     {
         m_num_attributes = num_attributes;
+    }
+
+    inline bool needs_generate()
+    {
+        return false;
+    }
+
+    inline void generate(const attribute_type& a, const label_type& l)
+    {
+    }
+
+    inline feature_type get_feature(const attribute_type& a, const label_type& l)
+    {
+        return l * m_num_attributes + a;
+    }
+};
+
+template <
+    class attribute_tmpl,
+    class label_tmpl,
+    class feature_tmpl
+>
+class sparse_data_traits_base
+{
+public:
+    typedef attribute_tmpl attribute_type;
+    typedef label_tmpl label_type;
+    typedef feature_tmpl feature_type;
+
+    typedef quark2_base<attribute_type, label_type> feature_generator_type;
+
+protected:
+    int m_num_labels;
+    int m_num_attributes;
+    feature_generator_type m_features;
+
+public:
+    sparse_data_traits_base() :
+        m_num_labels(0), m_num_attributes(0)
+    {
+    }
+
+    virtual ~sparse_data_traits_base()
+    {
+    }
+
+    int num_labels() const
+    {
+        return m_num_labels;
+    }
+
+    int num_attributes() const
+    {
+        return m_num_attributes;
+    }
+
+    int num_features() const
+    {
+        return m_features.size();
+    }
+
+    void set_num_labels(int num_labels)
+    {
+        m_num_labels = num_labels;
+    }
+
+    void set_num_attributes(int num_attributes)
+    {
+        m_num_attributes = num_attributes;
+    }
+
+    inline bool needs_generate()
+    {
+        return true;
+    }
+
+    inline void generate(const attribute_type& a, const label_type& l)
+    {
+        m_features.associate(a, l);
+    }
+
+    inline feature_type get_feature(const attribute_type& a, const label_type& l)
+    {
+        return m_features.to_value(a, l, -1);
     }
 };
 
@@ -801,16 +919,15 @@ public:
     typedef typename attributes_type::identifier_type attribute_identifier_type;
 
     const instance_type* m_instance;
-    attribute_identifier_type m_offset;
     label_type m_label;
 
     labeled_candidate_base()
-        : m_instance(NULL), m_offset(0), m_label(0)
+        : m_instance(NULL), m_label(0)
     {
     }
 
     labeled_candidate_base(const instance_type* inst)
-        : m_instance(inst), m_offset(0), m_label(0)
+        : m_instance(inst), m_label(0)
     {
     }
 
@@ -818,7 +935,7 @@ public:
         const instance_type* inst,
         const label_type& label
         )
-        : m_instance(inst), m_offset(0), m_label(label)
+        : m_instance(inst), m_label(label)
     {
         set_label(label);
     }
@@ -836,7 +953,6 @@ public:
     {
         m_instance = rho.m_instance;
         m_label = rho.m_label;
-        m_offset = rho.m_offset;
         return *this;
     }
 
@@ -862,7 +978,6 @@ public:
      */
     inline void set_label(const label_type& label)
     {
-        m_offset = m_instance->m_traits->num_attributes() * label;
         m_label = label;
     }
 
@@ -896,7 +1011,10 @@ public:
         typedef typename attributes_type::const_iterator const_iterator;
         const attributes_type& attributes = m_instance->attributes;
         for (const_iterator it = attributes.begin();it != attributes.end();++it) {
-            s += (double)v[m_offset + it->first] * (double)it->second;
+            int fid = m_instance->m_traits->get_feature(it->first, m_label);
+            if (0 <= fid) {
+                s += (double)v[fid] * (double)it->second;
+            }
         }
         return s;
     }
@@ -912,7 +1030,10 @@ public:
         typedef typename attributes_type::const_iterator const_iterator;
         const attributes_type& attributes = m_instance->attributes;
         for (const_iterator it = attributes.begin();it != attributes.end();++it) {
-            v[m_offset + it->first] += scale * (double)it->second;
+            int fid = m_instance->m_traits->get_feature(it->first, m_label);
+            if (0 <= fid) {
+                v[fid] += scale * (double)it->second;
+            }
         }
     }
 };
@@ -944,7 +1065,7 @@ public:
     attributes_type attributes;
 
 public:
-    const traits_type* m_traits;
+    traits_type* m_traits;
 
     class candidate_iterator
     {
@@ -1008,7 +1129,7 @@ public:
     {
     }
 
-    attribute_instance_base(const traits_type* traits)
+    attribute_instance_base(traits_type* traits)
         : m_traits(traits)
     {
     }
@@ -1030,6 +1151,14 @@ public:
     inline label_type size() const
     {
         return m_traits->num_labels();
+    }
+
+    void generate()
+    {
+        attributes_type::const_iterator it;
+        for (it = attributes.begin();it != attributes.end();++it) {
+            m_traits->generate(it->first, this->get_label());
+        }
     }
 };
 
@@ -1238,7 +1367,7 @@ public:
     /**
      * Constructs an object.
      */
-    binary_instance_base(const traits_type* traits)
+    binary_instance_base(traits_type* traits)
     {
     }
 
@@ -1294,7 +1423,7 @@ public:
     /**
      * Constructs an object.
      */
-    multi_instance_base(const traits_type* traits)
+    multi_instance_base(traits_type* traits)
     {
     }
 
@@ -1463,18 +1592,10 @@ public:
         return feature_end_index;
     }
 
-    /**
-     * Returns the number of features in the data.
-     *  @retval size_type   The number of features.
-     */
-    inline size_type num_features() const
+    void finalize()
     {
-        return features.size();
-    }
-
-    inline size_type num_labels() const
-    {
-        return 2;
+        traits.set_num_labels(2);
+        traits.set_num_attributes(features.size());
     }
 };
 
@@ -1519,9 +1640,10 @@ public:
         positive_labels.push_back(l);
     }
 
-    inline size_type num_labels() const
+    void finalize()
     {
-        return labels.size();
+        traits.set_num_labels(labels.size());
+        traits.set_num_attributes(features.size());
     }
 };
 
@@ -1535,6 +1657,10 @@ class attribute_data_base :
     public multi_data_base<instance_tmpl, attributes_quark_tmpl, label_quark_tmpl>
 {
 public:
+    typedef multi_data_base<instance_tmpl, attributes_quark_tmpl, label_quark_tmpl> base_type; 
+    typedef typename base_type::instance_type instance_type;
+
+public:
     attribute_data_base()
     {
     }
@@ -1542,9 +1668,25 @@ public:
     virtual ~attribute_data_base()
     {
     }
+
+    void finalize()
+    {
+        traits.set_num_labels(labels.size());
+        traits.set_num_attributes(features.size());
+
+        if (traits.needs_generate()) {
+            iterator it;
+            for (it = this->begin();it != this->end();++it) {
+                it->generate();
+            }
+        }
+    }
 };
 
 
+typedef feature_data_traits_base<int, int, int> feature_data_traits;
+typedef dense_data_traits_base<int, int, int> dense_data_traits;
+typedef sparse_data_traits_base<int, int, int> sparse_data_traits;
 
 typedef sparse_vector_base<int, double> sparse_attributes;
 
@@ -1555,7 +1697,7 @@ typedef multi_candidate_base<sparse_attributes, int> mcandidate;
 typedef multi_instance_base<mcandidate, feature_data_traits> minstance;
 typedef multi_data_base<minstance, quark, quark> mdata;
 
-typedef attribute_instance_base<sparse_attributes, int, attribute_data_traits> ainstance;
+typedef attribute_instance_base<sparse_attributes, int, sparse_data_traits> ainstance;
 typedef attribute_data_base<ainstance, quark, quark> adata;
 
 };

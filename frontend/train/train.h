@@ -83,16 +83,14 @@ train(option& opt)
     os << "Reading the data set" << std::endl;
     sw.start();
     num_groups = read_dataset(data, opt);
+    data.finalize();
     sw.stop();
     os << "Number of instances: " << data.size() << std::endl;
     os << "Number of groups: " << num_groups << std::endl;
-    os << "Number of featuress: " << data.num_features() << std::endl;
+    os << "Number of attributes: " << data.traits.num_attributes() << std::endl;
+    os << "Number of features: " << data.traits.num_features() << std::endl;
     os << "Seconds required: " << sw.get() << std::endl;
     os << std::endl;
-
-    // Set traits.
-    data.traits.set_num_labels(data.num_labels());
-    data.traits.set_num_attributes(data.num_features());
 
     // Start training.
     if (opt.cross_validation) {

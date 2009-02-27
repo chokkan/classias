@@ -268,7 +268,7 @@ public:
         bool false_analysis = false
         )
     {
-        const size_t K = data.num_features();
+        const size_t K = data.traits.num_features();
         typename data_type::const_iterator it;
 
         // Initialize feature weights.
