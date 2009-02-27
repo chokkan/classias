@@ -1155,7 +1155,7 @@ public:
 
     void generate()
     {
-        attributes_type::const_iterator it;
+        typename attributes_type::const_iterator it;
         for (it = attributes.begin();it != attributes.end();++it) {
             m_traits->generate(it->first, this->get_label());
         }
@@ -1595,7 +1595,7 @@ public:
     void finalize()
     {
         traits.set_num_labels(2);
-        traits.set_num_attributes(features.size());
+        traits.set_num_attributes(this->features.size());
     }
 };
 
@@ -1622,6 +1622,7 @@ class multi_data_base : public binary_data_base<instance_tmpl, features_quark_tm
 public:
     typedef label_quark_tmpl label_quark_type;
     typedef typename label_quark_type::value_type label_type;
+    typedef typename binary_data_base<instance_tmpl, features_quark_tmpl>::size_type size_type;
     typedef std::vector<label_type> positive_labels_type;
 
     label_quark_type labels;
@@ -1642,8 +1643,8 @@ public:
 
     void finalize()
     {
-        traits.set_num_labels(labels.size());
-        traits.set_num_attributes(features.size());
+        this->traits.set_num_labels(this->labels.size());
+        this->traits.set_num_attributes(this->features.size());
     }
 };
 
@@ -1671,11 +1672,11 @@ public:
 
     void finalize()
     {
-        traits.set_num_labels(labels.size());
-        traits.set_num_attributes(features.size());
+        this->traits.set_num_labels(this->labels.size());
+        this->traits.set_num_attributes(this->features.size());
 
-        if (traits.needs_generate()) {
-            iterator it;
+        if (this->traits.needs_generate()) {
+            typename base_type::iterator it;
             for (it = this->begin();it != this->end();++it) {
                 it->generate();
             }
