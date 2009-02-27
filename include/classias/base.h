@@ -543,6 +543,90 @@ public:
     }
 };
 
+class feature_data_traits
+{
+public:
+    int m_num_labels;
+    int m_num_attributes;
+
+public:
+    feature_data_traits() :
+        m_num_labels(0), m_num_attributes(0)
+    {
+    }
+
+    virtual ~feature_data_traits()
+    {
+    }
+
+    int num_labels() const
+    {
+        return m_num_labels;
+    }
+
+    int num_attributes() const
+    {
+        return m_num_attributes;
+    }
+
+    int num_features() const
+    {
+        return m_num_attributes;
+    }
+
+    void set_num_labels(int num_labels)
+    {
+        m_num_labels = num_labels;
+    }
+
+    void set_num_attributes(int num_attributes)
+    {
+        m_num_attributes = num_attributes;
+    }
+};
+
+class attribute_data_traits
+{
+public:
+    int m_num_labels;
+    int m_num_attributes;
+
+public:
+    attribute_data_traits() :
+        m_num_labels(0), m_num_attributes(0)
+    {
+    }
+
+    virtual ~attribute_data_traits()
+    {
+    }
+
+    int num_labels() const
+    {
+        return m_num_labels;
+    }
+
+    int num_attributes() const
+    {
+        return m_num_attributes;
+    }
+
+    int num_features() const
+    {
+        return m_num_labels * m_num_attributes;
+    }
+
+    void set_num_labels(int num_labels)
+    {
+        m_num_labels = num_labels;
+    }
+
+    void set_num_attributes(int num_attributes)
+    {
+        m_num_attributes = num_attributes;
+    }
+};
+
 
 
     
@@ -752,6 +836,7 @@ public:
     {
         m_instance = rho.m_instance;
         m_label = rho.m_label;
+        m_offset = rho.m_offset;
         return *this;
     }
 
@@ -838,56 +923,6 @@ public:
 
 
 
-class data_traits
-{
-public:
-    enum {
-        DT_NONE,
-        DT_BINARY,
-        DT_MULTI,
-        DT_ATTRIBUTE,
-    };
-
-protected:
-    int m_data_type;
-    int m_num_labels;
-    int m_num_attributes;
-    int m_num_features;
-
-public:
-    data_traits() :
-        m_data_type(DT_NONE),
-        m_num_labels(0), m_num_attributes(0),
-        m_num_features(0)
-    {
-    }
-
-    virtual ~data_traits()
-    {
-    }
-
-    int data_type() const
-    {
-        return m_data_type;
-    }
-
-    int num_labels() const
-    {
-        return m_num_labels;
-    }
-
-    int num_attributes() const
-    {
-        return m_num_attributes;
-    }
-
-    int num_features() const
-    {
-        return m_num_features;
-    }
-};
-
-/*
 template <
     class attributes_tmpl,
     class label_tmpl,
@@ -997,7 +1032,6 @@ public:
         return m_traits->num_labels();
     }
 };
-*/
 
 /**
  * Ranking candidate.
@@ -1178,7 +1212,10 @@ public:
  *
  *  @param  features_tmpl   The type of feature vector.
  */
-template <class features_tmpl>
+template <
+    class features_tmpl,
+    class data_traits_tmpl
+>
 class binary_instance_base :
     public features_tmpl,
     public truth_base,
@@ -1189,11 +1226,19 @@ class binary_instance_base :
 public:
     /// The type of a feature vector.
     typedef features_tmpl features_type;
+    typedef data_traits_tmpl traits_type;
 
     /**
      * Constructs an object.
      */
     binary_instance_base()
+    {
+    }
+
+    /**
+     * Constructs an object.
+     */
+    binary_instance_base(const traits_type* traits)
     {
     }
 
@@ -1216,7 +1261,10 @@ public:
  *  an array of candidates and group number.
 
  */
-template <class candidate_tmpl>
+template <
+    class candidate_tmpl,
+    class data_traits_tmpl
+>
 class multi_instance_base :
     public candidates_base<candidate_tmpl>,
     public weight_base,
@@ -1226,6 +1274,9 @@ class multi_instance_base :
 public:
     /// The type of a candidate.
     typedef candidate_tmpl candidate_type;
+
+    typedef data_traits_tmpl traits_type;
+
     /// The type of multiple candidates.
     typedef candidates_base<candidate_tmpl> candidates_type;
     /// The type of a feature vector.
@@ -1237,6 +1288,13 @@ public:
      * Constructs an object.
      */
     multi_instance_base()
+    {
+    }
+
+    /**
+     * Constructs an object.
+     */
+    multi_instance_base(const traits_type* traits)
     {
     }
 
@@ -1269,6 +1327,7 @@ public:
     typedef instance_tmpl instance_type;
     /// The type of a feature vector.
     typedef features_quark_tmpl features_quark_type;
+
     /// The type of a feature.
     typedef typename features_quark_type::value_type feature_type;
 
@@ -1280,6 +1339,7 @@ public:
     typedef typename instances_type::iterator iterator;
     /// A type providing a read-only random-access iterator.
     typedef typename instances_type::const_iterator const_iterator;
+    typedef typename instance_type::traits_type data_traits_type;
 
     /// A container of instances.
     instances_type instances;
@@ -1287,6 +1347,8 @@ public:
     features_quark_type features;
     /// The start index of features.
     feature_type feature_end_index;
+    ///
+    data_traits_type traits;
 
     /**
      * Constructs the object.
@@ -1387,7 +1449,7 @@ public:
      */
     inline instance_type& new_element()
     {
-        instances.push_back(instance_type());
+        instances.push_back(instance_type(&traits));
         return this->back();
     }
 
@@ -1408,6 +1470,11 @@ public:
     inline size_type num_features() const
     {
         return features.size();
+    }
+
+    inline size_type num_labels() const
+    {
+        return 2;
     }
 };
 
@@ -1451,6 +1518,11 @@ public:
     {
         positive_labels.push_back(l);
     }
+
+    inline size_type num_labels() const
+    {
+        return labels.size();
+    }
 };
 
 
@@ -1476,17 +1548,15 @@ public:
 
 typedef sparse_vector_base<int, double> sparse_attributes;
 
-typedef binary_instance_base<sparse_attributes> binstance;
+typedef binary_instance_base<sparse_attributes, feature_data_traits> binstance;
 typedef binary_data_base<binstance, quark> bdata;
 
 typedef multi_candidate_base<sparse_attributes, int> mcandidate;
-typedef multi_instance_base<mcandidate> minstance;
+typedef multi_instance_base<mcandidate, feature_data_traits> minstance;
 typedef multi_data_base<minstance, quark, quark> mdata;
 
-/*
-typedef attribute_instance_base<sparse_attributes, int, data_traits> ainstance;
+typedef attribute_instance_base<sparse_attributes, int, attribute_data_traits> ainstance;
 typedef attribute_data_base<ainstance, quark, quark> adata;
-*/
 
 };
 

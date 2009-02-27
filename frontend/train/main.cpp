@@ -220,10 +220,9 @@ int main(int argc, char *argv[])
         case option::TYPE_MULTI:
             ret = multi_train(opt);
             break;
-/*        case option::TYPE_ATTRIBUTE:
+        case option::TYPE_ATTRIBUTE:
             ret = attribute_train(opt);
             break;
-            */
         }
     } catch (const std::exception& e) {
         es << "ERROR: " << typeid(e).name() << ": " << e.what() << std::endl;

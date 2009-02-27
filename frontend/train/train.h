@@ -30,7 +30,7 @@ set_parameters(
 
     // Try to set the end index of the regularization.
     try {
-        params.set("regularization.end", (int)data.get_user_feature_end());
+        params.set("regularization.end", (int)data.traits.num_features());
     } catch (classias::unknown_parameter& e) {
         // Continue if the trainer does not support this parameter.
     }
@@ -89,6 +89,10 @@ train(option& opt)
     os << "Number of featuress: " << data.num_features() << std::endl;
     os << "Seconds required: " << sw.get() << std::endl;
     os << std::endl;
+
+    // Set traits.
+    data.traits.set_num_labels(data.num_labels());
+    data.traits.set_num_attributes(data.num_features());
 
     // Start training.
     if (opt.cross_validation) {

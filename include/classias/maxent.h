@@ -276,7 +276,7 @@ public:
         )
     {
         label_type M = 0;
-        const size_t K = data.num_features();
+        const size_t K = data.traits.num_features();
 
         // Initialize feature expectations and weights.
         m_oexps = new double[K];
