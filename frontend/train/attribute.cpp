@@ -153,6 +153,41 @@ read_stream(
     */
 }
 
+template <
+    class data_type,
+    class value_type
+>
+static void
+output_model(
+    data_type& data,
+    const value_type* weights,
+    const option& opt
+    )
+{
+    typedef typename data_type::features_quark_type features_quark_type;
+    typedef typename data_type::traits_type traits_type;
+    typedef typename traits_type::attribute_type attribute_type;
+    typedef typename traits_type::label_type label_type;
+    typedef typename features_quark_type::value_type features_type;
+    const features_quark_type& features = data.features;
+
+    // Open a model file for writing.
+    std::ofstream os(opt.model.c_str());
+
+    // Store the feature weights.
+    for (features_type i = 0;i < features.size();++i) {
+        value_type w = weights[i];
+        if (w != 0.) {
+            attribute_type a;
+            label_type l;
+            data.traits.backward(i, a, l);
+            os << w << '\t'
+                << data.features.to_item(a) << '\t'
+                << data.labels.to_item(l) << std::endl;
+        }
+    }
+}
+
 int attribute_train(option& opt)
 {
     // Branches for training algorithms.

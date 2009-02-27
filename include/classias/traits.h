@@ -59,18 +59,27 @@ public:
         m_num_attributes = num_attributes;
     }
 
-    inline bool needs_generate()
+    inline bool needs_examination()
     {
         return false;
     }
 
-    inline void generate(const attribute_type& a, const label_type& l)
+    inline void examine(const attribute_type& a, const label_type& l)
     {
     }
 
-    inline feature_type get_feature(const attribute_type& a, const label_type& l)
+    inline feature_type forward(const attribute_type& a, const label_type& l)
     {
         return a;
+    }
+
+    inline bool backward(
+        const feature_type& f,
+        attribute_type& a,
+        label_type& l
+        )
+    {
+        return false;
     }
 };
 
@@ -127,18 +136,29 @@ public:
         m_num_attributes = num_attributes;
     }
 
-    inline bool needs_generate()
+    inline bool needs_examination()
     {
         return false;
     }
 
-    inline void generate(const attribute_type& a, const label_type& l)
+    inline void examine(const attribute_type& a, const label_type& l)
     {
     }
 
-    inline feature_type get_feature(const attribute_type& a, const label_type& l)
+    inline feature_type forward(const attribute_type& a, const label_type& l)
     {
         return l * m_num_attributes + a;
+    }
+
+    inline bool backward(
+        const feature_type& f,
+        attribute_type& a,
+        label_type& l
+        )
+    {
+        l = f / m_num_attributes;
+        a = f % m_num_attributes;
+        return true;
     }
 };
 
@@ -198,19 +218,29 @@ public:
         m_num_attributes = num_attributes;
     }
 
-    inline bool needs_generate()
+    inline bool needs_examination()
     {
         return true;
     }
 
-    inline void generate(const attribute_type& a, const label_type& l)
+    inline void examine(const attribute_type& a, const label_type& l)
     {
         m_features.associate(a, l);
     }
 
-    inline feature_type get_feature(const attribute_type& a, const label_type& l)
+    inline feature_type forward(const attribute_type& a, const label_type& l)
     {
         return m_features.to_value(a, l, -1);
+    }
+
+    inline bool backward(
+        const feature_type& f,
+        attribute_type& a,
+        label_type& l
+        )
+    {
+        m_features.to_item(f, a, l);
+        return true;
     }
 };
 

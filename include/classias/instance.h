@@ -1,6 +1,10 @@
 #ifndef __CLASSIAS_INSTANCE_H__
 #define __CLASSIAS_INSTANCE_H__
 
+#include <map>
+#include <utility>
+#include <vector>
+
 namespace classias
 {
 
@@ -267,7 +271,7 @@ public:
         typedef typename attributes_type::const_iterator const_iterator;
         const attributes_type& attributes = m_instance->attributes;
         for (const_iterator it = attributes.begin();it != attributes.end();++it) {
-            int fid = m_instance->m_traits->get_feature(it->first, m_label);
+            int fid = m_instance->m_traits->forward(it->first, m_label);
             if (0 <= fid) {
                 s += (double)v[fid] * (double)it->second;
             }
@@ -286,7 +290,7 @@ public:
         typedef typename attributes_type::const_iterator const_iterator;
         const attributes_type& attributes = m_instance->attributes;
         for (const_iterator it = attributes.begin();it != attributes.end();++it) {
-            int fid = m_instance->m_traits->get_feature(it->first, m_label);
+            int fid = m_instance->m_traits->forward(it->first, m_label);
             if (0 <= fid) {
                 v[fid] += scale * (double)it->second;
             }
@@ -409,11 +413,11 @@ public:
         return m_traits->num_labels();
     }
 
-    void generate()
+    void examine()
     {
         typename attributes_type::const_iterator it;
         for (it = attributes.begin();it != attributes.end();++it) {
-            m_traits->generate(it->first, this->get_label());
+            m_traits->examine(it->first, this->get_label());
         }
     }
 };

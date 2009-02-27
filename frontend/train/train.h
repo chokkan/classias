@@ -38,33 +38,6 @@ set_parameters(
 
 template <
     class data_type,
-    class value_type
->
-static void
-output_model(
-    data_type& data,
-    const value_type* weights,
-    const option& opt
-    )
-{
-    typedef typename data_type::features_quark_type features_quark_type;
-    typedef typename features_quark_type::value_type features_type;
-    const features_quark_type& features = data.features;
-
-    // Open a model file for writing.
-    std::ofstream os(opt.model.c_str());
-
-    // Store the feature weights.
-    for (features_type i = 0;i < features.size();++i) {
-        value_type w = weights[i];
-        if (w != 0.) {
-            os << w << '\t' << features.to_item(i) << std::endl;
-        }
-    }
-}
-
-template <
-    class data_type,
     class trainer_type
 >
 static int
@@ -88,6 +61,7 @@ train(option& opt)
     os << "Number of instances: " << data.size() << std::endl;
     os << "Number of groups: " << num_groups << std::endl;
     os << "Number of attributes: " << data.traits.num_attributes() << std::endl;
+    os << "Number of labels: " << data.traits.num_labels() << std::endl;
     os << "Number of features: " << data.traits.num_features() << std::endl;
     os << "Seconds required: " << sw.get() << std::endl;
     os << std::endl;

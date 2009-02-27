@@ -1,17 +1,10 @@
 #ifndef __CLASSIAS_BASE_H__
 #define __CLASSIAS_BASE_H__
 
-#include <map>
 #include <string>
-#include <utility>
-#include <vector>
-
-#include "quark.h"
 
 namespace classias
 {
-
-
 
 /**
  * Truth class.
