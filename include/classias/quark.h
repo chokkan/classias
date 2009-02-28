@@ -1,6 +1,12 @@
 #ifndef __CLASSIAS_QUARK_H__
 #define __CLASSIAS_QUARK_H__
 
+#if defined _MSC_VER
+#include <unordered_map>
+#elif defined __GNUC__
+#include <tr1/unordered_map>
+#endif
+
 #include <map>
 #include <stdexcept>
 #include <vector>
@@ -30,7 +36,7 @@ public:
 
     typedef std::vector<item_type> inverse_map_type;
     typedef typename inverse_map_type::size_type value_type;
-    typedef std::map<item_type, value_type> forward_map_type;
+    typedef std::tr1::unordered_map<item_type, value_type> forward_map_type;
 
 protected:
     /// Forward mapping: (item0, item1) -> value.
@@ -122,7 +128,7 @@ public:
     typedef std::pair<item0_type, item1_type> elem_type;
     typedef std::vector<elem_type> inverse_map_type;
     typedef typename inverse_map_type::size_type value_type;
-    typedef std::map<elem_type, value_type> forward_map_type;
+    typedef std::tr1::unordered_map<elem_type, value_type> forward_map_type;
 
 protected:
     /// Forward mapping: (item0, item1) -> value.
