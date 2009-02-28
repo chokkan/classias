@@ -210,4 +210,15 @@ typedef quark2_base<std::string, std::string> quark2;
 
 };
 
+namespace std {
+    namespace tr1 {
+        template<>
+        struct hash<std::pair<int, int> > {
+            size_t operator()(const std::pair<int, int>& item) const {
+                return 100 * item.first + item.second;
+            }
+        };
+    };
+};
+
 #endif/*__CLASSIAS_QUARK_H__*/

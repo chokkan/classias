@@ -6,8 +6,6 @@
 namespace classias
 {
 
-
-
 template <
     class attribute_tmpl,
     class label_tmpl,
