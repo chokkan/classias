@@ -165,6 +165,7 @@ output_model(
     )
 {
     typedef typename data_type::features_quark_type features_quark_type;
+    typedef typename data_type::label_quark_type labels_quark_type;
     typedef typename data_type::traits_type traits_type;
     typedef typename traits_type::attribute_type attribute_type;
     typedef typename traits_type::label_type label_type;
@@ -173,6 +174,16 @@ output_model(
 
     // Open a model file for writing.
     std::ofstream os(opt.model.c_str());
+
+    // Output a model type.
+    os << "@model" << '\t' << "attribute-label" << std::endl;
+
+    // Output a set of labels.
+    os << "@labels";
+    for (labels_quark_type::value_type l = 0;l < data.labels.size();++l) {
+        os << '\t' << data.labels.to_item(l);
+    }
+    os << std::endl;
 
     // Store the feature weights.
     for (features_type i = 0;i < features.size();++i) {
