@@ -1,7 +1,7 @@
 /*
  *		Data I/O for attribute-based classification.
  *
- * Copyright (c) 2008, Naoaki Okazaki
+ * Copyright (c) 2008,2009 Naoaki Okazaki
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -203,10 +203,17 @@ int attribute_train(option& opt)
 {
     // Branches for training algorithms.
     if (opt.algorithm == "maxent") {
-        return train<
-            classias::adata,
-            classias::trainer_maxent<classias::adata, double>
-        >(opt);
+        if (opt.type == option::TYPE_ATTRIBUTE_DENSE) {
+            return train<
+                classias::ddata,
+                classias::trainer_maxent<classias::ddata, double>
+            >(opt);
+        } else {
+            return train<
+                classias::adata,
+                classias::trainer_maxent<classias::adata, double>
+            >(opt);
+        }
     } else {
         throw invalid_algorithm(opt.algorithm);
     }

@@ -1,7 +1,7 @@
 /*
- *		Frontend for training.
+ *		Classias frontend for training.
  *
- * Copyright (c) 2008, Naoaki Okazaki
+ * Copyright (c) 2008,20009 Naoaki Okazaki
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -143,6 +143,9 @@ static void usage(std::ostream& os, const char *argv0)
     os << "                            multiple candidates for the instance; a candidate" << std::endl;
     os << "                            line consists of a class label and features" << std::endl;
     os << "                            separated by TAB characters" << std::endl;
+    os << "      a, attribute          an instance consists of a label and attributes" << std::endl;
+    os << "                            separated by TAB characters" << std::endl;
+    os << "      d, attribute-dense    dense" << std::endl;
     os << "  -a, --algorithm=NAME  specify a training algorithm (DEFAULT='maxent')" << std::endl;
     os << "      maxent                maximum entropy (for multi)" << std::endl;
     os << "      logress               logistic regression (for binary)" << std::endl;

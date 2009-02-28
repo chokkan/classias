@@ -1,7 +1,7 @@
 /*
  *		Data I/O for multi-candidate classification.
  *
- * Copyright (c) 2008, Naoaki Okazaki
+ * Copyright (c) 2008,2009 Naoaki Okazaki
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -202,6 +202,9 @@ output_model(
 
     // Open a model file for writing.
     std::ofstream os(opt.model.c_str());
+
+    // Output a model type.
+    os << "@model" << '\t' << "multi" << std::endl;
 
     // Store the feature weights.
     for (features_type i = 0;i < features.size();++i) {
