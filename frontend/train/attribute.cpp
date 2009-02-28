@@ -180,7 +180,7 @@ output_model(
 
     // Output a set of labels.
     os << "@labels";
-    for (labels_quark_type::value_type l = 0;l < data.labels.size();++l) {
+    for (typename labels_quark_type::value_type l = 0;l < data.labels.size();++l) {
         os << '\t' << data.labels.to_item(l);
     }
     os << std::endl;

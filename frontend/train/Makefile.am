@@ -15,9 +15,7 @@ classias_train_SOURCES = \
 	multi.cpp \
 	main.cpp
 
-#classias_CPPFLAGS =
-
-AM_CFLAGS = @CFLAGS@
+AM_CXXFLAGS = @CXXFLAGS@
 INCLUDES = @INCLUDES@ -I../include
 AM_LDFLAGS = @LDFLAGS@
 

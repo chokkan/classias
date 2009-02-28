@@ -9,5 +9,5 @@ libclassias_la_LDFLAGS = \
 	-no-undefined \
 	-release @VERSION@
 
-AM_CFLAGS = @CFLAGS@
+AM_CXXFLAGS = @CXXFLAGS@
 INCLUDES = @INCLUDES@
