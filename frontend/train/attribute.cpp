@@ -132,8 +132,11 @@ read_stream(
             continue;
         }
 
-        // A new candidate.
-        read_line(line, data.new_element(), data.features, data.labels, opt, lines);
+        // Create a new instance.
+        instance_type& inst = data.new_element();
+        inst.set_group(group);
+
+        read_line(line, inst, data.features, data.labels, opt, lines);
     }
 
     /*

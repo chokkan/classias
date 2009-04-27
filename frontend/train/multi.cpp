@@ -155,7 +155,8 @@ read_stream(
 
         if (line.compare(0, 4, "@boi") == 0) {
             // Start of a new instance.
-            data.new_element();
+            instance_type& inst = data.new_element();
+            inst.set_group(group);
 
         } else if (line.compare(0, 4, "@eoi") == 0) {
 

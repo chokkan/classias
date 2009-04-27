@@ -123,7 +123,7 @@ train(option& opt)
 
         // Start training.
         sw.start();
-        trainer.train(data, opt.os, opt.holdout);
+        trainer.train(data, opt.os, (0 < opt.holdout ? (opt.holdout-1) : -1));
         sw.stop();
         os << "Seconds required: " << sw.get() << std::endl;
         os << std::endl;
