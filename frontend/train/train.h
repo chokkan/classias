@@ -29,7 +29,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* $Id:$ */
+/* $Id$ */
 
 #ifndef __TRAIN_H__
 #define __TRAIN_H__
@@ -123,7 +123,7 @@ train(option& opt)
 
         // Start training.
         sw.start();
-        trainer.train(data, opt.os, -1);
+        trainer.train(data, opt.os, opt.holdout);
         sw.stop();
         os << "Seconds required: " << sw.get() << std::endl;
         os << std::endl;

@@ -29,7 +29,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* $Id:$ */
+/* $Id$ */
 
 #ifndef __CLASSIAS_DATA_H__
 #define __CLASSIAS_DATA_H__
@@ -176,7 +176,7 @@ public:
     }
 
     /**
-     * Create a new instance.
+     * Creates and returns a new instance.
      *  @retval instance_type&  The reference to the new instance.
      */
     inline instance_type& new_element()
@@ -196,7 +196,7 @@ public:
     }
 
     /**
-     * Settle the information of the traits class.
+     * Updates the information in the traits class.
      */
     void finalize()
     {
@@ -264,7 +264,7 @@ public:
     }
 
     /**
-     * Settle the information of the traits class.
+     * Updates the information in the traits class.
      */
     void finalize()
     {
@@ -316,7 +316,7 @@ public:
     }
 
     /**
-     * Settle the information of the traits class.
+     * Updates the information in the traits class.
      */
     void finalize()
     {
@@ -327,6 +327,7 @@ public:
 
         // Check if the traits class needs to examine the instances.
         if (this->traits.needs_examination()) {
+            // This actually generates (sparse) features.
             typename base_type::iterator it;
             for (it = this->begin();it != this->end();++it) {
                 it->examine();
