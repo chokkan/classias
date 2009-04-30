@@ -151,6 +151,24 @@ read_stream(
             continue;
         }
 
+        // Read features that should not be regularized.
+        if (line.compare(0, 14, "@unregularize\t") == 0) {
+            if (0 < data.features.size()) {
+                throw invalid_data("Declarative @unregularize must precedes an instance", lines);
+            }
+
+            // Feature names separated by TAB characters.
+            tokenizer values(line, '\t');
+            tokenizer::iterator itv = values.begin();
+            for (++itv;itv != values.end();++itv) {
+                // Reserve early feature identifiers.
+                data.features(*itv);
+            }
+
+            // Set the start index of the user features.
+            data.set_user_feature_start(data.features.size());
+        }
+
         // Create a new instance.
         instance_type& inst = data.new_element();
         inst.set_group(group);
@@ -159,9 +177,6 @@ read_stream(
         read_line(line, inst, data.features, comment, opt, lines);
         comment.clear();
     }
-
-    // Set the end index of the user features.
-    data.set_user_feature_end(data.features.size());
 
     // Generate a bias feature if necessary.
     if (opt.generate_bias) {

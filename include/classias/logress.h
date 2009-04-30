@@ -29,7 +29,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* $Id:$ */
+/* $Id$ */
 
 #ifndef __CLASSIAS_LOGRESS_H__
 #define __CLASSIAS_LOGRESS_H__
@@ -86,8 +86,8 @@ protected:
     std::string m_regularization;
     /// Regularization sigma;
     value_type m_regularization_sigma;
-    /// Regularization start index.
-    int m_regularization_end;
+    /// The start index of regularization.
+    int m_regularization_start;
     /// The number of memories in L-BFGS.
     int m_lbfgs_num_memories;
     /// L-BFGS epsilon for convergence.
@@ -117,6 +117,7 @@ public:
     trainer_logress()
     {
         m_weights = NULL;
+        m_regularization_start = 0;
         clear();
     }
 
@@ -140,9 +141,6 @@ public:
             "{'': no regularization, 'L1': L1-regularization, 'L2': L2-regularization}");
         m_params.init("regularization.sigma", &m_regularization_sigma, 5.0,
             "Regularization coefficient (sigma).");
-        m_params.init("regularization.end", &m_regularization_end, -1,
-            "The index number of features at which L1/L2 norm computations stop. A negative\n"
-            "value computes L1/L2 norm with all features.");
         m_params.init("lbfgs.num_memories", &m_lbfgs_num_memories, 6,
             "The number of corrections to approximate the inverse hessian matrix.");
         m_params.init("lbfgs.epsilon", &m_lbfgs_epsilon, 1e-5,
@@ -235,7 +233,7 @@ public:
 	    // L2 regularization.
 	    if (m_c2 != 0.) {
             value_type norm = 0.;
-            for (int i = 0;i < m_regularization_end;++i) {
+            for (int i = m_regularization_start;i < n;++i) {
                 g[i] += (m_c2 * x[i]);
                 norm += x[i] * x[i];
             }
@@ -324,11 +322,8 @@ public:
             m_c2 = 0.;
         }
 
-        // Set the default value of m_regularization_end.
-        if (m_regularization_end < 0) {
-            m_regularization_end = K;
-        }
-
+        m_regularization_start = data.get_user_feature_start();
+        
         os << "Training a logistic regression model" << std::endl;
         m_params.show(os);
         os << std::endl;
@@ -349,7 +344,7 @@ public:
             m_lbfgs_linesearch,
             m_lbfgs_max_linesearch,
             m_c1,
-            m_regularization_end
+            m_regularization_start
             );
 
         // Report the result from the L-BFGS solver.

@@ -80,12 +80,12 @@ public:
     /// A feature quark.
     features_quark_type features;
     /// The start index of features.
-    feature_type feature_end_index;
+    feature_type feature_start_index;
 
     /**
      * Constructs the object.
      */
-    binary_data_base() : feature_end_index(0)
+    binary_data_base() : feature_start_index(0)
     {
     }
 
@@ -185,14 +185,14 @@ public:
         return this->back();
     }
 
-    inline void set_user_feature_end(feature_type index)
+    inline void set_user_feature_start(feature_type index)
     {
-        feature_end_index = index;
+        feature_start_index = index;
     }
 
-    inline feature_type get_user_feature_end() const
+    inline feature_type get_user_feature_start() const
     {
-        return feature_end_index;
+        return feature_start_index;
     }
 
     /**

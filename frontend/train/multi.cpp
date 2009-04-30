@@ -170,9 +170,6 @@ read_stream(
 
     data.append_positive_label(data.labels("TP"));
 
-    // Set the end index of the user features.
-    data.set_user_feature_end(data.features.size());
-
     // Generate a bias feature if necessary.
     if (opt.generate_bias) {
         // Insert the bias feature to each instance.

@@ -31,7 +31,7 @@ public:
         std::string linesearch,
         int maxlinesearch,
         double c1,
-        int l1_end
+        int l1_start
         );
 
     void lbfgs_output_status(std::ostream& os, int status);

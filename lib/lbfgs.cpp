@@ -29,7 +29,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* $Id:$ */
+/* $Id$ */
 
 #include <iostream>
 #include <classias/base.h>
@@ -76,7 +76,7 @@ int lbfgs_solver::lbfgs_solve(
     std::string linesearch,
     int maxlinesearch,
     double c1,
-    int l1_end
+    int l1_start
     )
 {
     // Set L-BFGS parameters.
@@ -92,8 +92,8 @@ int lbfgs_solver::lbfgs_solve(
     }
     param.max_linesearch = maxlinesearch;
     param.orthantwise_c = c1;
-    param.orthantwise_start = 0;
-    param.orthantwise_end = l1_end;
+    param.orthantwise_start = l1_start;
+    param.orthantwise_end = n;
 
     // Call L-BFGS routine.
     return lbfgs(
