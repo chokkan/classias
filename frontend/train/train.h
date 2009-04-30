@@ -60,15 +60,6 @@ set_parameters(
         }
         params.set(name, value);
     }
-
-    // Try to set the end index of the regularization.
-    try {
-        params.set("regularization.end", (int)data.traits.num_features());
-    } catch (classias::unknown_parameter& e) {
-        // Continue if the trainer does not support this parameter.
-        std::ostream& es = opt.es;
-        es << "WARNING: " << e.what() << std::endl;        
-    }
 }
 
 template <
