@@ -47,7 +47,7 @@ dnl Initialization for variables
 dnl ------------------------------------------------------------------
 CXXFLAGS="${ac_save_CXXFLAGS}"
 LDFLAGS="${ac_save_LDFLAGS}"
-INCLUDES="-I\$(top_srcdir) -I\$(top_srcdir)/include -I\$(srcdir)"
+INCLUDES="${ac_save_INCLUDES}"
 
 
 dnl ------------------------------------------------------------------
@@ -110,6 +110,8 @@ AC_ARG_WITH(
 	[INCLUDES="-I${withval}/include ${INCLUDES}"; LDFLAGS="-L${withval}/lib ${LDFLAGS}"]
 )
 AC_CHECK_LIB(lbfgs, lbfgs)
+
+INCLUDES="-I\$(top_srcdir) -I\$(top_srcdir)/include -I\$(srcdir)i ${INCLUDES}"
 
 dnl ------------------------------------------------------------------
 dnl Export variables

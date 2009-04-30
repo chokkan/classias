@@ -167,6 +167,8 @@ read_stream(
 
             // Set the start index of the user features.
             data.set_user_feature_start(data.features.size());
+
+            continue;
         }
 
         // Create a new instance.
