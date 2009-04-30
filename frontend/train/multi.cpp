@@ -153,7 +153,24 @@ read_stream(
             continue;
         }
 
-        if (line.compare(0, 4, "@boi") == 0) {
+        // Read features that should not be regularized.
+        if (line.compare(0, 14, "@unregularize\t") == 0) {
+            if (0 < data.features.size()) {
+                throw invalid_data("Declarative @unregularize must precede an instance", lines);
+            }
+
+            // Feature names separated by TAB characters.
+            tokenizer values(line, '\t');
+            tokenizer::iterator itv = values.begin();
+            for (++itv;itv != values.end();++itv) {
+                // Reserve early feature identifiers.
+                data.features(*itv);
+            }
+
+            // Set the start index of the user features.
+            data.set_user_feature_start(data.features.size());
+
+        } else if (line.compare(0, 4, "@boi") == 0) {
             // Start of a new instance.
             instance_type& inst = data.new_element();
             inst.set_group(group);

@@ -154,7 +154,7 @@ read_stream(
         // Read features that should not be regularized.
         if (line.compare(0, 14, "@unregularize\t") == 0) {
             if (0 < data.features.size()) {
-                throw invalid_data("Declarative @unregularize must precedes an instance", lines);
+                throw invalid_data("Declarative @unregularize must precede an instance", lines);
             }
 
             // Feature names separated by TAB characters.
