@@ -99,7 +99,7 @@ public:
     inline value_type logistic_error(bool b) const
     {
         double p = 0.;
-        if (-100. < m_score) {
+        if (m_score < -100.) {
             p = 0.;
         } else if (100. < m_score) {
             p = 1.;
@@ -112,7 +112,7 @@ public:
     inline value_type logistic_error(bool b, value_type& logp) const
     {
         double p = 0.;
-        if (-100. < m_score) {
+        if (m_score < -100.) {
             p = 0.;
             logp = static_cast<double>(b) * m_score;
         } else if (100. < m_score) {
