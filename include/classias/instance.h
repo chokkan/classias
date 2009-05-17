@@ -29,7 +29,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* $Id:$ */
+/* $Id$ */
 
 #ifndef __CLASSIAS_INSTANCE_H__
 #define __CLASSIAS_INSTANCE_H__
@@ -167,6 +167,15 @@ public:
     inline void append(const identifier_type& id, const value_type& value)
     {
         cont.push_back(element_type(id, value));
+    }
+
+    template <class function_type>
+    inline void for_each(function_type& func) const
+    {
+        double s = 0.;
+        for (const_iterator it = begin();it != end();++it) {
+            func(it->first, it->second);
+        }
     }
 
     /**

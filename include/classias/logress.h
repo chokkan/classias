@@ -46,7 +46,86 @@
 #include "evaluation.h"
 #include "parameters.h"
 
-namespace classias {
+namespace classias
+{
+
+template <
+    class key_tmpl,
+    class value_tmpl,
+    class model_tmpl
+>
+class linear_binary_instance
+{
+public:
+    typedef key_tmpl key_type;
+    typedef value_tmpl value_type;
+    typedef model_tmpl model_type;
+
+protected:
+    model_type& m_model;
+    value_type m_score;
+
+public:
+    linear_binary_instance(model_type& model)
+        : m_model(model)
+    {
+        m_score = 0.;
+    }
+
+    virtual ~linear_binary_instance()
+    {
+    }
+
+    inline operator bool() const
+    {
+        return (0. < m_score);
+    }
+
+    inline void operator()(const key_type& key, const value_type& value)
+    {
+        m_score += m_model[key] * value;        
+    }
+
+    inline value_type score() const
+    {
+        return m_score;
+    }
+
+    inline value_type logistic_prob() const
+    {
+        return (-100. < m_score ? (1. / (1. + std::exp(-m_score))) : 0.);
+    }
+
+    inline value_type logistic_error(bool b) const
+    {
+        double p = 0.;
+        if (-100. < m_score) {
+            p = 0.;
+        } else if (100. < m_score) {
+            p = 1.;
+        } else {
+            p = 1. / (1. + std::exp(-m_score));
+        }
+        return (static_cast<double>(b) - p);
+    }
+
+    inline value_type logistic_error(bool b, value_type& logp) const
+    {
+        double p = 0.;
+        if (-100. < m_score) {
+            p = 0.;
+            logp = static_cast<double>(b) * m_score;
+        } else if (100. < m_score) {
+            p = 1.;
+            logp = (static_cast<double>(b) - 1.) * m_score;
+        } else {
+            p = 1. / (1. + std::exp(-m_score));
+            logp = b ? std::log(p) : std::log(1.-p);
+        }
+        return (static_cast<double>(b) - p);
+    }
+};
+
 
 /**
  * Training a logistic regression model.
@@ -68,6 +147,8 @@ public:
     typedef typename data_type::instance_type instance_type;
     /// .
     typedef typename instance_type::features_type features_type;
+    typedef typename features_type::identifier_type feature_type;
+
     /// A type providing a read-only random-access iterator for instances.
     typedef typename data_type::const_iterator const_iterator;
 
@@ -179,6 +260,7 @@ public:
     {
         value_type loss = 0;
         typename data_type::const_iterator iti;
+        typename features_type::const_iterator itf;
 
         // Initialize the gradient of every weight as zero.
         for (int i = 0;i < n;++i) {
@@ -196,6 +278,16 @@ public:
                 continue;
             }
 
+            linear_binary_instance<feature_type, value_type, const value_type*> inst(x);
+
+            for (itf = iti->begin();itf != iti->end();++itf) {
+                inst(itf->first, itf->second);
+            }
+            //iti->for_each(inst);
+
+            d = inst.logistic_error(iti->get_truth(), logp);
+
+            /*
             // Compute the instance score.
             z = iti->inner_product(x);
 
@@ -223,11 +315,14 @@ public:
                     logp = std::log(1-p);                
                 }
             }
-
+            */
 
             loss -= iti->get_weight() * logp;
             // Update the gradients for the weights.
-            iti->add_to(g, -d * iti->get_weight());
+            for (itf = iti->begin();itf != iti->end();++itf) {
+                g[itf->first] -= itf->second * d * iti->get_weight();
+            }
+            //iti->add_to(g, -d * iti->get_weight());
         }
 
 	    // L2 regularization.
