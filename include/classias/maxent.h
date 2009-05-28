@@ -592,24 +592,6 @@ public:
         acc.output(os);
         matrix.output_micro(os, data.positive_labels.begin(), data.positive_labels.end());
     }
-
-protected:
-    static value_type logsumexp(value_type x, value_type y, int flag)
-    {
-        value_type vmin, vmax;
-
-        if (flag) return y;
-        if (x == y) return x + 0.69314718055;   /* log(2) */
-        if (x < y) {
-            vmin = x; vmax = y;
-        } else {
-            vmin = y; vmax = x;
-        }
-        if (vmin + 50 < vmax)
-            return vmax;
-        else
-            return vmax + std::log(std::exp(vmin - vmax) + 1.0);
-    }
 };
 
 };
