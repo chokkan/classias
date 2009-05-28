@@ -46,6 +46,159 @@
 namespace classias
 {
 
+template <
+    class key_tmpl,
+    class label_tmpl,
+    class value_tmpl,
+    class model_tmpl,
+    class traits_tmpl
+>
+class linear_multi_classifier
+{
+public:
+    typedef key_tmpl key_type;
+    typedef key_tmpl label_type;
+    typedef value_tmpl value_type;
+    typedef model_tmpl model_type;
+    typedef traits_tmpl traits_type;
+
+protected:
+    typedef std::vector<value_type> scores_type;
+    typedef std::vector<label_type> labels_type;
+
+    model_type& m_model;
+    scores_type m_scores;
+    scores_type m_probs;
+    labels_type m_labels;
+    traits_type& m_traits;
+
+    int         m_argmax;
+    value_type  m_norm;
+
+public:
+    linear_multi_classifier(model_type& model, traits_type& traits)
+        : m_model(model), m_traits(traits)
+    {
+        clear();
+    }
+
+    virtual ~linear_multi_classifier()
+    {
+    }
+
+    inline void clear()
+    {
+        m_norm = 0.;
+        for (int i = 0;i < this->size();++i) {
+            m_scores[i] = 0.;
+            m_probs[i] = 0.;
+        }
+    }
+
+    inline void resize(int n)
+    {
+        m_scores.resize(n);
+        m_probs.resize(n);
+        m_labels.resize(n);
+    }
+
+    inline int size() const
+    {
+        return (int)m_scores.size();
+    }
+
+    inline int argmax() const
+    {
+        return m_argmax;
+    }
+
+    inline value_type score(int i)
+    {
+        return m_scores[i];
+    }
+
+    inline value_type prob(int i)
+    {
+        return m_probs[i];
+    }
+
+    inline const label_type& label(int i)
+    {
+        return m_labels[i];
+    }
+
+    inline void operator()(int i, const key_type& key, const label_type& label, const value_type& value)
+    {
+        int fid = m_traits.forward(key, label);
+        if (0 <= fid) {
+            m_scores[i] += m_model[fid] * value;
+        }
+    }
+
+    template <class iterator_type>
+    inline void accumulate(int i, iterator_type first, iterator_type last, const label_type& label)
+    {
+        m_scores[i] = 0.;
+        m_labels[i] = label;
+        for (iterator_type it = first;it != last;++it) {
+            this->operator()(i, it->first, label, it->second);
+        }
+    }
+
+    template <class iterator_type>
+    inline void add_to(value_type* v, iterator_type first, iterator_type last, const label_type& label, value_type value)
+    {
+        for (iterator_type it = first;it != last;++it) {
+            int fid = m_traits.forward(it->first, label);
+            if (0 <= fid) {
+                v[fid] += value * it->second;
+            }
+        }        
+    }
+
+    inline bool finalize(bool prob)
+    {
+        if (m_scores.size() == 0) {
+            return false;
+        }
+
+        // Find the argmax index.
+        m_argmax = 0;
+        double vmax = m_scores[0];
+        for (int i = 0;i < this->size();++i) {
+            if (vmax < m_scores[i]) {
+                m_argmax = i;
+                vmax = m_scores[i];
+            }
+        }
+
+        if (prob) {
+            // Compute the exponents of scores.
+            for (int i = 0;i < this->size();++i) {
+                m_probs[i] = std::exp(m_scores[i]);
+            }
+
+            // Compute the partition factor, starting from the maximum value.
+            m_norm = m_probs[m_argmax];
+            for (int i = 0;i < this->size();++i) {
+                if (i != m_argmax) {
+                    m_norm += m_probs[i];
+                }
+            }
+
+            // Normalize the probabilities.
+            for (int i = 0;i < this->size();++i) {
+                m_probs[i] /= m_norm;
+            }
+        }
+
+        return true;
+    }
+};
+
+
+
+
 /**
  * Training a log-linear model using the maximum entropy modeling.
  *  @param  data_tmpl           Training data class.
@@ -66,12 +219,17 @@ protected:
     typedef trainer_maxent<data_type, value_type> this_class;
     /// A type representing an instance in the training data.
     typedef typename data_type::instance_type instance_type;
+    typedef typename data_type::traits_type traits_type;
     /// A type representing a candidate for an instance.
     typedef typename instance_type::candidate_type candidate_type;
+    typedef typename instance_type::feature_type feature_type;
     /// A type representing a label.
     typedef typename instance_type::label_type label_type;
     /// A type providing a read-only random-access iterator for instances.
     typedef typename data_type::const_iterator const_iterator;
+
+    typedef linear_multi_classifier<feature_type, label_type, value_type, value_type const*, traits_type> classifier_type;
+
 
     /// An array [K] of observation expectations.
     value_type *m_oexps;
@@ -81,6 +239,8 @@ protected:
     value_type *m_weights;
     /// An array [M] of scores for candidate labels.
     value_type *m_scores;
+
+    label_type m_num_labels;
 
     /// A data set for training.
     const data_type* m_data;
@@ -127,6 +287,7 @@ public:
         m_mexps = 0;
         m_weights = 0;
         m_scores = 0;
+        m_num_labels = 0;
         m_regularization_start = 0;
 
         clear();
@@ -197,16 +358,17 @@ public:
         int i;
         value_type loss = 0, norm = 0;
         const data_type& data = *m_data;
+        classifier_type cls(x, const_cast<traits_type&>(data.traits));
 
         // Initialize the model expectations as zero.
         for (i = 0;i < n;++i) {
             m_mexps[i] = 0.;
         }
+        cls.resize(m_num_labels);
 
         // For each instance in the data.
         for (const_iterator iti = data.begin();iti != data.end();++iti) {
-            value_type logp = 0.;
-            value_type norm = 0.;
+            int itrue = -1;
             typename instance_type::const_iterator itc;
 
             // Exclude instances for holdout evaluation.
@@ -216,20 +378,21 @@ public:
 
             // Compute score[i] for each candidate #i.
             for (i = 0, itc = iti->begin();itc != iti->end();++i, ++itc) {
-                m_scores[i] = itc->inner_product(x);
+                cls.accumulate(i, itc->begin(), itc->end(), itc->get_label());
                 if (itc->get_truth()) {
-                    logp = m_scores[i];
+                    itrue = i;
                 }
-                norm = logsumexp(norm, m_scores[i], (i == 0));
             }
+
+            cls.finalize(true);
 
             // Accumulate the model expectations of features.
             for (i = 0, itc = iti->begin();itc != iti->end();++i, ++itc) {
-                itc->add_to(m_mexps, std::exp(m_scores[i] - norm));
+                cls.add_to(m_mexps, itc->begin(), itc->end(), itc->get_label(), i);
             }
 
             // Accumulate the loss for predicting the instance.
-            loss -= (logp - norm);
+            loss -= std::log(cls.prob(itrue));
         }
 
         // Compute the gradients.
@@ -306,7 +469,6 @@ public:
         bool false_analysis = false
         )
     {
-        label_type M = 0;
         const size_t K = data.traits.num_features();
 
         // Initialize feature expectations and weights.
@@ -341,6 +503,7 @@ public:
         os << std::endl;
 
         // Compute observation expectations of the features.
+        m_num_labels = 0;
         for (const_iterator iti = data.begin();iti != data.end();++iti) {
             // Skip instances for holdout evaluation.
             if (iti->get_group() == m_holdout) {
@@ -356,8 +519,8 @@ public:
                 }
             }
 
-            if (M < (label_type)iti->size()) {
-                M = (label_type)iti->size();
+            if (m_num_labels < (label_type)iti->size()) {
+                m_num_labels = (label_type)iti->size();
             }
         }
 
@@ -365,7 +528,7 @@ public:
         m_os = &os;
         m_data = &data;
         m_clk_prev = clock();
-        m_scores = new double[M];
+        m_scores = new double[m_num_labels];
 
         // Call the L-BFGS solver.
         int ret = lbfgs_solve(
@@ -395,6 +558,8 @@ public:
         const data_type& data = *m_data;
         accuracy acc;
         confusion_matrix matrix(data.labels.size());
+        const value_type *x = m_weights;
+        classifier_type cls(x, const_cast<traits_type&>(data.traits));
 
         // Loop over instances.
         for (const_iterator iti = data.begin();iti != data.end();++iti) {
@@ -403,32 +568,23 @@ public:
                 continue;
             }
 
-            // Compute the score for each candidate #i.
-            label_type true_label = -1;
-            value_type score_max = -DBL_MAX;
+            int i;
+            int idx_true = -1;
             typename instance_type::const_iterator itc;
-            typename instance_type::const_iterator itc_max = iti->end();
-            for (itc = iti->begin();itc != iti->end();++itc) {
-                value_type score = itc->inner_product(m_weights);
-
-                // Store the candidate that yields the maximum score.
-                if (score_max < score) {
-                    score_max = score;
-                    itc_max = itc;
-                }
-
-                // Store the reference label.
+            for (i = 0, itc = iti->begin();itc != iti->end();++i, ++itc) {
+                cls.accumulate(i, itc->begin(), itc->end(), itc->get_label());
                 if (itc->get_truth()) {
-                    true_label = itc->get_label();
+                    idx_true = i;
                 }
             }
 
-            // Update the accuracy.
-            acc.set(itc_max->get_truth());
+            cls.finalize(false);
 
-            // Update the confusion matrix.
-            if (true_label != -1) {
-                matrix(true_label, itc_max->get_label())++;
+            int idx_max = cls.argmax();
+
+            acc.set(idx_true == idx_max);
+            if (idx_true != -1) {
+                matrix(cls.label(idx_true), cls.label(idx_max))++;
             }
         }
 

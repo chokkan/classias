@@ -54,7 +54,7 @@ template <
     class value_tmpl,
     class model_tmpl
 >
-class linear_binary_instance
+class linear_binary_classifier
 {
 public:
     typedef key_tmpl key_type;
@@ -66,13 +66,13 @@ protected:
     value_type m_score;
 
 public:
-    linear_binary_instance(model_type& model)
+    linear_binary_classifier(model_type& model)
         : m_model(model)
     {
-        m_score = 0.;
+        clear();
     }
 
-    virtual ~linear_binary_instance()
+    virtual ~linear_binary_classifier()
     {
     }
 
@@ -84,6 +84,20 @@ public:
     inline void operator()(const key_type& key, const value_type& value)
     {
         m_score += m_model[key] * value;        
+    }
+
+    template <class iterator_type>
+    inline void inner_product(iterator_type first, iterator_type last)
+    {
+        m_score = 0.;
+        for (iterator_type it = first;it != last;++it) {
+            this->operator()(it->first, it->second);
+        }
+    }
+
+    inline void clear()
+    {
+        m_score = 0.;
     }
 
     inline value_type score() const
@@ -151,6 +165,8 @@ public:
 
     /// A type providing a read-only random-access iterator for instances.
     typedef typename data_type::const_iterator const_iterator;
+
+    typedef linear_binary_classifier<feature_type, value_type, value_type const*> classifier_type;
 
     /// An array [K] of feature weights.
     value_type *m_weights;
@@ -258,9 +274,10 @@ public:
         const value_type step
         )
     {
-        value_type loss = 0;
         typename data_type::const_iterator iti;
         typename features_type::const_iterator itf;
+        value_type loss = 0;
+        classifier_type cls(x);
 
         // Initialize the gradient of every weight as zero.
         for (int i = 0;i < n;++i) {
@@ -269,60 +286,26 @@ public:
 
         // For each instance in the data.
         for (iti = m_data->begin();iti != m_data->end();++iti) {
-            value_type z = 0.;
-            value_type d = 0.;
-            value_type logp = 0.;
-
             // Exclude instances for holdout evaluation.
             if (iti->get_group() == m_holdout) {
                 continue;
             }
 
-            linear_binary_instance<feature_type, value_type, const value_type*> inst(x);
+            // Initialize the classifier.
+            cls.clear();
 
-            for (itf = iti->begin();itf != iti->end();++itf) {
-                inst(itf->first, itf->second);
-            }
-            //iti->for_each(inst);
+            // Compute the score for the instance.
+            cls.inner_product(iti->begin(), iti->end());
 
-            d = inst.logistic_error(iti->get_truth(), logp);
+            // Compute the error.
+            value_type logp = 0.;
+            value_type d = cls.logistic_error(iti->get_truth(), logp);
 
-            /*
-            // Compute the instance score.
-            z = iti->inner_product(x);
-
-            if (z < -50.) {
-                if (iti->get_truth()) {
-                    d = 1.;
-                    logp = +z;
-                } else {
-                    d = 0.;
-                }
-            } else if (50. < z) {
-                if (iti->get_truth()) {
-                    d = 0.;
-                } else {
-                    d = -1.;
-                    logp = -z;
-                }
-            } else {
-                double p = 1.0 / (1.0 + std::exp(-z));
-                if (iti->get_truth()) {
-                    d = 1.0 - p;
-                    logp = std::log(p);
-                } else {
-                    d = -p;
-                    logp = std::log(1-p);                
-                }
-            }
-            */
-
+            // Update the loss.
             loss -= iti->get_weight() * logp;
+
             // Update the gradients for the weights.
-            for (itf = iti->begin();itf != iti->end();++itf) {
-                g[itf->first] -= itf->second * d * iti->get_weight();
-            }
-            //iti->add_to(g, -d * iti->get_weight());
+            iti->add_to(g, -d * iti->get_weight());
         }
 
 	    // L2 regularization.
@@ -458,8 +441,10 @@ public:
     void holdout_evaluation(bool false_analysis = false)
     {
         std::ostream& os = *m_os;
+        const value_type *x = m_weights;
         int positive_labels[] = {1};
         confusion_matrix matrix(2);
+        classifier_type cls(x);
 
         if (false_analysis) {
             os << "=== False analysis ===" << std::endl;
@@ -472,21 +457,23 @@ public:
                 continue;
             }
 
-            // Compute the logit.
-            value_type z = iti->inner_product(m_weights);
+            // Initialize the classifier.
+            cls.clear();
 
-            // Obtain the label index of the reference and the model.
-            int rl = (iti->get_truth() ? 1 : 0);
-            int ml = (z <= 0. ? 0 : 1);
+            // Compute the score for the instance.
+            cls.inner_product(iti->begin(), iti->end());
+
+            int rl = static_cast<int>(iti->get_truth());
+            int ml = static_cast<int>(static_cast<bool>(cls));
 
             if (false_analysis) {
                 if (rl != ml) {
                     os << iti->get_comment() << std::endl;
-                    os << (ml == 0 ? "-1" : "+1") << '\t' << z << std::endl;
+                    os << (ml == 0 ? "-1" : "+1") << '\t' << cls.score() << std::endl;
                 }
             }
 
-            // Classify the instance.
+            // Store the results.
             matrix(rl, ml)++;
         }
 

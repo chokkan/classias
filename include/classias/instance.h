@@ -169,30 +169,6 @@ public:
         cont.push_back(element_type(id, value));
     }
 
-    template <class function_type>
-    inline void for_each(function_type& func) const
-    {
-        double s = 0.;
-        for (const_iterator it = begin();it != end();++it) {
-            func(it->first, it->second);
-        }
-    }
-
-    /**
-     * Compute the inner product with another vector.
-     *  @param  v           The vector.
-     *  @retval double      The inner product.
-     */
-    template <class vector_type>
-    inline double inner_product(const vector_type& v) const
-    {
-        double s = 0.;
-        for (const_iterator it = begin();it != end();++it) {
-            s += (double)v[it->first] * (double)it->second;
-        }
-        return s;
-    }
-
     /**
      * Add the scaled value to another vector.
      *  @param  v           The vector to which this function adds the value.
@@ -221,6 +197,8 @@ public:
     typedef label_tmpl label_type;
     typedef typename instance_type::attributes_type attributes_type;
     typedef typename attributes_type::identifier_type attribute_identifier_type;
+    typedef typename attributes_type::iterator iterator;
+    typedef typename attributes_type::const_iterator const_iterator;
 
     const instance_type* m_instance;
     label_type m_label;
@@ -304,23 +282,45 @@ public:
     }
 
     /**
-     * Compute the inner product with another vector.
-     *  @param  v           The vector.
-     *  @retval double      The inner product.
+     * Returns a random-access iterator to the first element.
+     *  @retval iterator    A random-access iterator (for read/write)
+     *                      addressing the first element in the vector or
+     *                      to the location succeeding an empty element.
      */
-    template <class vector_type>
-    inline double inner_product(const vector_type& v) const
+    inline iterator begin()
     {
-        double s = 0.;
-        typedef typename attributes_type::const_iterator const_iterator;
-        const attributes_type& attributes = m_instance->attributes;
-        for (const_iterator it = attributes.begin();it != attributes.end();++it) {
-            int fid = m_instance->m_traits->forward(it->first, m_label);
-            if (0 <= fid) {
-                s += (double)v[fid] * (double)it->second;
-            }
-        }
-        return s;
+        return m_instance->attributes.begin();
+    }
+
+    /**
+     * Returns a random-access iterator to the first element.
+     *  @retval iterator    A random-access iterator (for read-only)
+     *                      addressing the first element in the vector or
+     *                      to the location succeeding an empty element. 
+     */
+    inline const_iterator begin() const
+    {
+        return m_instance->attributes.begin();
+    }
+
+    /**
+     * Returns a random-access iterator pointing just beyond the last element.
+     *  @retval iterator    A random-access iterator (for read/write)
+     *                      addressing the end of the element.
+     */
+    inline iterator end()
+    {
+        return m_instance->attributes.end();
+    }
+
+    /**
+     * Returns a random-access iterator pointing just beyond the last element.
+     *  @retval iterator    A random-access iterator (for read-only)
+     *                      addressing the end of the element.
+     */
+    inline const_iterator end() const
+    {
+        return m_instance->attributes.end();
     }
 
     /**
@@ -382,6 +382,15 @@ public:
      */
     virtual ~candidate_base()
     {
+    }
+
+    template <class function_type>
+    inline void for_each(function_type& func) const
+    {
+        double s = 0.;
+        for (const_iterator it = begin();it != end();++it) {
+            func(it->first, 0, it->second);
+        }
     }
 };
 
@@ -596,6 +605,8 @@ public:
     typedef candidates_base<candidate_tmpl> candidates_type;
     /// The type of a feature vector.
     typedef typename candidate_type::features_type features_type;
+    typedef typename features_type::identifier_type feature_type;
+    typedef typename features_type::value_type value_type;
     /// The type of a candidate label.
     typedef typename candidate_type::label_type label_type;
 
@@ -634,6 +645,7 @@ public:
     typedef attributes_tmpl attributes_type;
     typedef typename label_base<label_tmpl>::label_type label_type;
     typedef typename attributes_type::identifier_type attribute_name_type;
+    typedef typename attributes_type::identifier_type feature_type;
     typedef traits_tmpl traits_type;
     typedef attribute_instance_base<attributes_type, label_type, traits_type> instance_type;
 
