@@ -64,10 +64,12 @@ public:
         ON_OPTION_WITH_ARG(SHORTOPT('t') || LONGOPT("type"))
             if (strcmp(arg, "binary") == 0 || strcmp(arg, "b") == 0) {
                 type = TYPE_BINARY;
-            } else if (strcmp(arg, "multi") == 0 || strcmp(arg, "m") == 0) {
-                type = TYPE_MULTI;
-            } else if (strcmp(arg, "attribute") == 0 || strcmp(arg, "a") == 0) {
-                type = TYPE_ATTRIBUTE;
+            } else if (strcmp(arg, "multi-sparse") == 0 || strcmp(arg, "n") == 0) {
+                type = TYPE_MULTI_SPARSE;
+            } else if (strcmp(arg, "multi-dense") == 0 || strcmp(arg, "m") == 0) {
+                type = TYPE_MULTI_DENSE;
+            } else if (strcmp(arg, "candidate") == 0 || strcmp(arg, "c") == 0) {
+                type = TYPE_CANDIDATE;
             } else {
                 std::stringstream ss;
                 ss << "unknown data format specified: " << arg;
@@ -75,14 +77,15 @@ public:
             }
 
         ON_OPTION_WITH_ARG(SHORTOPT('a') || LONGOPT("algorithm"))
-            if (strcmp(arg, "maxent") == 0) {
-            } else if (strcmp(arg, "logress") == 0) {
+            if (strcmp(arg, "logress") == 0 || strcmp(arg, "logress.lbfgs") == 0) {
+                algorithm = "logress";
+            } else if (strcmp(arg, "logress.sgd") == 0) {
+                algorithm = "logress.sgd";
             } else {
                 std::stringstream ss;
                 ss << "unknown training algorithm specified: " << arg;
                 throw invalid_value(ss.str());
             }
-            algorithm = arg;
 
         ON_OPTION_WITH_ARG(SHORTOPT('p') || LONGOPT("set"))
             params.push_back(arg);
@@ -135,17 +138,22 @@ static void usage(std::ostream& os, const char *argv0)
     os << "          if no file is specified, the tool reads a data set from STDIN" << std::endl;
     os << std::endl;
     os << "OPTIONS:" << std::endl;
-    os << "  -t, --type=TYPE       specify a task type (DEFAULT='attribute'):" << std::endl;
+    os << "  -t, --type=TYPE       specify a task type (DEFAULT='multi-sparse'):" << std::endl;
     os << "      b, binary             an instance consists of a boolean class, +1 or -1," << std::endl;
     os << "                            and features separated by TAB characters" << std::endl;
-    os << "      m, multi              an instance begins with an instance directive line" << std::endl;
+    os << "      m, multi-sparse       an instance consists of a label and attributes" << std::endl;
+    os << "                            separated by TAB characters; features are" << std::endl;
+    os << "                            represented by pairs of attributes and labels" << std::endl;
+    os << "                            appearing in the training set" << std::endl;
+    os << "      n, multi-dense        an instance consists of a label and attributes" << std::endl;
+    os << "                            separated by TAB characters; features are" << std::endl;
+    os << "                            represented by pairs of attributes and labels" << std::endl;
+    os << "                            regardless of their appearances in the training set" << std::endl;
+    os << "      c, candidate          an instance begins with an instance directive line" << std::endl;
     os << "                            '@instance' followed by lines that correspond to" << std::endl;
     os << "                            multiple candidates for the instance; a candidate" << std::endl;
     os << "                            line consists of a class label and features" << std::endl;
     os << "                            separated by TAB characters" << std::endl;
-    os << "      a, attribute          an instance consists of a label and attributes" << std::endl;
-    os << "                            separated by TAB characters" << std::endl;
-    os << "      d, attribute-dense    dense" << std::endl;
     os << "  -a, --algorithm=NAME  specify a training algorithm (DEFAULT='maxent')" << std::endl;
     os << "      maxent                maximum entropy (for multi)" << std::endl;
     os << "      logress               logistic regression (for binary)" << std::endl;
@@ -220,10 +228,10 @@ int main(int argc, char *argv[])
         case option::TYPE_BINARY:
             ret = binary_train(opt);
             break;
-        case option::TYPE_MULTI:
+        case option::TYPE_CANDIDATE:
             ret = multi_train(opt);
             break;
-        case option::TYPE_ATTRIBUTE:
+        case option::TYPE_MULTI_SPARSE:
             ret = attribute_train(opt);
             break;
         }

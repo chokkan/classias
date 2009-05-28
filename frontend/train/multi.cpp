@@ -1,5 +1,5 @@
 /*
- *		Data I/O for multi-candidate classification.
+ *		Data I/O for attribute-based classification.
  *
  * Copyright (c) 2008,2009 Naoaki Okazaki
  * All rights reserved.
@@ -46,14 +46,11 @@
 #include "train.h"
 
 /*
-<line>          ::= <comment> | <boi> | <eoi> | <candidate> | <br>
+<line>          ::= <comment> | <instance> | <br>
 <comment>       ::= "#" <string> <br>
-<boi>           ::= "@boi" <br>
-<eoi>           ::= "@eoi" <br>
-<instance>      ::= <class> [ <label> ] ("\t" <feature>)+ <br>
-<class>         ::= "F" | "T"
-<label>         ::= <name>
-<feature>       ::= <name> [ ":" <weight> ]
+<instance>      ::= <class> ("\t" <attribute>)+ <br>
+<class>         ::= <string>
+<attribute>     ::= <name> [ ":" <weight> ]
 <name>          ::= <string>
 <weight>        ::= <numeric>
 <br>            ::= "\n"
@@ -61,21 +58,19 @@
 
 template <
     class instance_type,
-    class features_quark_type,
+    class attributes_quark_type,
     class label_quark_type
 >
 static void
 read_line(
     const std::string& line,
     instance_type& instance,
-    features_quark_type& features,
+    attributes_quark_type& attributes,
     label_quark_type& labels,
     const option& opt,
     int lines = 0
     )
 {
-    typedef typename instance_type::candidate_type candidate_type;
-
     // Split the line with tab characters.
     tokenizer values(line, '\t');
     tokenizer::iterator itv = values.begin();
@@ -88,31 +83,16 @@ read_line(
         throw invalid_data("an empty label found", lines);
     }
 
-    // Set the truth value for this candidate.
-    bool truth = false;
-    if (itv->compare(0, 1, "T") == 0) {
-        truth = true;
-    } else if (itv->compare(0, 1, "F") == 0) {
-        truth = false;
-    } else {
-        throw invalid_data("a class label must begins with either 'T' or 'F'", lines);
-    }
+    // Set the instance label.
+    instance.set_label(labels(*itv));
 
-    // Obtain the label.
-    std::string label(*itv);
-
-    // Create a new candidate.
-    candidate_type& cand = instance.new_element();
-    cand.set_truth(truth);
-    cand.set_label(labels(label));
-
-    // Set featuress for the instance.
+    // Set attributes for the instance.
     for (++itv;itv != values.end();++itv) {
         if (!itv->empty()) {
             double value;
             std::string name;
             get_name_value(*itv, name, value);
-            cand.append(features(name), value);
+            instance.attributes.append(attributes(name), value);
         }
     }
 }
@@ -131,8 +111,7 @@ read_stream(
     int lines = 0;
     typedef typename data_type::instance_type instance_type;
     typedef typename data_type::feature_type feature_type;
-    typedef typename data_type::iterator data_iterator;
-    typedef typename instance_type::iterator instance_iterator;
+    typedef typename data_type::iterator iterator;
 
     for (;;) {
         // Read a line.
@@ -153,51 +132,28 @@ read_stream(
             continue;
         }
 
-        // Read features that should not be regularized.
-        if (line.compare(0, 14, "@unregularize\t") == 0) {
-            if (0 < data.features.size()) {
-                throw invalid_data("Declarative @unregularize must precede an instance", lines);
-            }
+        // Create a new instance.
+        instance_type& inst = data.new_element();
+        inst.set_group(group);
 
-            // Feature names separated by TAB characters.
-            tokenizer values(line, '\t');
-            tokenizer::iterator itv = values.begin();
-            for (++itv;itv != values.end();++itv) {
-                // Reserve early feature identifiers.
-                data.features(*itv);
-            }
-
-            // Set the start index of the user features.
-            data.set_user_feature_start(data.features.size());
-
-        } else if (line.compare(0, 4, "@boi") == 0) {
-            // Start of a new instance.
-            instance_type& inst = data.new_element();
-            inst.set_group(group);
-
-        } else if (line.compare(0, 4, "@eoi") == 0) {
-
-        } else if (line.compare(0, 9, "@negative") == 0) {
-            // 
-        } else {
-            // A new candidate.
-            read_line(line, data.back(), data.features, data.labels, opt, lines);
-        }
+        read_line(line, inst, data.features, data.labels, opt, lines);
     }
 
-    data.append_positive_label(data.labels("TP"));
+    /*
+    // Set the end index of the user features.
+    data.set_user_feature_end(data.features.size());
 
     // Generate a bias feature if necessary.
     if (opt.generate_bias) {
+        // Allocate a bias feature.
+        feature_type bf = data.features("@bias");
+
         // Insert the bias feature to each instance.
-        for (data_iterator iti = data.begin();iti != data.end();++iti) {
-            for (instance_iterator itc = iti->begin();itc != iti->end();++itc) {
-                // A bias feature for the candidate label.
-                std::string name = "@bias@" + data.labels.to_item(itc->get_label());
-                itc->append(data.features(name), 1.0);
-            }
+        for (iterator it = data.begin();it != data.end();++it) {
+            it->append(bf, 1.0);
         }
     }
+    */
 }
 
 template <
@@ -212,6 +168,10 @@ output_model(
     )
 {
     typedef typename data_type::features_quark_type features_quark_type;
+    typedef typename data_type::label_quark_type labels_quark_type;
+    typedef typename data_type::traits_type traits_type;
+    typedef typename traits_type::attribute_type attribute_type;
+    typedef typename traits_type::label_type label_type;
     typedef typename features_quark_type::value_type features_type;
     const features_quark_type& features = data.features;
 
@@ -219,35 +179,53 @@ output_model(
     std::ofstream os(opt.model.c_str());
 
     // Output a model type.
-    os << "@model" << '\t' << "multi" << std::endl;
+    os << "@model" << '\t' << "attribute-label" << std::endl;
+
+    // Output a set of labels.
+    os << "@labels";
+    for (typename labels_quark_type::value_type l = 0;l < data.labels.size();++l) {
+        os << '\t' << data.labels.to_item(l);
+    }
+    os << std::endl;
 
     // Store the feature weights.
     for (features_type i = 0;i < features.size();++i) {
         value_type w = weights[i];
         if (w != 0.) {
-            os << w << '\t' << features.to_item(i) << std::endl;
+            attribute_type a;
+            label_type l;
+            data.traits.backward(i, a, l);
+            os << w << '\t'
+                << data.features.to_item(a) << '\t'
+                << data.labels.to_item(l) << std::endl;
         }
     }
 }
 
-int multi_train(option& opt)
+int attribute_train(option& opt)
 {
     // Branches for training algorithms.
     if (opt.algorithm == "maxent") {
-        return train<
-            classias::mdata,
-            classias::trainer_maxent<classias::mdata, double>
-        >(opt);
+        if (opt.type == option::TYPE_MULTI_DENSE) {
+            return train<
+                classias::ddata,
+                classias::trainer_maxent<classias::ddata, double>
+            >(opt);
+        } else {
+            return train<
+                classias::adata,
+                classias::trainer_maxent<classias::adata, double>
+            >(opt);
+        }
     } else {
         throw invalid_algorithm(opt.algorithm);
     }
 }
 
-bool multi_usage(option& opt)
+bool attribute_usage(option& opt)
 {
-    // Branches for training algorithms.
-    if (opt.algorithm == "maxent") {
-        classias::trainer_maxent<classias::mdata, double> tr;
+    if (opt.algorithm == "logress") {
+        classias::trainer_maxent<classias::adata, double> tr;
         tr.params().help(opt.os);
         return true;
     }

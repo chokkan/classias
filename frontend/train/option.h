@@ -54,9 +54,9 @@ public:
     enum {
         TYPE_NONE = 0,          /// Default type.
         TYPE_BINARY,            /// Binary classification.
-        TYPE_MULTI,             /// Multi-candidate ranker.
-        TYPE_ATTRIBUTE,         /// Attribute-label classification.
-        TYPE_ATTRIBUTE_DENSE,   /// Attribute-label with dense features.
+        TYPE_CANDIDATE,             /// Multi-candidate ranker.
+        TYPE_MULTI_SPARSE,         /// Attribute-label classification.
+        TYPE_MULTI_DENSE,   /// Attribute-label with dense features.
     };
 
     std::istream&   is;

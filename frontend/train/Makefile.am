@@ -10,9 +10,9 @@ classias_train_SOURCES = \
 	tokenize.h \
 	util.h \
 	train.h \
-	attribute.cpp \
 	binary.cpp \
 	multi.cpp \
+	candidate.cpp \
 	main.cpp
 
 AM_CXXFLAGS = @CXXFLAGS@
