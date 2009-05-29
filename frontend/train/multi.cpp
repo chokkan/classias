@@ -150,22 +150,6 @@ read_stream(
 
         read_line(line, inst, data.features, data.labels, opt, lines);
     }
-
-    /*
-    // Set the end index of the user features.
-    data.set_user_feature_end(data.features.size());
-
-    // Generate a bias feature if necessary.
-    if (opt.generate_bias) {
-        // Allocate a bias feature.
-        feature_type bf = data.features("@bias");
-
-        // Insert the bias feature to each instance.
-        for (iterator it = data.begin();it != data.end();++it) {
-            it->append(bf, 1.0);
-        }
-    }
-    */
 }
 
 template <

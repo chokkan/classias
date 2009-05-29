@@ -45,10 +45,12 @@
 #include "tokenize.h"
 #include "train.h"
 
+/* Automatic generation of bias features is not supported. */
+
 /*
 <line>          ::= <comment> | <boi> | <eoi> | <candidate> | <br>
 <comment>       ::= "#" <string> <br>
-<boi>           ::= "@boi" <br>
+<boi>           ::= "@boi" [ <weight> ] <br>
 <eoi>           ::= "@eoi" <br>
 <instance>      ::= <class> [ <label> ] ("\t" <feature>)+ <br>
 <class>         ::= "F" | "T"
@@ -74,6 +76,7 @@ read_line(
     int lines = 0
     )
 {
+    std::string name;
     typedef typename instance_type::candidate_type candidate_type;
 
     // Split the line with tab characters.
@@ -88,29 +91,28 @@ read_line(
         throw invalid_data("an empty label found", lines);
     }
 
+    // Parse the instance label.
+    name = *itv;
+
     // Set the truth value for this candidate.
     bool truth = false;
-    if (itv->compare(0, 1, "T") == 0) {
+    if (name.compare(0, 1, "+") == 0) {
         truth = true;
-    } else if (itv->compare(0, 1, "F") == 0) {
+    } else if (name.compare(0, 1, "-") == 0) {
         truth = false;
     } else {
-        throw invalid_data("a class label must begins with either 'T' or 'F'", lines);
+        throw invalid_data("a class label must begins with either '+' or '-'", lines);
     }
-
-    // Obtain the label.
-    std::string label(*itv);
 
     // Create a new candidate.
     candidate_type& cand = instance.new_element();
     cand.set_truth(truth);
-    cand.set_label(labels(label));
+    cand.set_label(labels(name));
 
     // Set featuress for the instance.
     for (++itv;itv != values.end();++itv) {
         if (!itv->empty()) {
             double value;
-            std::string name;
             get_name_value(*itv, name, value, opt.value_separator);
             cand.append(features(name), value);
         }
@@ -154,12 +156,12 @@ read_stream(
         }
 
         // Read features that should not be regularized.
-        if (line.compare(0, 14, "@unregularize") == 0) {
+        if (line.compare(0, 13, "@unregularize") == 0) {
             if (0 < data.features.size()) {
                 throw invalid_data("Declarative @unregularize must precede an instance", lines);
             }
 
-            // Feature names separated by TAB characters.
+            // Feature names for unregularization.
             tokenizer values(line, opt.token_separator);
             tokenizer::iterator itv = values.begin();
             for (++itv;itv != values.end();++itv) {
@@ -171,31 +173,24 @@ read_stream(
             data.set_user_feature_start(data.features.size());
 
         } else if (line.compare(0, 4, "@boi") == 0) {
-            // Start of a new instance.
-            instance_type& inst = data.new_element();
-            inst.set_group(group);
+            double value;
+            std::string name;
+            get_name_value(line, name, value, opt.value_separator);
 
-        } else if (line.compare(0, 4, "@eoi") == 0) {
+            if (name == "@boi") {
+                // Start of a new instance.
+                instance_type& inst = data.new_element();
+                inst.set_group(group);
+                inst.set_weight(value);
+            }
+
+        } else if (line == "@eoi") {
 
         } else if (line.compare(0, 9, "@negative") == 0) {
             // 
         } else {
             // A new candidate.
             read_line(line, data.back(), data.features, data.labels, opt, lines);
-        }
-    }
-
-    data.append_positive_label(data.labels("TP"));
-
-    // Generate a bias feature if necessary.
-    if (opt.generate_bias) {
-        // Insert the bias feature to each instance.
-        for (data_iterator iti = data.begin();iti != data.end();++iti) {
-            for (instance_iterator itc = iti->begin();itc != iti->end();++itc) {
-                // A bias feature for the candidate label.
-                std::string name = "@bias@" + data.labels.to_item(itc->get_label());
-                itc->append(data.features(name), 1.0);
-            }
         }
     }
 }
@@ -219,19 +214,24 @@ output_model(
     std::ofstream os(opt.model.c_str());
 
     // Output a model type.
-    os << "@model" << '\t' << "multi" << std::endl;
+    os << "@model" << opt.token_separator << "candidate" << std::endl;
 
     // Store the feature weights.
     for (features_type i = 0;i < features.size();++i) {
         value_type w = weights[i];
         if (w != 0.) {
-            os << w << '\t' << features.to_item(i) << std::endl;
+            os << w << opt.token_separator << features.to_item(i) << std::endl;
         }
     }
 }
 
 int candidate_train(option& opt)
 {
+    if (opt.generate_bias) {
+        // Automatic generation of bias features is not supported for candidate type.
+        throw invalid_algorithm("Automatic generation of bias features is not supported for 'candidate' type.");
+    }
+
     // Branches for training algorithms.
     if (opt.algorithm == "logress.lbfgs") {
         return train<
