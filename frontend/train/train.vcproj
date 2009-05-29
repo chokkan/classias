@@ -207,6 +207,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\include\os.h"
+				>
+			</File>
+			<File
 				RelativePath="..\include\tokenize.h"
 				>
 			</File>

@@ -589,7 +589,7 @@ template <
     class candidate_tmpl,
     class data_traits_tmpl
 >
-class multi_instance_base :
+class candidate_instance_base :
     public candidates_base<candidate_tmpl>,
     public weight_base,
     public group_base,
@@ -613,21 +613,21 @@ public:
     /**
      * Constructs an object.
      */
-    multi_instance_base()
+    candidate_instance_base()
     {
     }
 
     /**
      * Constructs an object.
      */
-    multi_instance_base(traits_type* traits)
+    candidate_instance_base(traits_type* traits)
     {
     }
 
     /**
      * Destructs an object.
      */
-    virtual ~multi_instance_base()
+    virtual ~candidate_instance_base()
     {
     }
 };
@@ -637,7 +637,7 @@ template <
     class label_tmpl,
     class traits_tmpl
 >
-class attribute_instance_base :
+class multi_instance_base :
     public group_base,
     public label_base<label_tmpl>
 {
@@ -647,7 +647,7 @@ public:
     typedef typename attributes_type::identifier_type attribute_name_type;
     typedef typename attributes_type::identifier_type feature_type;
     typedef traits_tmpl traits_type;
-    typedef attribute_instance_base<attributes_type, label_type, traits_type> instance_type;
+    typedef multi_instance_base<attributes_type, label_type, traits_type> instance_type;
 
     typedef labeled_candidate_base<instance_type, label_type> candidate_type;
 
@@ -714,16 +714,16 @@ public:
     typedef candidate_iterator const_iterator;
 
 public:
-    attribute_instance_base() : m_traits(NULL)
+    multi_instance_base() : m_traits(NULL)
     {
     }
 
-    attribute_instance_base(traits_type* traits)
+    multi_instance_base(traits_type* traits)
         : m_traits(traits)
     {
     }
 
-    virtual ~attribute_instance_base()
+    virtual ~multi_instance_base()
     {
     }
 

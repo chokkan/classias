@@ -225,7 +225,7 @@ template <
     class features_quark_tmpl,
     class label_quark_tmpl
 >
-class multi_data_base : public binary_data_base<instance_tmpl, features_quark_tmpl>
+class candidate_data_base : public binary_data_base<instance_tmpl, features_quark_tmpl>
 {
 public:
     /// The type of the base class.
@@ -247,14 +247,14 @@ public:
     /**
      * Constructs the object.
      */
-    multi_data_base()
+    candidate_data_base()
     {
     }
 
     /**
      * Destructs the object.
      */
-    virtual ~multi_data_base()
+    virtual ~candidate_data_base()
     {
     }
 
@@ -291,12 +291,12 @@ template <
     class attributes_quark_tmpl,
     class label_quark_tmpl
 >
-class attribute_data_base :
-    public multi_data_base<instance_tmpl, attributes_quark_tmpl, label_quark_tmpl>
+class multi_data_base :
+    public candidate_data_base<instance_tmpl, attributes_quark_tmpl, label_quark_tmpl>
 {
 public:
     /// The type of the base class.
-    typedef multi_data_base<instance_tmpl, attributes_quark_tmpl, label_quark_tmpl> base_type;
+    typedef candidate_data_base<instance_tmpl, attributes_quark_tmpl, label_quark_tmpl> base_type;
     /// The type of the instance class.
     typedef typename base_type::instance_type instance_type;
 
@@ -304,14 +304,14 @@ public:
     /**
      * Constructs the object.
      */
-    attribute_data_base()
+    multi_data_base()
     {
     }
 
     /**
      * Destructs the object.
      */
-    virtual ~attribute_data_base()
+    virtual ~multi_data_base()
     {
     }
 

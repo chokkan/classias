@@ -72,7 +72,7 @@ read_line(
     )
 {
     // Split the line with tab characters.
-    tokenizer values(line, '\t');
+    tokenizer values(line, opt.token_separator);
     tokenizer::iterator itv = values.begin();
     if (itv == values.end()) {
         throw invalid_data("no field found in the line", lines);
@@ -91,7 +91,7 @@ read_line(
         if (!itv->empty()) {
             double value;
             std::string name;
-            get_name_value(*itv, name, value);
+            get_name_value(*itv, name, value, opt.value_separator);
             instance.attributes.append(attributes(name), value);
         }
     }
@@ -205,27 +205,26 @@ output_model(
 int attribute_train(option& opt)
 {
     // Branches for training algorithms.
-    if (opt.algorithm == "maxent") {
-        if (opt.type == option::TYPE_MULTI_DENSE) {
+    if (opt.algorithm == "logress.lbfgs") {
+        if (opt.type == option::TYPE_MULTI_SPARSE) {
             return train<
-                classias::ddata,
-                classias::trainer_maxent<classias::ddata, double>
+                classias::mdata,
+                classias::trainer_maxent<classias::mdata, double>
             >(opt);
-        } else {
+        } else if (opt.type == option::TYPE_MULTI_DENSE) {
             return train<
-                classias::adata,
-                classias::trainer_maxent<classias::adata, double>
+                classias::ndata,
+                classias::trainer_maxent<classias::ndata, double>
             >(opt);
         }
-    } else {
-        throw invalid_algorithm(opt.algorithm);
     }
+    throw invalid_algorithm(opt.algorithm);
 }
 
 bool attribute_usage(option& opt)
 {
-    if (opt.algorithm == "logress") {
-        classias::trainer_maxent<classias::adata, double> tr;
+    if (opt.algorithm == "logress.lbfgs") {
+        classias::trainer_maxent<classias::mdata, double> tr;
         tr.params().help(opt.os);
         return true;
     }

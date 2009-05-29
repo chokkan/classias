@@ -79,6 +79,9 @@ public:
     bool        false_analysis;
     bool        generate_bias;
 
+    char        token_separator;
+    char        value_separator;
+
     option(
         std::istream& _is = std::cin,
         std::ostream& _os = std::cout,
@@ -88,7 +91,8 @@ public:
         algorithm("maxent"),        
         split(0), holdout(-1), cross_validation(false),
         false_analysis(false),
-        generate_bias(false)
+        generate_bias(false),
+        token_separator('\t'), value_separator(':')
     {
         negatives.insert("-1");
         negatives.insert("O");

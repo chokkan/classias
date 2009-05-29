@@ -77,7 +77,7 @@ read_line(
     typedef typename instance_type::candidate_type candidate_type;
 
     // Split the line with tab characters.
-    tokenizer values(line, '\t');
+    tokenizer values(line, opt.token_separator);
     tokenizer::iterator itv = values.begin();
     if (itv == values.end()) {
         throw invalid_data("no field found in the line", lines);
@@ -111,7 +111,7 @@ read_line(
         if (!itv->empty()) {
             double value;
             std::string name;
-            get_name_value(*itv, name, value);
+            get_name_value(*itv, name, value, opt.value_separator);
             cand.append(features(name), value);
         }
     }
@@ -154,13 +154,13 @@ read_stream(
         }
 
         // Read features that should not be regularized.
-        if (line.compare(0, 14, "@unregularize\t") == 0) {
+        if (line.compare(0, 14, "@unregularize") == 0) {
             if (0 < data.features.size()) {
                 throw invalid_data("Declarative @unregularize must precede an instance", lines);
             }
 
             // Feature names separated by TAB characters.
-            tokenizer values(line, '\t');
+            tokenizer values(line, opt.token_separator);
             tokenizer::iterator itv = values.begin();
             for (++itv;itv != values.end();++itv) {
                 // Reserve early feature identifiers.
@@ -230,24 +230,24 @@ output_model(
     }
 }
 
-int multi_train(option& opt)
+int candidate_train(option& opt)
 {
     // Branches for training algorithms.
-    if (opt.algorithm == "maxent") {
+    if (opt.algorithm == "logress.lbfgs") {
         return train<
-            classias::mdata,
-            classias::trainer_maxent<classias::mdata, double>
+            classias::cdata,
+            classias::trainer_maxent<classias::cdata, double>
         >(opt);
     } else {
         throw invalid_algorithm(opt.algorithm);
     }
 }
 
-bool multi_usage(option& opt)
+bool candidate_usage(option& opt)
 {
     // Branches for training algorithms.
-    if (opt.algorithm == "logress") {
-        classias::trainer_maxent<classias::mdata, double> tr;
+    if (opt.algorithm == "logress.lbfgs") {
+        classias::trainer_maxent<classias::cdata, double> tr;
         tr.params().help(opt.os);
         return true;
     }

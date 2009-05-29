@@ -29,7 +29,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* $Id:$ */
+/* $Id$ */
 
 #ifndef __UTIL_H__
 #define __UTIL_H__
@@ -113,9 +113,9 @@ public:
 
 static void
 get_name_value(
-    const std::string& str, std::string& name, double& value)
+    const std::string& str, std::string& name, double& value, char separator)
 {
-    size_t col = str.rfind(':');
+    size_t col = str.rfind(separator);
     if (col == str.npos) {
         name = str;
         value = 1.;

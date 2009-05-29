@@ -35,6 +35,7 @@
 #include <config.h>
 #endif/*HAVE_CONFIG_H*/
 
+#include <os.h>
 #include <iostream>
 #include <classias/version.h>
 #include <optparse.h>
@@ -44,10 +45,10 @@
 
 int binary_train(option& opt);
 bool binary_usage(option& opt);
-int multi_train(option& opt);
-bool multi_usage(option& opt);
 int attribute_train(option& opt);
 bool attribute_usage(option& opt);
+int candidate_train(option& opt);
+bool candidate_usage(option& opt);
 
 class optionparser : public option, public optparse
 {
@@ -78,7 +79,7 @@ public:
 
         ON_OPTION_WITH_ARG(SHORTOPT('a') || LONGOPT("algorithm"))
             if (strcmp(arg, "logress") == 0 || strcmp(arg, "logress.lbfgs") == 0) {
-                algorithm = "logress";
+                algorithm = "logress.lbfgs";
             } else if (strcmp(arg, "logress.sgd") == 0) {
                 algorithm = "logress.sgd";
             } else {
@@ -116,6 +117,32 @@ public:
                 if (!itv->empty()) {
                     negatives.insert(*itv);
                 }
+            }
+
+        ON_OPTION_WITH_ARG(SHORTOPT('s') || LONGOPT("token-separator"))
+            if (strcmp(arg, " ") == 0 || strcasecmp(arg, "spc") == 0 || strcasecmp(arg, "space") == 0) {
+                token_separator = ' ';
+            } else if (strcmp(arg, ",") == 0 || strcasecmp(arg, "comma") == 0) {
+                token_separator = ',';
+            } else if (strcmp(arg, "\t") == 0 || strcasecmp(arg, "tab") == 0) {
+                token_separator = '\t';
+            } else {
+                std::stringstream ss;
+                ss << "unknown token separator specified: " << arg;
+                throw invalid_value(ss.str());
+            }
+
+        ON_OPTION_WITH_ARG(SHORTOPT('c') || LONGOPT("value-separator"))
+            if (strcmp(arg, ":") == 0 || strcasecmp(arg, "colon") == 0) {
+                value_separator = ':';
+            } else if (strcmp(arg, "=") == 0 || strcasecmp(arg, "eq") == 0 || strcasecmp(arg, "equal") == 0) {
+                value_separator = '=';
+            } else if (strcmp(arg, "|") == 0 || strcasecmp(arg, "bar") == 0) {
+                value_separator = '|';
+            } else {
+                std::stringstream ss;
+                ss << "unknown value separator specified: " << arg;
+                throw invalid_value(ss.str());
             }
 
         ON_OPTION(SHORTOPT('h') || LONGOPT("help"))
@@ -174,6 +201,14 @@ static void usage(std::ostream& os, const char *argv0)
     os << "  -n, --negative=LABELS specify negative LABELS (separated by SPACE characters)" << std::endl;
     os << "                        (DEFAULT='-1 O'); this utility assumes instances with" << std::endl;
     os << "                        LABELS as negatives when computing the preformance" << std::endl;
+    os << "  -s, --token-separator=SEP assume SEP character as a token separator:" << std::endl;
+    os << "      '\t', tab                 a TAB ('\t') character (DEFAULT)" << std::endl;
+    os << "      ' ',  spc, space          a SPACE (' ') character" << std::endl;
+    os << "      ',',  comma               a COMMA (',') character" << std::endl;
+    os << "  -c, --value-separator=SEP assume SEP character as a value separator:" << std::endl;
+    os << "      ':',  colon               a COLON (':') character (DEFAULT)" << std::endl;
+    os << "      '=',  equal               a EQUAL ('=') character" << std::endl;
+    os << "      '|',  bar                 a BAR ('|') character" << std::endl;
     os << "  -h, --help            show this help message and exit" << std::endl;
     os << "  -H, --help-parameters show the help message of algorithm-specific parameters;" << std::endl;
     os << "                        specify an algorithm with '-a' or '--algorithm' option" << std::endl;
@@ -213,7 +248,7 @@ int main(int argc, char *argv[])
         usage(os, argv[0]);
         return ret;
     } else if (opt.mode == option::MODE_HELP_ALGORITHM) {
-        multi_usage(opt) || binary_usage(opt)/* || attribute_usage(opt)*/;
+        candidate_usage(opt) || binary_usage(opt)/* || attribute_usage(opt)*/;
         return ret;
     }
 
@@ -228,11 +263,11 @@ int main(int argc, char *argv[])
         case option::TYPE_BINARY:
             ret = binary_train(opt);
             break;
-        case option::TYPE_CANDIDATE:
-            ret = multi_train(opt);
-            break;
         case option::TYPE_MULTI_SPARSE:
             ret = attribute_train(opt);
+            break;
+        case option::TYPE_CANDIDATE:
+            ret = candidate_train(opt);
             break;
         }
     } catch (const std::exception& e) {

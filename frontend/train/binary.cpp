@@ -49,7 +49,7 @@
 <line>          ::= <comment> | <instance> | <br>
 <comment>       ::= "#" <string> <br>
 <instance>      ::= <class> ("\t" <feature>)+ <br>
-<class>         ::= "-1" | "1" | "+1"
+<class>         ::= ("-1" | "1" | "+1") [ ":" <weight> ]
 <feature>       ::= <name> [ ":" <weight> ]
 <name>          ::= <string>
 <weight>        ::= <numeric>
@@ -74,7 +74,7 @@ read_line(
     std::string name;
 
     // Split the line with tab characters.
-    tokenizer values(line, '\t');
+    tokenizer values(line, opt.token_separator);
     tokenizer::iterator itv = values.begin();
     if (itv == values.end()) {
         throw invalid_data("no field found in the line", lines);
@@ -86,7 +86,7 @@ read_line(
     }
 
     // Parse the instance label.
-    get_name_value(*itv, name, value);
+    get_name_value(*itv, name, value, opt.value_separator);
 
     // Set the class label of this instance.
     if (name == "+1" || name == "1") {
@@ -108,7 +108,7 @@ read_line(
     // Set featuress for the instance.
     for (++itv;itv != values.end();++itv) {
         if (!itv->empty()) {
-            get_name_value(*itv, name, value);
+            get_name_value(*itv, name, value, opt.value_separator);
             instance.append(features(name), value);
         }
     }
