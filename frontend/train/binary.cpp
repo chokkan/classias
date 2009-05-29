@@ -65,7 +65,6 @@ read_line(
     const std::string& line,
     instance_type& instance,
     features_quark_type& features,
-    const std::string& comment,
     const option& opt,
     int lines = 0
     )
@@ -100,17 +99,17 @@ read_line(
     // Set the instance weight.
     instance.set_weight(value);
 
-    // Set the comment of this instance.
-    if (!comment.empty()) {
-        instance.set_comment(comment);
-    }
-
     // Set featuress for the instance.
     for (++itv;itv != values.end();++itv) {
         if (!itv->empty()) {
             get_name_value(*itv, name, value, opt.value_separator);
             instance.append(features(name), value);
         }
+    }
+
+    // Include a bias feature if necessary.
+    if (opt.generate_bias) {
+        instance.append(features("@bias"), 1.);
     }
 }
 
@@ -147,18 +146,17 @@ read_stream(
 
         // Skip a comment line.
         if (line.compare(0, 1, "#") == 0) {
-            comment += line;
             continue;
         }
 
         // Read features that should not be regularized.
-        if (line.compare(0, 14, "@unregularize\t") == 0) {
+        if (line.compare(0, 13, "@unregularize") == 0) {
             if (0 < data.features.size()) {
                 throw invalid_data("Declarative @unregularize must precede an instance", lines);
             }
 
-            // Feature names separated by TAB characters.
-            tokenizer values(line, '\t');
+            // Feature names.
+            tokenizer values(line, opt.token_separator);
             tokenizer::iterator itv = values.begin();
             for (++itv;itv != values.end();++itv) {
                 // Reserve early feature identifiers.
@@ -176,19 +174,8 @@ read_stream(
         inst.set_group(group);
 
         // Read the instance.
-        read_line(line, inst, data.features, comment, opt, lines);
+        read_line(line, inst, data.features, opt, lines);
         comment.clear();
-    }
-
-    // Generate a bias feature if necessary.
-    if (opt.generate_bias) {
-        // Allocate a bias feature.
-        feature_type bf = data.features("@bias");
-
-        // Insert the bias feature to each instance.
-        for (iterator it = data.begin();it != data.end();++it) {
-            it->append(bf, 1.0);
-        }
     }
 }
 
@@ -211,13 +198,13 @@ output_model(
     std::ofstream os(opt.model.c_str());
 
     // Output a model type.
-    os << "@model" << '\t' << "binary" << std::endl;
+    os << "@model" << opt.token_separator << "binary" << std::endl;
 
     // Store the feature weights.
     for (features_type i = 0;i < features.size();++i) {
         value_type w = weights[i];
         if (w != 0.) {
-            os << w << '\t' << features.to_item(i) << std::endl;
+            os << w << opt.token_separator << features.to_item(i) << std::endl;
         }
     }
 }
@@ -225,7 +212,7 @@ output_model(
 int binary_train(option& opt)
 {
     // Branches for training algorithms.
-    if (opt.algorithm == "logress") {
+    if (opt.algorithm == "logress.lbfgs") {
         return train<
             classias::bdata,
             classias::trainer_logress<classias::bdata, double>
@@ -237,7 +224,7 @@ int binary_train(option& opt)
 
 bool binary_usage(option& opt)
 {
-    if (opt.algorithm == "logress") {
+    if (opt.algorithm == "logress.lbfgs") {
         classias::trainer_logress<classias::bdata, double> tr;
         tr.params().help(opt.os);
         return true;

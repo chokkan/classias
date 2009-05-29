@@ -373,8 +373,7 @@ public:
     int train(
         const data_type& data,
         std::ostream& os,
-        int holdout = -1,
-        bool false_analysis = false
+        int holdout = -1
         )
     {
         const size_t K = data.traits.num_features();
@@ -427,28 +426,16 @@ public:
 
         // Report the result from the L-BFGS solver.
         lbfgs_output_status(os, ret);
-
-        if (holdout != -1 || false_analysis) {
-            os << std::endl;
-            os << "***** Final model *****" << std::endl;
-            holdout_evaluation(false_analysis);
-            os << std::endl;
-        }
-
         return ret;
     }
 
-    void holdout_evaluation(bool false_analysis = false)
+    void holdout_evaluation()
     {
         std::ostream& os = *m_os;
         const value_type *x = m_weights;
         int positive_labels[] = {1};
         confusion_matrix matrix(2);
         classifier_type cls(x);
-
-        if (false_analysis) {
-            os << "=== False analysis ===" << std::endl;
-        }
 
         // For each multi_instance_base in the data_base.
         for (const_iterator iti = m_data->begin();iti != m_data->end();++iti) {
@@ -466,19 +453,8 @@ public:
             int rl = static_cast<int>(iti->get_truth());
             int ml = static_cast<int>(static_cast<bool>(cls));
 
-            if (false_analysis) {
-                if (rl != ml) {
-                    os << iti->get_comment() << std::endl;
-                    os << (ml == 0 ? "-1" : "+1") << '\t' << cls.score() << std::endl;
-                }
-            }
-
             // Store the results.
             matrix(rl, ml)++;
-        }
-
-        if (false_analysis) {
-            os << "===" << std::endl;
         }
 
         matrix.output_accuracy(os);

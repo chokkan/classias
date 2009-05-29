@@ -71,6 +71,9 @@ read_line(
     int lines = 0
     )
 {
+    double value;
+    std::string name;
+
     // Split the line with tab characters.
     tokenizer values(line, opt.token_separator);
     tokenizer::iterator itv = values.begin();
@@ -83,8 +86,12 @@ read_line(
         throw invalid_data("an empty label found", lines);
     }
 
-    // Set the instance label.
-    instance.set_label(labels(*itv));
+    // Parse the instance label.
+    get_name_value(*itv, name, value, opt.value_separator);
+
+    // Set the instance label and weight.
+    instance.set_label(labels(name));
+    instance.set_weight(value);
 
     // Set attributes for the instance.
     for (++itv;itv != values.end();++itv) {
@@ -94,6 +101,11 @@ read_line(
             get_name_value(*itv, name, value, opt.value_separator);
             instance.attributes.append(attributes(name), value);
         }
+    }
+
+    // Include a bias feature if necessary.
+    if (opt.generate_bias) {
+        instance.attributes.append(attributes("@bias"), 1.);
     }
 }
 
@@ -202,7 +214,7 @@ output_model(
     }
 }
 
-int attribute_train(option& opt)
+int multi_train(option& opt)
 {
     // Branches for training algorithms.
     if (opt.algorithm == "logress.lbfgs") {
@@ -221,7 +233,7 @@ int attribute_train(option& opt)
     throw invalid_algorithm(opt.algorithm);
 }
 
-bool attribute_usage(option& opt)
+bool multi_usage(option& opt)
 {
     if (opt.algorithm == "logress.lbfgs") {
         classias::trainer_maxent<classias::mdata, double> tr;

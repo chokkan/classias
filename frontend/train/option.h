@@ -52,11 +52,11 @@ public:
     };
 
     enum {
-        TYPE_NONE = 0,          /// Default type.
-        TYPE_BINARY,            /// Binary classification.
-        TYPE_CANDIDATE,             /// Multi-candidate ranker.
-        TYPE_MULTI_SPARSE,         /// Attribute-label classification.
+        TYPE_NONE = 0,      /// Default type.
+        TYPE_BINARY,        /// Binary classification.
+        TYPE_MULTI_SPARSE,  /// Attribute-label classification.
         TYPE_MULTI_DENSE,   /// Attribute-label with dense features.
+        TYPE_CANDIDATE,     /// Multi-candidate ranker.
     };
 
     std::istream&   is;
@@ -67,17 +67,13 @@ public:
 
     int         mode;
     int         type;
-
-    std::string model;
-    labels_type negatives;
-
     std::string algorithm;
     params_type params;
+    std::string model;
+    bool        generate_bias;
     int         split;
     int         holdout;
     bool        cross_validation;
-    bool        false_analysis;
-    bool        generate_bias;
 
     char        token_separator;
     char        value_separator;
@@ -86,16 +82,14 @@ public:
         std::istream& _is = std::cin,
         std::ostream& _os = std::cout,
         std::ostream& _es = std::cerr
-        ) : is(_is), os(_os), es(_es),
+        ) :
+        is(_is), os(_os), es(_es),
         mode(MODE_NORMAL), type(TYPE_NONE), model(""),
-        algorithm("maxent"),        
-        split(0), holdout(-1), cross_validation(false),
-        false_analysis(false),
+        algorithm("logress.lbfgs"),        
         generate_bias(false),
+        split(0), holdout(-1), cross_validation(false),
         token_separator('\t'), value_separator(':')
     {
-        negatives.insert("-1");
-        negatives.insert("O");
     }
 };
 

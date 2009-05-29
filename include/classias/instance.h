@@ -544,8 +544,7 @@ class binary_instance_base :
     public features_tmpl,
     public truth_base,
     public weight_base,
-    public group_base,
-    public comment_base
+    public group_base
 {
 public:
     /// The type of a feature vector.
@@ -592,8 +591,7 @@ template <
 class candidate_instance_base :
     public candidates_base<candidate_tmpl>,
     public weight_base,
-    public group_base,
-    public comment_base
+    public group_base
 {
 public:
     /// The type of a candidate.
@@ -639,6 +637,7 @@ template <
 >
 class multi_instance_base :
     public group_base,
+    public weight_base,
     public label_base<label_tmpl>
 {
 public:

@@ -465,8 +465,7 @@ public:
     int train(
         const data_type& data,
         std::ostream& os,
-        int holdout = -1,
-        bool false_analysis = false
+        int holdout = -1
         )
     {
         const size_t K = data.traits.num_features();
