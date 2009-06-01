@@ -39,7 +39,7 @@
 #include <string>
 
 #include <classias/classias.h>
-#include <classias/logress.h>
+#include <classias/train/lbfgs/binary.h>
 
 #include "option.h"
 #include "tokenize.h"
@@ -127,8 +127,6 @@ read_stream(
     int lines = 0;
     std::string comment;
     typedef typename data_type::instance_type instance_type;
-    typedef typename data_type::feature_type feature_type;
-    typedef typename data_type::iterator iterator;
 
     for (;;) {
         // Read a line.
@@ -151,7 +149,7 @@ read_stream(
 
         // Read features that should not be regularized.
         if (line.compare(0, 13, "@unregularize") == 0) {
-            if (0 < data.features.size()) {
+            if (!data.empty()) {
                 throw invalid_data("Declarative @unregularize must precede an instance", lines);
             }
 
@@ -160,11 +158,11 @@ read_stream(
             tokenizer::iterator itv = values.begin();
             for (++itv;itv != values.end();++itv) {
                 // Reserve early feature identifiers.
-                data.features(*itv);
+                data.attributes(*itv);
             }
 
             // Set the start index of the user features.
-            data.set_user_feature_start(data.features.size());
+            data.set_user_feature_start(data.attributes.size());
 
             continue;
         }
@@ -174,7 +172,7 @@ read_stream(
         inst.set_group(group);
 
         // Read the instance.
-        read_line(line, inst, data.features, opt, lines);
+        read_line(line, inst, data.attributes, opt, lines);
         comment.clear();
     }
 }
@@ -190,9 +188,9 @@ output_model(
     const option& opt
     )
 {
-    typedef typename data_type::features_quark_type features_quark_type;
-    typedef typename features_quark_type::value_type features_type;
-    const features_quark_type& features = data.features;
+    typedef typename data_type::attributes_quark_type attributes_quark_type;
+    typedef typename attributes_quark_type::value_type aid_type;
+    const attributes_quark_type& attributes = data.attributes;
 
     // Open a model file for writing.
     std::ofstream os(opt.model.c_str());
@@ -201,10 +199,10 @@ output_model(
     os << "@model" << opt.token_separator << "binary" << std::endl;
 
     // Store the feature weights.
-    for (features_type i = 0;i < features.size();++i) {
+    for (aid_type i = 0;i < attributes.size();++i) {
         value_type w = weights[i];
         if (w != 0.) {
-            os << w << opt.token_separator << features.to_item(i) << std::endl;
+            os << w << opt.token_separator << attributes.to_item(i) << std::endl;
         }
     }
 }

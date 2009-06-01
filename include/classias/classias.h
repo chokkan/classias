@@ -34,32 +34,31 @@
 #ifndef __CLASSIAS_CLASSIAS_H__
 #define __CLASSIAS_CLASSIAS_H__
 
-#include "base.h"
-#include "traits.h"
+#include "types.h"
+#include "feature_generator.h"
 #include "instance.h"
 #include "data.h"
 
 namespace classias
 {
 
-typedef feature_data_traits_base<int, int, int> feature_data_traits;
-typedef dense_data_traits_base<int, int, int> dense_data_traits;
-typedef sparse_data_traits_base<int, int, int> sparse_data_traits;
+typedef dense_feature_generator_base<int_t, int_t, int_t> dense_feature_generator;
+typedef sparse_feature_generator_base<int_t, int_t, int_t> sparse_feature_generator;
 
-typedef sparse_vector_base<int, double> sparse_attributes;
+typedef sparse_vector_base<int_t, real_t> sparse_attributes;
 
-typedef binary_instance_base<sparse_attributes, feature_data_traits> binstance;
+typedef binary_instance_base<sparse_attributes> binstance;
 typedef binary_data_base<binstance, quark> bdata;
 
-typedef candidate_base<sparse_attributes, int> ccandidate;
-typedef candidate_instance_base<ccandidate, feature_data_traits> cinstance;
+typedef candidate_base<sparse_attributes, int_t> ccandidate;
+typedef candidate_instance_base<ccandidate> cinstance;
 typedef candidate_data_base<cinstance, quark, quark> cdata;
 
-typedef multi_instance_base<sparse_attributes, int, sparse_data_traits> minstance;
-typedef multi_data_base<minstance, quark, quark> mdata;
+typedef multi_instance_base<sparse_attributes, int_t> minstance;
+typedef multi_data_base<minstance, quark, quark, dense_feature_generator> mdata;
 
-typedef multi_instance_base<sparse_attributes, int, dense_data_traits> ninstance;
-typedef multi_data_base<ninstance, quark, quark> ndata;
+typedef multi_instance_base<sparse_attributes, int_t> ninstance;
+typedef multi_data_base<ninstance, quark, quark, sparse_feature_generator> ndata;
 
 };
 

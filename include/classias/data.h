@@ -1,5 +1,5 @@
 /*
- *		Instance collections for Classias.
+ *		Instance collections.
  *
  * Copyright (c) 2008,2009 Naoaki Okazaki
  * All rights reserved.
@@ -44,25 +44,22 @@ namespace classias
  *
  *  This class provides a data set for binary classification.
  *
- *  @param  instance_tmpl       The type of an instance.
- *  @param  features_quark_tmpl The type of a feature quark.
+ *  @param  instance_tmpl           The type of an instance.
+ *  @param  attributes_quark_tmpl   The type of an attribute quark.
  */
 template <
     class instance_tmpl,
-    class features_quark_tmpl
+    class attributes_quark_tmpl
 >
 class binary_data_base
 {
 public:
     /// The type of an instance.
     typedef instance_tmpl instance_type;
-    /// The type of the traits class associated with the instance class.
-    typedef typename instance_type::traits_type traits_type;
-
     /// The type of a feature vector.
-    typedef features_quark_tmpl features_quark_type;
-    /// The type of a feature.
-    typedef typename features_quark_type::value_type feature_type;
+    typedef attributes_quark_tmpl attributes_quark_type;
+    /// The type of an attribute.
+    typedef typename attributes_quark_type::value_type attribute_type;
 
     /// A type providing a container of instances.
     typedef std::vector<instance_type> instances_type;
@@ -75,12 +72,10 @@ public:
 
     /// A container of instances.
     instances_type instances;
-    /// A data traits.
-    traits_type traits;
     /// A feature quark.
-    features_quark_type features;
+    attributes_quark_type attributes;
     /// The start index of features.
-    feature_type feature_start_index;
+    int_t feature_start_index;
 
     /**
      * Constructs the object.
@@ -121,6 +116,26 @@ public:
     inline size_type size() const
     {
         return instances.size();
+    }
+
+    /**
+     * Returns a read/write reference to an instance.
+     *  @param  i               The index number for an instance.
+     *  @retval instance_type&  Reference to the instance.
+     */
+    inline instance_type& operator[](size_type i)
+    {
+        return instances[i];
+    }
+
+    /**
+     * Returns a read-only reference to an instance.
+     *  @param  i                       The index number for an instance.
+     *  @retval const instance_type&    Reference to the instance.
+     */
+    inline const instance_type& operator[](size_type i) const
+    {
+        return instances[i];
     }
 
     /**
@@ -181,40 +196,69 @@ public:
      */
     inline instance_type& new_element()
     {
-        instances.push_back(instance_type(&traits));
+        instances.push_back(instance_type());
         return this->back();
     }
 
-    inline void set_user_feature_start(feature_type index)
+    /**
+     * Sets the start index of user features.
+     *  @param  index       The start index of user features.
+     */
+    inline void set_user_feature_start(int_t index)
     {
         feature_start_index = index;
     }
 
-    inline feature_type get_user_feature_start() const
+    /**
+     * Returns the start index of user features.
+     *  @return fid_type    The start index of user features.
+     */
+    inline int_t get_user_feature_start() const
     {
         return feature_start_index;
     }
 
     /**
-     * Updates the information in the traits class.
+     * Returns the total number of attributes.
+     *  @return int         The total number of attributes.
+     */
+    int_t num_attributes() const
+    {
+        return attributes.size();
+    }
+
+    /**
+     * Returns the total number of features.
+     *  @return int         The total number of features.
+     */
+    int_t num_features() const
+    {
+        return attributes.size();
+    }
+
+    /**
+     * Returns the total number of labels.
+     *  @return int         The total number of labels.
+     */
+    int_t num_labels() const
+    {
+        return 2;
+    }
+
+    /**
+     * Finalize the data set.
      */
     void finalize()
     {
-        // The number of labels is 2 (binary).
-        traits.set_num_labels(2);
-        // Features and attributes are equivalent.
-        traits.set_num_attributes(this->features.size());
     }
 };
 
 
 
-
-
 /**
- * Data set for ranking instances.
+ * Data set for candidate instances.
  *
- *  This class provides a data set for ranking instances.
+ *  This class provides a data set for candidate instances.
  *
  *  @param  instance_tmpl       The type of an instance.
  *  @param  features_quark_tmpl The type of a feature quark.
@@ -223,25 +267,22 @@ public:
 template <
     class instance_tmpl,
     class features_quark_tmpl,
-    class label_quark_tmpl
+    class labels_quark_tmpl
 >
-class candidate_data_base : public binary_data_base<instance_tmpl, features_quark_tmpl>
+class candidate_data_base :
+    public binary_data_base<instance_tmpl, features_quark_tmpl>
 {
 public:
-    /// The type of the base class.
-    typedef binary_data_base<instance_tmpl, features_quark_tmpl> base_type;
     /// The type of label quark.
-    typedef label_quark_tmpl label_quark_type;
+    typedef labels_quark_tmpl labels_quark_type;
     /// The type of a label.
-    typedef typename label_quark_type::value_type label_type;
-    /// The 
-    typedef typename base_type::size_type size_type;
-
+    typedef typename labels_quark_type::value_type label_type;
+    /// The type of a container for positive labels.
     typedef std::vector<label_type> positive_labels_type;
 
-    /// A set of labels.
-    label_quark_type labels;
-    /// 
+    /// A set of labels in the data set.
+    labels_quark_type labels;
+    /// A set of positive labels in the data set.
     positive_labels_type positive_labels;
 
     /**
@@ -258,20 +299,22 @@ public:
     {
     }
 
+    /**
+     * Appends a positive label.
+     *  @param  l       The positive label to append.
+     */
     void append_positive_label(label_type l)
     {
         positive_labels.push_back(l);
     }
 
     /**
-     * Updates the information in the traits class.
+     * Returns the total number of labels.
+     *  @return int         The total number of labels.
      */
-    void finalize()
+    int_t num_labels() const
     {
-        // The number of distinct labels.
-        this->traits.set_num_labels(this->labels.size());
-        // Features and attributes are equivalent.
-        this->traits.set_num_attributes(this->features.size());
+        return labels.size();
     }
 };
 
@@ -285,20 +328,22 @@ public:
  *  @param  instance_tmpl           The type of an instance.
  *  @param  attributes_quark_tmpl   The type of an attribute quark.
  *  @param  label_quark_tmpl        The type of a label quark.
+ *  @param  feature_generator_tmpl  The type of a feature generator.
  */
 template <
     class instance_tmpl,
     class attributes_quark_tmpl,
-    class label_quark_tmpl
+    class label_quark_tmpl,
+    class feature_generator_tmpl
 >
 class multi_data_base :
     public candidate_data_base<instance_tmpl, attributes_quark_tmpl, label_quark_tmpl>
 {
 public:
-    /// The type of the base class.
-    typedef candidate_data_base<instance_tmpl, attributes_quark_tmpl, label_quark_tmpl> base_type;
-    /// The type of the instance class.
-    typedef typename base_type::instance_type instance_type;
+    /// The type of the feature-generator class.
+    typedef feature_generator_tmpl feature_generator_type;
+    /// The feature generator.
+    feature_generator_type feature_generator;
 
 public:
     /**
@@ -316,21 +361,29 @@ public:
     }
 
     /**
-     * Updates the information in the traits class.
+     * Returns the total number of features.
+     *  @return int         The total number of features.
+     */
+    int_t num_features() const
+    {
+        return feature_generator.num_features();
+    }
+
+    /**
+     * Finalize the data set.
      */
     void finalize()
     {
-        // The number of distinct labels.
-        this->traits.set_num_labels(this->labels.size());
-        // Features are actually attributes.
-        this->traits.set_num_attributes(this->features.size());
+        feature_generator.set_num_labels(this->labels.size());
+        feature_generator.set_num_attributes(this->attributes.size());
 
-        // Check if the traits class needs to examine the instances.
-        if (this->traits.needs_examination()) {
-            // This actually generates (sparse) features.
-            typename base_type::iterator it;
-            for (it = this->begin();it != this->end();++it) {
-                it->examine();
+        if (feature_generator.needs_registration()) {
+            typename iterator iti;
+            for (iti = this->begin();iti != this->end();++iti) {
+                typename instance_type::iterator it;
+                for (it = iti->begin();it != iti->end();++it) {
+                    this->feature_generator.regist(it->first, iti->get_label());
+                }
             }
         }
     }

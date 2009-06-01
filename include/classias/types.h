@@ -1,5 +1,5 @@
 /*
- *		Base types of Classias.
+ *		Classias basic types.
  *
  * Copyright (c) 2008,2009 Naoaki Okazaki
  * All rights reserved.
@@ -31,13 +31,22 @@
 
 /* $Id$ */
 
-#ifndef __CLASSIAS_BASE_H__
-#define __CLASSIAS_BASE_H__
+#ifndef __CLASSIAS_TYPES_H__
+#define __CLASSIAS_TYPES_H__
 
-#include <string>
+#include <vector>
+
+
 
 namespace classias
 {
+
+/// Integer type.
+typedef int int_t;
+/// Float type.
+typedef double real_t;
+
+
 
 /**
  * Truth class.
@@ -267,11 +276,11 @@ class weight_base
 {
 public:
     /// The type representing the weight.
-    typedef double weight_type;
+    typedef real_t weight_type;
 
 protected:
     /// The instance weight.
-    weight_type m_weight;
+    real_t m_weight;
 
 public:
     /**
@@ -474,6 +483,135 @@ public:
 
 
 
+/**
+ * Sparse vector.
+ *
+ *  This class implements a sparse vector as a linear array of elements, pairs
+ *  of identifiers and values.
+ *
+ *  @param  identifier_base The type of element identifier.
+ *  @param  value_base      The type of element values.
+ */
+template <class identifier_base, class value_base>
+class sparse_vector_base
+{
+public:
+    /// A type representing an element identifier.
+    typedef identifier_base identifier_type;
+    /// A type representing an element value.
+    typedef value_base value_type;
+    /// A type representing an element, a pair of (identifier, value).
+    typedef std::pair<identifier_type, value_type> element_type;
+    /// A type providing a container of (identifier, value) pairs.
+    typedef std::vector<element_type> container_type;
+    /// A type counting the number of pairs in a container.
+    typedef typename container_type::size_type size_type;
+    /// A type providing a random-access iterator.
+    typedef typename container_type::iterator iterator;
+    /// A type providing a read-only random-access iterator.
+    typedef typename container_type::const_iterator const_iterator;
+
+protected:
+    /// A container of (identifier, value) pairs.
+    container_type cont;
+
+public:
+    /**
+     * Constructs a sparse vector.
+     */
+    sparse_vector_base()
+    {
+    }
+
+    /**
+     * Destructs the sparse vector.
+     */
+    virtual ~sparse_vector_base()
+    {
+    }
+
+    /**
+     * Erases all the elements of the vector.
+     */
+    inline void clear()
+    {
+        cont.clear();
+    }
+
+    /**
+     * Tests if the sparse vector is empty.
+     *  @retval bool        \c true if the sparse vector is empty,
+     *                      \c false otherwise.
+     */
+    inline bool empty() const
+    {
+        return cont.empty();
+    }
+
+    /**
+     * Returns the number of elements in the vector.
+     *  @retval size_type   The current size of the sparse vector.
+     */
+    inline size_type size() const
+    {
+        return cont.size();
+    }
+
+    /**
+     * Returns a random-access iterator to the first element.
+     *  @retval iterator    A random-access iterator (for read/write)
+     *                      addressing the first element in the vector or
+     *                      to the location succeeding an empty element.
+     */
+    inline iterator begin()
+    {
+        return cont.begin();
+    }
+
+    /**
+     * Returns a random-access iterator to the first element.
+     *  @retval iterator    A random-access iterator (for read-only)
+     *                      addressing the first element in the vector or
+     *                      to the location succeeding an empty element. 
+     */
+    inline const_iterator begin() const
+    {
+        return cont.begin();
+    }
+
+    /**
+     * Returns a random-access iterator pointing just beyond the last element.
+     *  @retval iterator    A random-access iterator (for read/write)
+     *                      addressing the end of the element.
+     */
+    inline iterator end()
+    {
+        return cont.end();
+    }
+
+    /**
+     * Returns a random-access iterator pointing just beyond the last element.
+     *  @retval iterator    A random-access iterator (for read-only)
+     *                      addressing the end of the element.
+     */
+    inline const_iterator end() const
+    {
+        return cont.end();
+    }
+
+    /**
+     * Adds an element (name, value) to the end of the vector.
+     *  @param  id          The element identifier.
+     *  @param  value       The element value.
+     */
+    inline void append(const identifier_type& id, const value_type& value)
+    {
+        cont.push_back(element_type(id, value));
+    }
 };
 
-#endif/*__CLASSIAS_BASE_H__*/
+
+
+};
+
+#endif/*__CLASSIAS_TYPES_H__*/

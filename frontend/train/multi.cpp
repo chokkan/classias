@@ -39,7 +39,7 @@
 #include <string>
 
 #include <classias/classias.h>
-#include <classias/maxent.h>
+#include <classias/train/lbfgs/multi.h>
 
 #include "option.h"
 #include "tokenize.h"
@@ -99,13 +99,13 @@ read_line(
             double value;
             std::string name;
             get_name_value(*itv, name, value, opt.value_separator);
-            instance.attributes.append(attributes(name), value);
+            instance.append(attributes(name), value);
         }
     }
 
     // Include a bias feature if necessary.
     if (opt.generate_bias) {
-        instance.attributes.append(attributes("@bias"), 1.);
+        instance.append(attributes("@bias"), 1.);
     }
 }
 
@@ -122,8 +122,6 @@ read_stream(
 {
     int lines = 0;
     typedef typename data_type::instance_type instance_type;
-    typedef typename data_type::feature_type feature_type;
-    typedef typename data_type::iterator iterator;
 
     for (;;) {
         // Read a line.
@@ -148,8 +146,11 @@ read_stream(
         instance_type& inst = data.new_element();
         inst.set_group(group);
 
-        read_line(line, inst, data.features, data.labels, opt, lines);
+        read_line(line, inst, data.attributes, data.labels, opt, lines);
     }
+
+    // Generate features.
+    data.finalize();
 }
 
 template <
@@ -163,13 +164,11 @@ output_model(
     const option& opt
     )
 {
-    typedef typename data_type::features_quark_type features_quark_type;
-    typedef typename data_type::label_quark_type labels_quark_type;
-    typedef typename data_type::traits_type traits_type;
-    typedef typename traits_type::attribute_type attribute_type;
-    typedef typename traits_type::label_type label_type;
-    typedef typename features_quark_type::value_type features_type;
-    const features_quark_type& features = data.features;
+    typedef typename classias::int_t int_t;
+    typedef typename data_type::attributes_quark_type attributes_quark_type;
+    typedef typename attributes_quark_type::item_type attribute_type;
+    typedef typename data_type::labels_quark_type labels_quark_type;
+    typedef typename labels_quark_type::item_type label_type;
 
     // Open a model file for writing.
     std::ofstream os(opt.model.c_str());
@@ -179,20 +178,19 @@ output_model(
 
     // Output a set of labels.
     os << "@labels";
-    for (typename labels_quark_type::value_type l = 0;l < data.labels.size();++l) {
+    for (int_t l = 0;l < data.num_labels();++l) {
         os << '\t' << data.labels.to_item(l);
     }
     os << std::endl;
 
     // Store the feature weights.
-    for (features_type i = 0;i < features.size();++i) {
+    for (int_t i = 0;i < data.num_features();++i) {
         value_type w = weights[i];
         if (w != 0.) {
-            attribute_type a;
-            label_type l;
-            data.traits.backward(i, a, l);
+            int_t a, l;
+            data.feature_generator.backward(i, a, l);
             os << w << '\t'
-                << data.features.to_item(a) << '\t'
+                << data.attributes.to_item(a) << '\t'
                 << data.labels.to_item(l) << std::endl;
         }
     }

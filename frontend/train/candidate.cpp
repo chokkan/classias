@@ -39,7 +39,7 @@
 #include <string>
 
 #include <classias/classias.h>
-#include <classias/maxent.h>
+#include <classias/train/lbfgs/candidate.h>
 
 #include "option.h"
 #include "tokenize.h"
@@ -132,9 +132,6 @@ read_stream(
 {
     int lines = 0;
     typedef typename data_type::instance_type instance_type;
-    typedef typename data_type::feature_type feature_type;
-    typedef typename data_type::iterator data_iterator;
-    typedef typename instance_type::iterator instance_iterator;
 
     for (;;) {
         // Read a line.
@@ -157,7 +154,7 @@ read_stream(
 
         // Read features that should not be regularized.
         if (line.compare(0, 13, "@unregularize") == 0) {
-            if (0 < data.features.size()) {
+            if (!data.empty()) {
                 throw invalid_data("Declarative @unregularize must precede an instance", lines);
             }
 
@@ -166,11 +163,11 @@ read_stream(
             tokenizer::iterator itv = values.begin();
             for (++itv;itv != values.end();++itv) {
                 // Reserve early feature identifiers.
-                data.features(*itv);
+                data.attributes(*itv);
             }
 
             // Set the start index of the user features.
-            data.set_user_feature_start(data.features.size());
+            data.set_user_feature_start(data.attributes.size());
 
         } else if (line.compare(0, 4, "@boi") == 0) {
             double value;
@@ -190,7 +187,7 @@ read_stream(
             // 
         } else {
             // A new candidate.
-            read_line(line, data.back(), data.features, data.labels, opt, lines);
+            read_line(line, data.back(), data.attributes, data.labels, opt, lines);
         }
     }
 }
@@ -206,9 +203,7 @@ output_model(
     const option& opt
     )
 {
-    typedef typename data_type::features_quark_type features_quark_type;
-    typedef typename features_quark_type::value_type features_type;
-    const features_quark_type& features = data.features;
+    typedef classias::int_t int_t;
 
     // Open a model file for writing.
     std::ofstream os(opt.model.c_str());
@@ -217,10 +212,12 @@ output_model(
     os << "@model" << opt.token_separator << "candidate" << std::endl;
 
     // Store the feature weights.
-    for (features_type i = 0;i < features.size();++i) {
+    for (int_t i = 0;i < data.attributes.size();++i) {
         value_type w = weights[i];
         if (w != 0.) {
-            os << w << opt.token_separator << features.to_item(i) << std::endl;
+            os <<
+                w << opt.token_separator <<
+                data.attributes.to_item(i) << std::endl;
         }
     }
 }
@@ -236,18 +233,19 @@ int candidate_train(option& opt)
     if (opt.algorithm == "logress.lbfgs") {
         return train<
             classias::cdata,
-            classias::trainer_maxent<classias::cdata, double>
+            classias::trainer_lbfgs_candidate<classias::cdata, double>
         >(opt);
     } else {
         throw invalid_algorithm(opt.algorithm);
     }
+    return 0;
 }
 
 bool candidate_usage(option& opt)
 {
     // Branches for training algorithms.
     if (opt.algorithm == "logress.lbfgs") {
-        classias::trainer_maxent<classias::cdata, double> tr;
+        classias::trainer_lbfgs_candidate<classias::cdata, double> tr;
         tr.params().help(opt.os);
         return true;
     }

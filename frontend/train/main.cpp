@@ -231,7 +231,7 @@ int main(int argc, char *argv[])
         usage(os, argv[0]);
         return ret;
     } else if (opt.mode == option::MODE_HELP_ALGORITHM) {
-        binary_usage(opt) || multi_usage(opt) && candidate_usage(opt);
+        binary_usage(opt) || multi_usage(opt) || candidate_usage(opt);
         return ret;
     }
 

@@ -62,8 +62,10 @@
 			<Tool
 				Name="VCLinkerTool"
 				UseLibraryDependencyInputs="true"
+				AdditionalDependencies="lbfgs_debug.lib"
 				OutputFile="$(OutDir)\classias-$(ProjectName).exe"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="$(SolutionDir)win32"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -139,6 +141,7 @@
 				UseLibraryDependencyInputs="true"
 				OutputFile="$(OutDir)\classias-$(ProjectName).exe"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="$(SolutionDir)win32"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"

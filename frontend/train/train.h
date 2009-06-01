@@ -86,9 +86,9 @@ train(option& opt)
     sw.stop();
     os << "Number of instances: " << data.size() << std::endl;
     os << "Number of groups: " << num_groups << std::endl;
-    os << "Number of attributes: " << data.traits.num_attributes() << std::endl;
-    os << "Number of labels: " << data.traits.num_labels() << std::endl;
-    os << "Number of features: " << data.traits.num_features() << std::endl;
+    os << "Number of attributes: " << data.num_attributes() << std::endl;
+    os << "Number of labels: " << data.num_labels() << std::endl;
+    os << "Number of features: " << data.num_features() << std::endl;
     os << "Seconds required: " << sw.get() << std::endl;
     os << std::endl;
 

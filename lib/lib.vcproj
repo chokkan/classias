@@ -154,10 +154,6 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
-			<File
-				RelativePath=".\lbfgs.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="ヘッダー ファイル"
@@ -195,15 +191,15 @@
 			Name="Data types"
 			>
 			<File
-				RelativePath="..\include\classias\base.h"
-				>
-			</File>
-			<File
 				RelativePath="..\include\classias\classias.h"
 				>
 			</File>
 			<File
 				RelativePath="..\include\classias\data.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\classias\feature_generator.h"
 				>
 			</File>
 			<File
@@ -215,7 +211,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\include\classias\traits.h"
+				RelativePath="..\include\classias\types.h"
 				>
 			</File>
 		</Filter>
@@ -230,6 +226,26 @@
 				RelativePath="..\include\classias\maxent.h"
 				>
 			</File>
+			<Filter
+				Name="L-BFGS"
+				>
+				<File
+					RelativePath="..\include\classias\train\lbfgs\base.h"
+					>
+				</File>
+				<File
+					RelativePath="..\include\classias\train\lbfgs\binary.h"
+					>
+				</File>
+				<File
+					RelativePath="..\include\classias\train\lbfgs\candidate.h"
+					>
+				</File>
+				<File
+					RelativePath="..\include\classias\train\lbfgs\multi.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>
