@@ -187,32 +187,6 @@ read_dataset(
     }
 }
 
-template <class data_type>
-static std::string
-set_positive_labels(
-    data_type& data,
-    const option& opt
-    )
-{
-    std::string negative_labels;
-    typedef typename data_type::instance_type instance_type;
-    typedef typename instance_type::label_type label_type;
-
-    for (label_type l = 0;l < data.labels.size();++l) {
-        const std::string& label = data.labels.to_item(l);
-        if (opt.negatives.find(label) == opt.negatives.end()) {
-            data.positive_labels.push_back(l);
-        } else {
-            if (!negative_labels.empty()) {
-                negative_labels += ' ';
-            }
-            negative_labels += label;
-        }
-    }
-
-    return negative_labels;
-}
-
 template <class char_type, class traits_type>
 inline std::basic_ostream<char_type, traits_type>&
 timestamp(std::basic_ostream<char_type, traits_type>& os)

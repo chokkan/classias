@@ -127,6 +127,13 @@ class linear_binary_logistic :
     public linear_binary<attribute_tmpl, value_tmpl, model_tmpl>
 {
 public:
+    /// The type of an attribute.
+    typedef attribute_tmpl attribute_type;
+    /// The type of a feature weight.
+    typedef value_tmpl value_type;
+    /// The type of a model.
+    typedef model_tmpl model_type;
+    /// Tne type of the base class.
     typedef linear_binary<attribute_tmpl, value_tmpl, model_tmpl> base_type;
 
 public:
@@ -151,7 +158,11 @@ public:
      */
     inline value_type prob() const
     {
-        return (-100. < m_score ? (1. / (1. + std::exp(-m_score))) : 0.);
+        return (
+            (-100. < this->m_score) ?
+            (1. / (1. + std::exp(-this->m_score))) :
+            0.
+            );
     }
 
     /**
@@ -161,13 +172,14 @@ public:
      */
     inline value_type error(bool b) const
     {
-        double p = 0.;
-        if (m_score < -100.) {
+        value_type p = 0.;
+        const value_type score = this->m_score;
+        if (score < -100.) {
             p = 0.;
-        } else if (100. < m_score) {
+        } else if (100. < score) {
             p = 1.;
         } else {
-            p = 1. / (1. + std::exp(-m_score));
+            p = 1. / (1. + std::exp(-score));
         }
         return (static_cast<double>(b) - p);
     }
@@ -181,15 +193,16 @@ public:
      */
     inline value_type error(bool b, value_type& logp) const
     {
-        double p = 0.;
-        if (m_score < -100.) {
+        value_type p = 0.;
+        const value_type score = this->m_score;
+        if (score < -100.) {
             p = 0.;
-            logp = static_cast<double>(b) * m_score;
-        } else if (100. < m_score) {
+            logp = static_cast<double>(b) * score;
+        } else if (100. < score) {
             p = 1.;
-            logp = (static_cast<double>(b) - 1.) * m_score;
+            logp = (static_cast<double>(b) - 1.) * score;
         } else {
-            p = 1. / (1. + std::exp(-m_score));
+            p = 1. / (1. + std::exp(-score));
             logp = b ? std::log(p) : std::log(1.-p);
         }
         return (static_cast<double>(b) - p);

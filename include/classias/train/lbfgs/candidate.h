@@ -27,6 +27,8 @@ class trainer_lbfgs_candidate : public lbfgs_base<value_tmpl>
 protected:
     /// A type representing a data set for training.
     typedef data_tmpl data_type;
+    /// A type representing values for internal computations.
+    typedef value_tmpl value_type;
     /// A synonym of the base class.
     typedef lbfgs_base<value_tmpl> base_class;
     /// A synonym of this class.
@@ -93,7 +95,7 @@ public:
             const instance_type& inst = *iti;
 
             // Exclude instances for holdout evaluation.
-            if (inst.get_group() == m_holdout) {
+            if (inst.get_group() == this->m_holdout) {
                 continue;
             }
 
@@ -116,7 +118,7 @@ public:
             // Accumulate the model expectations of features.
             for (i = 0;i < (int)inst.size();++i) {
                 const candidate_type& cand = inst[i];
-                candidate_type::const_iterator it;
+                typename candidate_type::const_iterator it;
                 for (it = cand.begin();it != cand.end();++it) {
                     g[it->first] += cls.prob(i) * it->second;
                 }
@@ -139,7 +141,7 @@ public:
         const size_t L = data.num_labels();
 
         // Initialize feature expectations and weights.
-        initialize_weights(K);
+        this->initialize_weights(K);
         m_oexps = new double[K];
         for (size_t k = 0;k < K;++k) {
             m_oexps[k] = 0.;
@@ -147,7 +149,7 @@ public:
 
         // Report the training parameters.
         os << "MAP estimation for a multiple-logistic-regression model using L-BFGS" << std::endl;
-        m_params.show(os);
+        this->m_params.show(os);
         os << std::endl;
 
         // Compute observation expectations of the features.
@@ -155,7 +157,7 @@ public:
             const instance_type& inst = *iti;
 
             // Skip instances for holdout evaluation.
-            if (inst.get_group() == m_holdout) {
+            if (inst.get_group() == this->m_holdout) {
                 continue;
             }
 
@@ -181,17 +183,17 @@ public:
             );
 
         // Report the result from the L-BFGS solver.
-        lbfgs_output_status(os, ret);
+        this->lbfgs_output_status(os, ret);
         return ret;
     }
 
     void holdout_evaluation()
     {
-        std::ostream& os = *m_os;
-        const data_type& data = *m_data;
+        std::ostream& os = *(this->m_os);
+        const data_type& data = *(this->m_data);
         accuracy acc;
         confusion_matrix matrix(data.labels.size());
-        const value_type *x = m_weights;
+        const value_type *x = this->m_weights;
         classifier_type cls(x);
 
         // Loop over instances.
@@ -200,7 +202,7 @@ public:
             const instance_type& inst = *iti;
 
             // Exclude instances for holdout evaluation.
-            if (inst.get_group() != m_holdout) {
+            if (inst.get_group() != this->m_holdout) {
                 continue;
             }
 

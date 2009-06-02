@@ -27,10 +27,12 @@ class trainer_lbfgs_binary : public lbfgs_base<value_tmpl>
 public:
     /// A type representing a data set for training.
     typedef data_tmpl data_type;
+    /// A type representing values for internal computations.
+    typedef value_tmpl value_type;
     /// A synonym of the base class.
     typedef lbfgs_base<value_tmpl> base_class;
     /// A synonym of this class.
-    typedef trainer_lbfgs_binary<data_type, value_type> this_class;
+    typedef trainer_lbfgs_binary<data_tmpl, value_tmpl> this_class;
     /// A type representing an instance in the training data.
     typedef typename data_type::instance_type instance_type;
     /// A type providing a read-only random-access iterator for instances.
@@ -76,7 +78,7 @@ public:
         // For each instance in the data.
         for (iti = m_data->begin();iti != m_data->end();++iti) {
             // Exclude instances for holdout evaluation.
-            if (iti->get_group() == m_holdout) {
+            if (iti->get_group() == this->m_holdout) {
                 continue;
             }
 
@@ -107,10 +109,10 @@ public:
         )
     {
         const size_t K = data.num_features();
-        initialize_weights(K);
+        this->initialize_weights(K);
         
         os << "MAP estimation for a logistic regression model using L-BFGS" << std::endl;
-        m_params.show(os);
+        this->m_params.show(os);
         os << std::endl;
 
         // Call the L-BFGS solver.
@@ -123,14 +125,14 @@ public:
             );
 
         // Report the result from the L-BFGS solver.
-        lbfgs_output_status(os, ret);
+        this->lbfgs_output_status(os, ret);
         return ret;
     }
 
     void holdout_evaluation()
     {
-        std::ostream& os = *m_os;
-        const value_type *x = m_weights;
+        std::ostream& os = *(this->m_os);
+        const value_type *x = this->m_weights;
         int positive_labels[] = {1};
         confusion_matrix matrix(2);
         classifier_type cls(x);
@@ -138,7 +140,7 @@ public:
         // For each instance in the data.
         for (const_iterator iti = m_data->begin();iti != m_data->end();++iti) {
             // Skip instances for training.
-            if (iti->get_group() != m_holdout) {
+            if (iti->get_group() != this->m_holdout) {
                 continue;
             }
 
@@ -160,3 +162,4 @@ public:
 };
 
 #endif/*__CLASSIAS_LBFGS_BINARY_H__*/
+

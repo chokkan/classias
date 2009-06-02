@@ -212,9 +212,20 @@ class linear_candidate_logistic :
     public linear_candidate<attribute_tmpl, label_tmpl, value_tmpl, model_tmpl>
 {
 public:
+    /// The type of an attribute.
+    typedef attribute_tmpl attribute_type;
+    /// The type of a label.
+    typedef label_tmpl label_type;
+    /// The type of a feature weight.
+    typedef value_tmpl value_type;
+    /// The type of a model.
+    typedef model_tmpl model_type;
+    /// The type of the base class.
     typedef linear_candidate<attribute_tmpl, label_tmpl, value_tmpl, model_tmpl> base_type;
 
 protected:
+    /// The type representing an array of real values.
+    typedef typename base_type::scores_type scores_type;
     /// The partition factor.
     value_type  m_norm;
     /// The probabilities of candidates.
@@ -287,13 +298,13 @@ public:
 
         // Compute the exponents of scores.
         for (int i = 0;i < this->size();++i) {
-            m_probs[i] = std::exp(m_scores[i]);
+            m_probs[i] = std::exp(this->m_scores[i]);
         }
 
         // Compute the partition factor, starting from the maximum value.
-        m_norm = m_probs[m_argmax];
+        m_norm = m_probs[this->m_argmax];
         for (int i = 0;i < this->size();++i) {
-            if (i != m_argmax) {
+            if (i != this->m_argmax) {
                 m_norm += m_probs[i];
             }
         }

@@ -210,6 +210,14 @@ template <
 class sparse_feature_generator_base :
     public dense_feature_generator_base<attribute_tmpl, label_tmpl, feature_tmpl>
 {
+public:
+    /// The type of an attribute.
+    typedef attribute_tmpl attribute_type;
+    /// The type of a label.
+    typedef label_tmpl label_type;
+    /// The type of a feature.
+    typedef feature_tmpl feature_type;
+
 protected:
     /// Class for associations from (attribute, label) to feature.
     typedef quark2_base<attribute_type, label_type> feature_generator_type;
