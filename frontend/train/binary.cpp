@@ -213,7 +213,7 @@ int binary_train(option& opt)
     if (opt.algorithm == "logress.lbfgs") {
         return train<
             classias::bdata,
-            classias::trainer_logress<classias::bdata, double>
+            classias::trainer_lbfgs_binary<classias::bdata, double>
         >(opt);
     } else {
         throw invalid_algorithm(opt.algorithm);
@@ -223,7 +223,7 @@ int binary_train(option& opt)
 bool binary_usage(option& opt)
 {
     if (opt.algorithm == "logress.lbfgs") {
-        classias::trainer_logress<classias::bdata, double> tr;
+        classias::trainer_lbfgs_binary<classias::bdata, double> tr;
         tr.params().help(opt.os);
         return true;
     }

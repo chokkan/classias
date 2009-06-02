@@ -46,21 +46,21 @@ namespace classias
  *
  *  This class implements a candidate for a candidate-classification instance.
  *
- *  @param  features_tmpl   The type of feature vector.
+ *  @param  attributes_tmpl The type of attribute vector.
  *  @param  label_tmpl      The type of candidate label.
  */
 template <
-    class features_tmpl,
+    class attributes_tmpl,
     class label_tmpl
 >
 class candidate_base : 
-    public features_tmpl,
+    public attributes_tmpl,
     public truth_base,
     public label_base<label_tmpl>
 {
 public:
     /// The type of a feature vector.
-    typedef features_tmpl features_type;
+    typedef attributes_tmpl attributes_type;
 
     /**
      * Constructs a candidate.

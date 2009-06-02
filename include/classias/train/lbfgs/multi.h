@@ -7,163 +7,11 @@
 #include <iostream>
 
 #include "base.h"
+#include <classias/classify/linear/multi.h>
 #include "../../evaluation.h"
 
 namespace classias
 {
-
-template <
-    class key_tmpl,
-    class label_tmpl,
-    class value_tmpl,
-    class model_tmpl,
-    class traits_tmpl
->
-class linear_multi_classifier
-{
-public:
-    typedef key_tmpl key_type;
-    typedef key_tmpl label_type;
-    typedef value_tmpl value_type;
-    typedef model_tmpl model_type;
-    typedef traits_tmpl traits_type;
-
-protected:
-    typedef std::vector<value_type> scores_type;
-    typedef std::vector<label_type> labels_type;
-
-    model_type& m_model;
-    scores_type m_scores;
-    scores_type m_probs;
-    labels_type m_labels;
-    traits_type& m_traits;
-
-    int         m_argmax;
-    value_type  m_norm;
-
-public:
-    linear_multi_classifier(model_type& model, traits_type& traits)
-        : m_model(model), m_traits(traits)
-    {
-        clear();
-    }
-
-    virtual ~linear_multi_classifier()
-    {
-    }
-
-    inline void clear()
-    {
-        m_norm = 0.;
-        for (int i = 0;i < this->size();++i) {
-            m_scores[i] = 0.;
-            m_probs[i] = 0.;
-        }
-    }
-
-    inline void resize(int n)
-    {
-        m_scores.resize(n);
-        m_probs.resize(n);
-        m_labels.resize(n);
-    }
-
-    inline int size() const
-    {
-        return (int)m_scores.size();
-    }
-
-    inline int argmax() const
-    {
-        return m_argmax;
-    }
-
-    inline value_type score(int i)
-    {
-        return m_scores[i];
-    }
-
-    inline value_type prob(int i)
-    {
-        return m_probs[i];
-    }
-
-    inline const label_type& label(int i)
-    {
-        return m_labels[i];
-    }
-
-    inline void operator()(int i, const key_type& key, const label_type& label, const value_type& value)
-    {
-        int fid = m_traits.forward(key, label);
-        if (0 <= fid) {
-            m_scores[i] += m_model[fid] * value;
-        }
-    }
-
-    template <class iterator_type>
-    inline void accumulate(int i, iterator_type first, iterator_type last, const label_type& label)
-    {
-        m_scores[i] = 0.;
-        m_labels[i] = label;
-        for (iterator_type it = first;it != last;++it) {
-            this->operator()(i, it->first, label, it->second);
-        }
-    }
-
-    template <class iterator_type>
-    inline void add_to(value_type* v, iterator_type first, iterator_type last, const label_type& label, value_type value)
-    {
-        for (iterator_type it = first;it != last;++it) {
-            int fid = m_traits.forward(it->first, label);
-            if (0 <= fid) {
-                v[fid] += value * it->second;
-            }
-        }        
-    }
-
-    inline bool finalize(bool prob)
-    {
-        if (m_scores.size() == 0) {
-            return false;
-        }
-
-        // Find the argmax index.
-        m_argmax = 0;
-        double vmax = m_scores[0];
-        for (int i = 0;i < this->size();++i) {
-            if (vmax < m_scores[i]) {
-                m_argmax = i;
-                vmax = m_scores[i];
-            }
-        }
-
-        if (prob) {
-            // Compute the exponents of scores.
-            for (int i = 0;i < this->size();++i) {
-                m_probs[i] = std::exp(m_scores[i]);
-            }
-
-            // Compute the partition factor, starting from the maximum value.
-            m_norm = m_probs[m_argmax];
-            for (int i = 0;i < this->size();++i) {
-                if (i != m_argmax) {
-                    m_norm += m_probs[i];
-                }
-            }
-
-            // Normalize the probabilities.
-            for (int i = 0;i < this->size();++i) {
-                m_probs[i] /= m_norm;
-            }
-        }
-
-        return true;
-    }
-};
-
-
-
 
 /**
  * Training a log-linear model using the maximum entropy modeling.
@@ -174,7 +22,7 @@ template <
     class data_tmpl,
     class value_tmpl = double
 >
-class trainer_maxent : public lbfgs_base<value_tmpl>
+class trainer_lbfgs_multi : public lbfgs_base<value_tmpl>
 {
 protected:
     /// A type representing a data set for training.
@@ -182,60 +30,46 @@ protected:
     /// A synonym of the base class.
     typedef lbfgs_base<value_tmpl> base_class;
     /// A synonym of this class.
-    typedef trainer_maxent<data_type, value_type> this_class;
+    typedef trainer_lbfgs_multi<data_type, value_type> this_class;
     /// A type representing an instance in the training data.
     typedef typename data_type::instance_type instance_type;
-    /// A type representing traits
-    typedef typename data_type::feature_generator_type feature_generator_type;
-    typedef typename instance_type::attributes_type attributes_type;
-    /// A type representing a candidate for an instance.
-    typedef typename attributes_type::identifier_type attribute_type;
-    /// A type representing a label.
-    typedef typename instance_type::label_type label_type;
     /// A type providing a read-only random-access iterator for instances.
     typedef typename data_type::const_iterator const_iterator;
-
-    typedef linear_multi_classifier<
+    /// A type representing a feature generator.
+    typedef typename data_type::feature_generator_type feature_generator_type;
+    /// A type representing a candidate for an instance.
+    typedef typename data_type::attribute_type attribute_type;
+    /// A type representing a label.
+    typedef typename instance_type::label_type label_type;
+    /// The type of a classifier.
+    typedef classify::linear_multi_logistic<
         attribute_type, label_type, value_type, value_type const*, feature_generator_type> classifier_type;
 
 
     /// An array [K] of observation expectations.
     value_type *m_oexps;
-    /// An array [K] of model expectations.
-    value_type *m_mexps;
-    /// An array [M] of scores for candidate labels.
-    value_type *m_scores;
-
-    label_type m_num_labels;
-
     /// A data set for training.
     const data_type* m_data;
 
 public:
-    trainer_maxent()
+    trainer_lbfgs_multi()
     {
         m_oexps = NULL;
-        m_mexps = NULL;
-        m_scores = NULL;
+        m_data = NULL;
         clear();
     }
 
-    virtual ~trainer_maxent()
+    virtual ~trainer_lbfgs_multi()
     {
         clear();
     }
 
     void clear()
     {
-        delete[] m_mexps;
         delete[] m_oexps;
-        delete[] m_scores;
-        m_oexps = 0;
-        m_mexps = 0;
-        m_scores = 0;
+        m_oexps = NULL;
 
         m_data = NULL;
-        m_num_labels = 0;
         base_class::clear();
     }
 
@@ -245,42 +79,42 @@ public:
         const int n
         )
     {
-        value_type loss = 0, norm = 0;
+        value_type loss = 0;
         const data_type& data = *m_data;
+        const int_t L = data.num_labels();
         classifier_type cls(x, const_cast<feature_generator_type&>(data.feature_generator));
 
-        cls.resize(m_num_labels);
+        // The number of labels is constant; reserve the work space.
+        cls.resize(L);
 
+        // Initialize the gradients with (the negative of) observation expexcations.
         for (int i = 0;i < n;++i) {
-            m_mexps[i] = 0.;
+            g[i] = -m_oexps[i];
         }
 
         // For each instance in the data.
         for (const_iterator iti = data.begin();iti != data.end();++iti) {
+            const instance_type& inst = *iti;
+
             // Exclude instances for holdout evaluation.
-            if (iti->get_group() == m_holdout) {
+            if (inst.get_group() == m_holdout) {
                 continue;
             }
 
-            // Compute score[i] for each candidate #i.
-            for (label_type i = 0;i < data.num_labels();++i) {
-                cls.accumulate(i, iti->begin(), iti->end(), i);
+            // Compute the probability prob[i] for each label #i.
+            for (int_t i = 0;i < L;++i) {
+                cls.inner_product(i, inst.begin(), inst.end(), i);
             }
-
-            cls.finalize(true);
+            cls.finalize();
 
             // Accumulate the model expectations of features.
-            for (label_type i = 0;i < data.num_labels();++i) {
-                cls.add_to(m_mexps, iti->begin(), iti->end(), i, cls.prob(i));
+            for (int_t i = 0;i < L;++i) {
+                data.feature_generator.add_to(
+                    g, inst.begin(), inst.end(), i, cls.prob(i));
             }
 
             // Accumulate the loss for predicting the instance.
-            loss -= std::log(cls.prob(iti->get_label()));
-        }
-
-        // Compute the gradients.
-        for (int i = 0;i < n;++i) {
-            g[i] = -(m_oexps[i] - m_mexps[i]);
+            loss -= std::log(cls.prob(inst.get_label()));
         }
 
         return loss;
@@ -298,19 +132,16 @@ public:
         // Initialize feature expectations and weights.
         initialize_weights(K);
         m_oexps = new double[K];
-        m_mexps = new double[K];
         for (size_t k = 0;k < K;++k) {
             m_oexps[k] = 0.;
-            m_mexps[k] = 0.;
         }
 
         // Report the training parameters.
-        os << "Training a maximum entropy model" << std::endl;
+        os << "MAP estimation for a multiple-logistic-regression model using L-BFGS" << std::endl;
         m_params.show(os);
         os << std::endl;
 
         // Compute observation expectations of the features.
-        m_num_labels = L;
         for (const_iterator iti = data.begin();iti != data.end();++iti) {
             // Skip instances for holdout evaluation.
             if (iti->get_group() == m_holdout) {
@@ -318,14 +149,9 @@ public:
             }
 
             // Compute the observation expectations.
-            typename instance_type::const_iterator itc;
-            for (itc = iti->begin();itc != iti->end();++itc) {
-                m_oexps[data.feature_generator.forward(itc->first, iti->get_label())] += itc->second;
-            }
+            data.feature_generator.add_to(
+                m_oexps, iti->begin(), iti->end(), iti->get_label(), 1.0);
         }
-
-        // Initialze the variables used by callback functions.
-        m_scores = new double[m_num_labels];
 
         // Call the L-BFGS solver.
         m_data = &data;
@@ -360,15 +186,15 @@ public:
             int i;
             typename instance_type::const_iterator itc;
             for (i = 0;i < data.num_labels();++i) {
-                cls.accumulate(i, iti->begin(), iti->end(), i);
+                cls.inner_product(i, iti->begin(), iti->end(), i);
             }
 
-            cls.finalize(false);
+            cls.finalize();
 
             int idx_max = cls.argmax();
 
             acc.set(iti->get_label() == idx_max);
-            matrix(cls.label(iti->get_label()), cls.label(idx_max))++;
+            matrix(iti->get_label(), idx_max)++;
         }
 
         // Report accuracy, precision, recall, and f1 score.

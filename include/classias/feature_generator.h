@@ -173,6 +173,23 @@ public:
         a = f / m_num_labels;
         l = f % m_num_labels;
     }
+
+    template <class value_type, class iterator_type>
+    inline void add_to(
+        value_type* m,
+        iterator_type first,
+        iterator_type last,
+        const label_type& label,
+        value_type value
+        ) const
+    {
+        for (iterator_type it = first;it != last;++it) {
+            int_t fid = this->forward(it->first, label);
+            if (0 <= fid) {
+                m[fid] += value * it->second;
+            }
+        }
+    }
 };
 
 

@@ -150,42 +150,24 @@
 	</References>
 	<Files>
 		<Filter
-			Name="ソース ファイル"
-			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			Name="Classifiers"
 			>
-		</Filter>
-		<Filter
-			Name="ヘッダー ファイル"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
-			>
-			<File
-				RelativePath="..\include\classias\evaluation.h"
+			<Filter
+				Name="Linear"
 				>
-			</File>
-			<File
-				RelativePath="..\include\classias\lbfgs.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\classias\linear.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\classias\parameters.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\classias\version.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="リソース ファイル"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-			>
+				<File
+					RelativePath="..\include\classias\classify\linear\binary.h"
+					>
+				</File>
+				<File
+					RelativePath="..\include\classias\classify\linear\candidate.h"
+					>
+				</File>
+				<File
+					RelativePath="..\include\classias\classify\linear\multi.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Data types"
@@ -218,14 +200,6 @@
 		<Filter
 			Name="Training algorithms"
 			>
-			<File
-				RelativePath="..\include\classias\logress.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\classias\maxent.h"
-				>
-			</File>
 			<Filter
 				Name="L-BFGS"
 				>
@@ -246,6 +220,22 @@
 					>
 				</File>
 			</Filter>
+		</Filter>
+		<Filter
+			Name="Utilities"
+			>
+			<File
+				RelativePath="..\include\classias\evaluation.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\classias\parameters.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\classias\version.h"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

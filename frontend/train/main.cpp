@@ -65,9 +65,9 @@ public:
         ON_OPTION_WITH_ARG(SHORTOPT('t') || LONGOPT("type"))
             if (strcmp(arg, "binary") == 0 || strcmp(arg, "b") == 0) {
                 type = TYPE_BINARY;
-            } else if (strcmp(arg, "multi-sparse") == 0 || strcmp(arg, "n") == 0) {
+            } else if (strcmp(arg, "multi-sparse") == 0 || strcmp(arg, "m") == 0) {
                 type = TYPE_MULTI_SPARSE;
-            } else if (strcmp(arg, "multi-dense") == 0 || strcmp(arg, "m") == 0) {
+            } else if (strcmp(arg, "multi-dense") == 0 || strcmp(arg, "n") == 0) {
                 type = TYPE_MULTI_DENSE;
             } else if (strcmp(arg, "candidate") == 0 || strcmp(arg, "c") == 0) {
                 type = TYPE_CANDIDATE;

@@ -203,12 +203,12 @@ int multi_train(option& opt)
         if (opt.type == option::TYPE_MULTI_SPARSE) {
             return train<
                 classias::mdata,
-                classias::trainer_maxent<classias::mdata, double>
+                classias::trainer_lbfgs_multi<classias::mdata, double>
             >(opt);
         } else if (opt.type == option::TYPE_MULTI_DENSE) {
             return train<
                 classias::ndata,
-                classias::trainer_maxent<classias::ndata, double>
+                classias::trainer_lbfgs_multi<classias::ndata, double>
             >(opt);
         }
     }
@@ -218,7 +218,7 @@ int multi_train(option& opt)
 bool multi_usage(option& opt)
 {
     if (opt.algorithm == "logress.lbfgs") {
-        classias::trainer_maxent<classias::mdata, double> tr;
+        classias::trainer_lbfgs_multi<classias::mdata, double> tr;
         tr.params().help(opt.os);
         return true;
     }
