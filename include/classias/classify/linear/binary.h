@@ -181,31 +181,31 @@ public:
         } else {
             p = 1. / (1. + std::exp(-score));
         }
-        return (static_cast<double>(b) - p);
+        return (p - static_cast<double>(b));
     }
 
     /**
      * Compute the error of the classification result.
      *  @param  b           The reference label for this instance.
-     *  @param  logp        The log of the probability of the instance being
-     *                      classified to the reference label.
+     *  @param  loss        The negative of the log of the probability of the
+     *                      instance being classified to the reference label.
      *  @return value_type  The error.
      */
-    inline value_type error(bool b, value_type& logp) const
+    inline value_type error(bool b, value_type& loss) const
     {
         value_type p = 0.;
         const value_type score = this->m_score;
         if (score < -100.) {
             p = 0.;
-            logp = static_cast<double>(b) * score;
+            loss = -static_cast<double>(b) * score;
         } else if (100. < score) {
             p = 1.;
-            logp = (static_cast<double>(b) - 1.) * score;
+            loss = -(static_cast<double>(b) - 1.) * score;
         } else {
             p = 1. / (1. + std::exp(-score));
-            logp = b ? std::log(p) : std::log(1.-p);
+            loss = b ? -std::log(p) : -std::log(1.-p);
         }
-        return (static_cast<double>(b) - p);
+        return (p - static_cast<double>(b));
     }
 };
 

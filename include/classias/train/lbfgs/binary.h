@@ -75,6 +75,11 @@ public:
         value_type loss = 0;
         classifier_type cls(x);
 
+        // Initialize the gradients with zero.
+        for (int i = 0;i < n;++i) {
+            g[i] = 0.;
+        }
+
         // For each instance in the data.
         for (iti = m_data->begin();iti != m_data->end();++iti) {
             // Exclude instances for holdout evaluation.
@@ -86,16 +91,16 @@ public:
             cls.inner_product(iti->begin(), iti->end());
 
             // Compute the error.
-            value_type logp = 0.;
-            value_type d = cls.error(iti->get_truth(), logp);
+            value_type nlogp = 0.;
+            value_type err = cls.error(iti->get_truth(), nlogp);
 
             // Update the loss.
-            loss -= iti->get_weight() * logp;
+            loss += (iti->get_weight() * nlogp);
 
             // Update the gradients for the weights.
-            d *= iti->get_weight();
+            err *= iti->get_weight();
             for (it = iti->begin();it != iti->end();++it) {
-                g[it->first] -= d * it->second;
+                g[it->first] += err * it->second;
             }
         }
 
