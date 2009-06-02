@@ -18,6 +18,3 @@ classias_train_SOURCES = \
 AM_CXXFLAGS = @CXXFLAGS@
 INCLUDES = @INCLUDES@ -I../include
 AM_LDFLAGS = @LDFLAGS@
-
-#trankin_CFLAGS = -I$(top_builddir)/lib/crf/include
-classias_train_LDADD = $(top_builddir)/lib/libclassias.la

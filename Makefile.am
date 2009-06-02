@@ -1,6 +1,6 @@
 # $Id$
 
-SUBDIRS = lib include frontend win32
+SUBDIRS = include frontend win32
 
 docdir = $(prefix)/share/doc/@PACKAGE@
 doc_DATA = README INSTALL COPYING COPYING AUTHORS ChangeLog

@@ -123,5 +123,5 @@ AC_SUBST(INCLUDES)
 dnl ------------------------------------------------------------------
 dnl Output the configure results.
 dnl ------------------------------------------------------------------
-AC_CONFIG_FILES(Makefile lib/Makefile include/Makefile frontend/Makefile frontend/train/Makefile win32/Makefile)
+AC_CONFIG_FILES(Makefile include/Makefile frontend/Makefile frontend/train/Makefile win32/Makefile)
 AC_OUTPUT
