@@ -240,6 +240,15 @@ public:
     }
 
     /**
+     * Returns the total number of features.
+     *  @return int         The total number of features.
+     */
+    size_t num_features() const
+    {
+        return m_features.num_features();
+    }
+
+    /**
      * Returns if this class requires registration.
      *  @return bool    This class always returns \c true
      */
