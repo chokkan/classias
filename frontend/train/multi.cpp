@@ -148,9 +148,6 @@ read_stream(
 
         read_line(line, inst, data.attributes, data.labels, opt, lines);
     }
-
-    // Generate features.
-    data.finalize();
 }
 
 template <
