@@ -100,7 +100,7 @@ public:
      *                      before computing the inner product.
      */
     template <class iterator_type>
-    inline void inner_product(iterator_type first, iterator_type last, bool reset=false)
+    inline void inner_product(iterator_type first, iterator_type last, bool reset=true)
     {
         if (reset) {
             this->clear();

@@ -133,11 +133,6 @@ public:
         const value_type step
         )
     {
-        // Initialize the gradient of every weight as zero.
-        for (int i = 0;i < n;++i) {
-            g[i] = 0.;
-        }
-
         // Compute the loss and gradients.
         value_type loss = loss_and_gradient(x, g, n);
 
