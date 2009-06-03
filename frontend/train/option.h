@@ -70,6 +70,7 @@ public:
     std::string algorithm;
     params_type params;
     std::string model;
+    bool        shuffle;
     bool        generate_bias;
     int         split;
     int         holdout;
@@ -86,7 +87,7 @@ public:
         is(_is), os(_os), es(_es),
         mode(MODE_NORMAL), type(TYPE_NONE), model(""),
         algorithm("logress.lbfgs"),        
-        generate_bias(false),
+        shuffle(false), generate_bias(false),
         split(0), holdout(-1), cross_validation(false),
         token_separator('\t'), value_separator(':')
     {

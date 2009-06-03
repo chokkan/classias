@@ -91,6 +91,9 @@ public:
         ON_OPTION_WITH_ARG(SHORTOPT('p') || LONGOPT("set"))
             params.push_back(arg);
 
+        ON_OPTION(SHORTOPT('f') || LONGOPT("shuffle"))
+            shuffle = true;
+
         ON_OPTION(SHORTOPT('b') || LONGOPT("generate-bias"))
             generate_bias = true;
 
@@ -175,6 +178,7 @@ static void usage(std::ostream& os, const char *argv0)
     os << "                        specified by '-a' or '--algorithm' and the task type" << std::endl;
     os << "                        specified by '-t' or '--type' to see the list of the" << std::endl;
     os << "                        algorithm-specific parameters" << std::endl;
+    os << "  -f, --shuffle         shuffle instances in the data" << std::endl;
     os << "  -b, --generate-bias   insert bias features automatically" << std::endl;
     os << "  -m, --model=FILE      store the model to FILE (DEFAULT=''); if the value is" << std::endl;
     os << "                        empty, this utility does not store the model" << std::endl;

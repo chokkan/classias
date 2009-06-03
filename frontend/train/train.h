@@ -34,6 +34,7 @@
 #ifndef __TRAIN_H__
 #define __TRAIN_H__
 
+#include <algorithm>
 #include <vector>
 #include "util.h"
 
@@ -83,6 +84,9 @@ train(option& opt)
     sw.start();
     num_groups = read_dataset(data, opt);
     data.finalize();
+    if (opt.shuffle) {
+        std::random_shuffle(data.begin(), data.end());
+    }
     sw.stop();
     os << "Number of instances: " << data.size() << std::endl;
     os << "Number of groups: " << num_groups << std::endl;
