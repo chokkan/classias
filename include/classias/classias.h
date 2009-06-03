@@ -55,10 +55,10 @@ typedef candidate_instance_base<ccandidate> cinstance;
 typedef candidate_data_base<cinstance, quark, quark> cdata;
 
 typedef multi_instance_base<sparse_attributes, int_t> minstance;
-typedef multi_data_base<minstance, quark, quark, dense_feature_generator> mdata;
+typedef multi_data_base<minstance, quark, quark, sparse_feature_generator> mdata;
 
 typedef multi_instance_base<sparse_attributes, int_t> ninstance;
-typedef multi_data_base<ninstance, quark, quark, sparse_feature_generator> ndata;
+typedef multi_data_base<ninstance, quark, quark, dense_feature_generator> ndata;
 
 };
 

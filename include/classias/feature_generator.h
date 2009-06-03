@@ -207,8 +207,7 @@ template <
     class label_tmpl,
     class feature_tmpl
 >
-class sparse_feature_generator_base :
-    public dense_feature_generator_base<attribute_tmpl, label_tmpl, feature_tmpl>
+class sparse_feature_generator_base
 {
 public:
     /// The type of an attribute.
@@ -217,6 +216,12 @@ public:
     typedef label_tmpl label_type;
     /// The type of a feature.
     typedef feature_tmpl feature_type;
+
+protected:
+    /// The total number of labels.
+    size_t m_num_labels;
+    /// The total number of attributes.
+    size_t m_num_attributes;
 
 protected:
     /// Class for associations from (attribute, label) to feature.
@@ -228,7 +233,8 @@ public:
     /**
      * Constructs an object.
      */
-    sparse_feature_generator_base()
+    sparse_feature_generator_base() :
+        m_num_labels(0), m_num_attributes(0)
     {
     }
 
@@ -246,6 +252,24 @@ public:
     size_t num_features() const
     {
         return m_features.size();
+    }
+
+    /**
+     * Sets the total number of attributes.
+     *  @param  num_attributes  The total number of attributes.
+     */
+    void set_num_attributes(size_t num_attributes)
+    {
+        m_num_attributes = num_attributes;
+    }
+
+    /**
+     * Sets the total number of labels.
+     *  @param  num_labels  The total number of labels.
+     */
+    void set_num_labels(size_t num_labels)
+    {
+        m_num_labels = num_labels;
     }
 
     /**
@@ -292,6 +316,23 @@ public:
         ) const
     {
         m_features.to_item(f, a, l);
+    }
+
+    template <class value_type, class iterator_type>
+    inline void add_to(
+        value_type* m,
+        iterator_type first,
+        iterator_type last,
+        const label_type& label,
+        value_type value
+        ) const
+    {
+        for (iterator_type it = first;it != last;++it) {
+            int_t fid = this->forward(it->first, label);
+            if (0 <= fid) {
+                m[fid] += value * it->second;
+            }
+        }
     }
 };
 

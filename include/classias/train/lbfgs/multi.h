@@ -116,7 +116,7 @@ public:
             }
 
             // Accumulate the loss for predicting the instance.
-            loss -= std::log(cls.prob(inst.get_label()));
+            loss -= cls.logprob(inst.get_label());
         }
 
         return loss;

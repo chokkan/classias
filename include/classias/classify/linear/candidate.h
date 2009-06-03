@@ -224,19 +224,16 @@ public:
     typedef linear_candidate<attribute_tmpl, label_tmpl, value_tmpl, model_tmpl> base_type;
 
 protected:
-    /// The type representing an array of real values.
-    typedef typename base_type::scores_type scores_type;
     /// The partition factor.
-    value_type  m_norm;
-    /// The probabilities of candidates.
-    scores_type m_probs;
+    value_type  m_lognorm;
 
 public:
     /**
      * Constructs an instance.
      *  @param  model       The model associated with the classifier.
      */
-    linear_candidate_logistic(model_type& model) : base_type(model)
+    linear_candidate_logistic(model_type& model) :
+        base_type(model), m_lognorm(0)
     {
         clear();
     }
@@ -254,31 +251,27 @@ public:
     inline void clear()
     {
         base_type::clear();
-
-        m_norm = 0.;
-        for (int i = 0;i < this->size();++i) {
-            m_probs[i] = 0.;
-        }
+        m_lognorm = 0.;
     }
 
     /**
-     * Reserves the working space for n candidates.
-     *  @param  n           The number of candidates.
-     */
-    inline void resize(int n)
-    {
-        base_type::resize(n);
-        m_probs.resize(n);
-    }
-
-    /**
-     * Returns the probability of a candidate.
+     * Returns the probability for a candidate.
      *  @param  i           The candidate index.
      *  @return value_type  The probability.
      */
     inline value_type prob(int i)
     {
-        return m_probs[i];
+        return std::exp(m_scores[i] - m_lognorm);
+    }
+
+    /**
+     * Returns the log of the probability for a candidate.
+     *  @param  i           The candidate index.
+     *  @return value_type  The probability.
+     */
+    inline value_type logprob(int i)
+    {
+        return (m_scores[i] - m_lognorm);
     }
 
     template <class iterator_type>
@@ -296,23 +289,17 @@ public:
     {
         base_type::finalize();
 
-        // Compute the exponents of scores.
-        for (int i = 0;i < this->size();++i) {
-            m_probs[i] = std::exp(this->m_scores[i]);
+        if (this->size() == 0) {
+            return;
         }
 
         // Compute the partition factor, starting from the maximum value.
-        m_norm = m_probs[this->m_argmax];
+        value_type sum = 0.;
+        value_type max = m_scores[this->m_argmax];
         for (int i = 0;i < this->size();++i) {
-            if (i != this->m_argmax) {
-                m_norm += m_probs[i];
-            }
+            sum += std::exp(m_scores[i] - max);
         }
-
-        // Normalize the probabilities.
-        for (int i = 0;i < this->size();++i) {
-            m_probs[i] /= m_norm;
-        }
+        m_lognorm = max + std::log(sum);
     }
 };
 

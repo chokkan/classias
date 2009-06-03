@@ -211,9 +211,7 @@ public:
     typedef linear_multi<attribute_tmpl, label_tmpl, value_tmpl, model_tmpl, features_tmpl> base_type;
 
 protected:
-    typedef typename base_type::scores_type scores_type;
-    scores_type m_probs;
-    value_type  m_norm;
+    value_type  m_lognorm;
 
 public:
     /**
@@ -222,7 +220,7 @@ public:
      *  @param  feature_generator   The feature generator.
      */
     linear_multi_logistic(model_type& model, features_tmpl& feature_generator)
-        : base_type(model, feature_generator)
+        : base_type(model, feature_generator), m_lognorm(0)
     {
         clear();
     }
@@ -240,20 +238,7 @@ public:
     inline void clear()
     {
         base_type::clear();
-        m_norm = 0.;
-        for (int i = 0;i < this->size();++i) {
-            m_probs[i] = 0.;
-        }
-    }
-
-    /**
-     * Reserves the working space for n candidates.
-     *  @param  n           The number of candidates.
-     */
-    inline void resize(int n)
-    {
-        base_type::resize(n);
-        m_probs.resize(n);
+        m_lognorm = 0.;
     }
 
     /**
@@ -263,7 +248,17 @@ public:
      */
     inline value_type prob(int i)
     {
-        return m_probs[i];
+        return std::exp(m_scores[i] - m_lognorm);
+    }
+
+    /**
+     * Returns the log of the probability for a label.
+     *  @param  i           The candidate index.
+     *  @return value_type  The probability.
+     */
+    inline value_type logprob(int i)
+    {
+        return (m_scores[i] - m_lognorm);
     }
 
     /**
@@ -277,23 +272,13 @@ public:
             return;
         }
 
-        // Compute the exponents of scores.
-        for (int i = 0;i < this->size();++i) {
-            m_probs[i] = std::exp(this->m_scores[i]);
-        }
-
         // Compute the partition factor, starting from the maximum value.
-        m_norm = m_probs[this->m_argmax];
+        value_type sum = 0.;
+        value_type max = m_scores[this->m_argmax];
         for (int i = 0;i < this->size();++i) {
-            if (i != this->m_argmax) {
-                m_norm += m_probs[i];
-            }
+            sum += std::exp(m_scores[i] - max);
         }
-
-        // Normalize the probabilities.
-        for (int i = 0;i < this->size();++i) {
-            m_probs[i] /= m_norm;
-        }
+        m_lognorm = max + std::log(sum);
     }
 };
 
