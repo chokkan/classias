@@ -34,6 +34,7 @@
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
+#include <algorithm>
 #include <fstream>
 #include <ctime>
 #include <sstream>
@@ -177,6 +178,11 @@ read_dataset(
 {
     // Read the training data.
     read_data(data, opt);
+
+    // Shuffle instances if necessary.
+    if (opt.shuffle) {
+        std::random_shuffle(data.begin(), data.end());
+    }
 
     // Split the training data if necessary.
     if (0 < opt.split) {
