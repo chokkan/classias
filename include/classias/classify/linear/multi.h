@@ -248,7 +248,7 @@ public:
      */
     inline value_type prob(int i)
     {
-        return std::exp(m_scores[i] - m_lognorm);
+        return std::exp(this->m_scores[i] - m_lognorm);
     }
 
     /**
@@ -258,7 +258,7 @@ public:
      */
     inline value_type logprob(int i)
     {
-        return (m_scores[i] - m_lognorm);
+        return (this->m_scores[i] - m_lognorm);
     }
 
     /**
@@ -274,9 +274,9 @@ public:
 
         // Compute the partition factor, starting from the maximum value.
         value_type sum = 0.;
-        value_type max = m_scores[this->m_argmax];
+        value_type max = this->m_scores[this->m_argmax];
         for (int i = 0;i < this->size();++i) {
-            sum += std::exp(m_scores[i] - max);
+            sum += std::exp(this->m_scores[i] - max);
         }
         m_lognorm = max + std::log(sum);
     }
