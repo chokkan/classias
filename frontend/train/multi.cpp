@@ -199,13 +199,13 @@ int multi_train(option& opt)
     if (opt.algorithm == "logress.lbfgs") {
         if (opt.type == option::TYPE_MULTI_SPARSE) {
             return train<
-                classias::mdata,
-                classias::trainer_lbfgs_multi<classias::mdata, double>
+                classias::ndata,
+                classias::trainer_lbfgs_multi<classias::ndata, double>
             >(opt);
         } else if (opt.type == option::TYPE_MULTI_DENSE) {
             return train<
-                classias::ndata,
-                classias::trainer_lbfgs_multi<classias::ndata, double>
+                classias::mdata,
+                classias::trainer_lbfgs_multi<classias::mdata, double>
             >(opt);
         }
     }
