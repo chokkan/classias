@@ -171,12 +171,16 @@ public:
 
     void holdout_evaluation()
     {
+        accuracy acc;
         std::ostream& os = *(this->m_os);
         const data_type& data = *(this->m_data);
-        accuracy acc;
+        const size_t L = data.num_labels();
         confusion_matrix matrix(data.labels.size());
         const value_type *x = this->m_weights;
         classifier_type cls(x, const_cast<feature_generator_type&>(data.feature_generator));
+
+        // The number of labels is constant; reserve the work space.
+        cls.resize(L);
 
         // Loop over instances.
         for (const_iterator iti = data.begin();iti != data.end();++iti) {
