@@ -245,7 +245,7 @@ public:
      */
     size_t num_features() const
     {
-        return m_features.num_features();
+        return m_features.size();
     }
 
     /**
