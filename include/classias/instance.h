@@ -98,6 +98,8 @@ class binary_instance_base :
 public:
     /// The type of a feature vector.
     typedef features_tmpl features_type;
+    /// The type of an attribute name (identifier).
+    typedef typename features_type::identifier_type attribute_type;
 
     /**
      * Constructs an object.
@@ -137,6 +139,8 @@ class multi_instance_base :
 public:
     /// The type of an attribute vector.
     typedef attributes_tmpl attributes_type;
+    /// The type of an attribute name (identifier).
+    typedef typename attributes_type::identifier_type attribute_type;
 
     /**
      * Constructs an object.

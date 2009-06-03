@@ -82,7 +82,6 @@ train(option& opt)
     os << "Reading the data set" << std::endl;
     sw.start();
     num_groups = read_dataset(data, opt);
-    data.finalize();
     sw.stop();
     os << "Number of instances: " << data.size() << std::endl;
     os << "Number of groups: " << num_groups << std::endl;

@@ -123,6 +123,15 @@ read_stream(
     int lines = 0;
     typedef typename data_type::instance_type instance_type;
 
+    // If necessary, generate a bias attribute here to reserve feature #0.
+    if (opt.generate_bias) {
+        int aid = (int)data.attributes("@bias");
+        if (aid != 0) {
+            throw invalid_data("A bias attribute could not obtain #0", 0);
+        }
+        // We will reserve the bias feature(s) in finalize_data() function.
+    }
+
     for (;;) {
         // Read a line.
         std::string line;
@@ -148,6 +157,28 @@ read_stream(
 
         read_line(line, inst, data.attributes, data.labels, opt, lines);
     }
+}
+
+template <
+    class data_type
+>
+static void
+finalize_data(
+    data_type& data,
+    const option& opt
+    )
+{
+    // If necessary, reserve early feature numbers for bias features.
+    if (opt.generate_bias) {
+        int aid = (int)data.attributes("@bias");
+        if (aid != 0) {
+            throw invalid_data("A bias attribute could not obtain #0", 0);
+        }
+        data.generate_bias_features(aid);
+    }
+
+    // Generate features that associate attributes and labels.
+    data.generate_features();
 }
 
 template <

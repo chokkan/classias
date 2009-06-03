@@ -244,13 +244,6 @@ public:
     {
         return 2;
     }
-
-    /**
-     * Finalize the data set.
-     */
-    void finalize()
-    {
-    }
 };
 
 
@@ -358,6 +351,8 @@ class multi_data_base :
 public:
     /// The type of an instance.
     typedef instance_tmpl instance_type;
+    /// The type of an attribute.
+    typedef typename instance_type::attribute_type attribute_type;
     /// The type of a feature vector.
     typedef attributes_quark_tmpl attributes_quark_type;
     /// The type of label quark.
@@ -403,10 +398,26 @@ public:
         return feature_generator.num_features();
     }
 
+    void generate_bias_features(const attribute_type& a)
+    {
+        feature_generator.set_num_labels(this->labels.size());
+        feature_generator.set_num_attributes(this->attributes.size());
+
+        int_t max = -1;
+        for (int_t l = 0;l < this->num_labels();++l) {
+            int_t fid = this->feature_generator.regist(a, l);
+            if (max < fid) {
+                max = fid;
+            }
+        }
+
+        this->set_user_feature_start(max+1);
+    }
+
     /**
      * Finalize the data set.
      */
-    void finalize()
+    void generate_features()
     {
         feature_generator.set_num_labels(this->labels.size());
         feature_generator.set_num_attributes(this->attributes.size());

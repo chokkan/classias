@@ -141,6 +141,7 @@ public:
         // Report the training parameters.
         os << "MAP estimation for a multiple-logistic-regression model using L-BFGS" << std::endl;
         this->m_params.show(os);
+        os << "lbfgs.regularization_start: " << data.get_user_feature_start() << std::endl;
         os << std::endl;
 
         // Compute observation expectations of the features.

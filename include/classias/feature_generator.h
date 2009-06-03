@@ -142,8 +142,9 @@ public:
      *  @param  a       An attribute.
      *  @param  l       A label.
      */
-    inline void regist(const attribute_type& a, const label_type& l)
+    inline feature_type regist(const attribute_type& a, const label_type& l)
     {
+        return forward(a, l);
     }
 
     /**
@@ -286,9 +287,9 @@ public:
      *  @param  a       An attribute.
      *  @param  l       A label.
      */
-    inline void regist(const attribute_type& a, const label_type& l)
+    inline feature_type regist(const attribute_type& a, const label_type& l)
     {
-        m_features.associate(a, l);
+        return m_features.associate(a, l);
     }
 
     /**

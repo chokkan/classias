@@ -128,6 +128,15 @@ read_stream(
     std::string comment;
     typedef typename data_type::instance_type instance_type;
 
+    // If necessary, generate a bias attribute here to reserve feature #0.
+    if (opt.generate_bias) {
+        int fid = (int)data.attributes("@bias");
+        if (fid != 0) {
+            throw invalid_data("A bias attribute could not obtain #0", 0);
+        }
+        data.set_user_feature_start(fid+1);
+    }
+
     for (;;) {
         // Read a line.
         std::string line;
@@ -147,26 +156,6 @@ read_stream(
             continue;
         }
 
-        // Read features that should not be regularized.
-        if (line.compare(0, 13, "@unregularize") == 0) {
-            if (!data.empty()) {
-                throw invalid_data("Declarative @unregularize must precede an instance", lines);
-            }
-
-            // Feature names.
-            tokenizer values(line, opt.token_separator);
-            tokenizer::iterator itv = values.begin();
-            for (++itv;itv != values.end();++itv) {
-                // Reserve early feature identifiers.
-                data.attributes(*itv);
-            }
-
-            // Set the start index of the user features.
-            data.set_user_feature_start(data.attributes.size());
-
-            continue;
-        }
-
         // Create a new instance.
         instance_type& inst = data.new_element();
         inst.set_group(group);
@@ -175,6 +164,17 @@ read_stream(
         read_line(line, inst, data.attributes, opt, lines);
         comment.clear();
     }
+}
+
+template <
+    class data_type
+>
+static void
+finalize_data(
+    data_type& data,
+    const option& opt
+    )
+{
 }
 
 template <

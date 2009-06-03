@@ -179,6 +179,9 @@ read_dataset(
     // Read the training data.
     read_data(data, opt);
 
+    // Finalize the data.
+    finalize_data(data, opt);
+
     // Shuffle instances if necessary.
     if (opt.shuffle) {
         std::random_shuffle(data.begin(), data.end());

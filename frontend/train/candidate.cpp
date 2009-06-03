@@ -193,6 +193,17 @@ read_stream(
 }
 
 template <
+    class data_type
+>
+static void
+finalize_data(
+    data_type& data,
+    const option& opt
+    )
+{
+}
+
+template <
     class data_type,
     class value_type
 >
