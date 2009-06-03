@@ -146,7 +146,7 @@ public:
         // Compute observation expectations of the features.
         for (const_iterator iti = data.begin();iti != data.end();++iti) {
             // Skip instances for holdout evaluation.
-            if (iti->get_group() == this->m_holdout) {
+            if (iti->get_group() == holdout) {
                 continue;
             }
 

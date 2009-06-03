@@ -157,7 +157,7 @@ public:
             const instance_type& inst = *iti;
 
             // Skip instances for holdout evaluation.
-            if (inst.get_group() == this->m_holdout) {
+            if (inst.get_group() == holdout) {
                 continue;
             }
 
