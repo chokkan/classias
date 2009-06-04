@@ -140,6 +140,7 @@ public:
         std::ostream& os = *(this->m_os);
         const value_type *x = this->m_weights;
         int positive_labels[] = {1};
+        accuracy acc;
         confusion_matrix matrix(2);
         classifier_type cls(x);
 
@@ -157,10 +158,11 @@ public:
             int ml = static_cast<int>(static_cast<bool>(cls));
 
             // Store the results.
+            acc.set(rl == ml);
             matrix(rl, ml)++;
         }
 
-        matrix.output_accuracy(os);
+        acc.output(os);
         matrix.output_micro(os, positive_labels, positive_labels+1);
     }
 };

@@ -207,6 +207,7 @@ public:
         // Report accuracy, precision, recall, and f1 score.
         acc.output(os);
         matrix.output_micro(os, data.positive_labels.begin(), data.positive_labels.end());
+        matrix.output_macro(os, data.positive_labels.begin(), data.positive_labels.end());
     }
 };
 

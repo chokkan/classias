@@ -29,7 +29,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* $Id:$ */
+/* $Id$ */
 
 #ifndef __CLASSIAS_EVALUATION_H__
 #define __CLASSIAS_EVALUATION_H__
@@ -56,7 +56,7 @@ public:
 
     inline void set(bool b)
     {
-        if (b) ++c;
+        c += static_cast<int>(b);
         ++n;
     }
 
@@ -191,14 +191,6 @@ public:
         }
     }
 
-    void output_accuracy(std::ostream& os) const
-    {
-        int num_correct = this->correct();
-        int num_total = this->total();
-        os << "Accuracy: " << divide(num_correct, num_total) <<
-            " (" << num_correct << "/" << num_total << ")" << std::endl;
-    }
-
     template <class positive_iterator_type>
     void output_micro(
         std::ostream& os,
@@ -216,11 +208,55 @@ public:
         double recall = divide(num_match, num_reference);
         double f1score = divide(2 * precision * recall, precision + recall);
 
-        os << "Precision: " << precision <<
-            " (" << num_match << "/" << num_prediction << ")" << std::endl;
-        os << "Recall: " << recall <<
-            " (" << num_match << "/" << num_reference << ")" << std::endl;
-        os << "F1-score: " << f1score << std::endl;
+        os << "Micro-average P, R, F1: " <<
+            precision << " (" << num_match << "/" << num_prediction << ")" << ' ' <<
+            recall << " (" << num_match << "/" << num_reference << ")" << ' ' <<
+            f1score << std::endl;
+    }
+
+    template <class positive_iterator_type>
+    void compute_macro(
+        positive_iterator_type pb,
+        positive_iterator_type pe,
+        double& precision,
+        double& recall,
+        double& f1
+        ) const
+    {
+        int n = 0;
+        int num_match = 0;
+        int num_reference = 0;
+        int num_prediction = 0;
+        precision = recall = f1 = 0.;
+
+        for (positive_iterator_type it = pb;it != pe;++it) {
+            num_match = this->match(*it);
+            num_reference = this->xsum(*it);
+            num_prediction = this->ysum(*it);
+            double p = divide(num_match, num_prediction);
+            double r = divide(num_match, num_reference);
+            double f = divide(2 * p * r, p + r);
+            precision += p;
+            recall += r;
+            f1 += f;
+            ++n;
+        }
+
+        precision /= n;
+        recall /= n;
+        f1 /= n;
+    }
+
+    template <class positive_iterator_type>
+    void output_macro(
+        std::ostream& os,
+        positive_iterator_type pb,
+        positive_iterator_type pe
+        ) const
+    {
+        double precision = 0., recall = 0., f1 = 0.;
+        compute_macro(pb, pe, precision, recall, f1);
+        os << "Macro-average P, R, F1: " << precision << " " << recall << " " << f1 << std::endl;
     }
 };
 
