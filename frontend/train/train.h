@@ -172,7 +172,7 @@ train(option& opt)
             trainer_type trainer;
             set_parameters(trainer, data, opt);
 
-            os << "Cross validation (" << (i + 1) << "/" << num_groups << ")" << std::endl;
+            os << "===== Cross validation (" << (i + 1) << "/" << num_groups << ") =====" << std::endl;
             sw.start();
             trainer.train(data, opt.os, i);
             sw.stop();
