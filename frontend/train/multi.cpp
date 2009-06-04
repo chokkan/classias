@@ -105,7 +105,7 @@ read_line(
 
     // Include a bias feature if necessary.
     if (opt.generate_bias) {
-        instance.append(attributes("@bias"), 1.);
+        instance.append(attributes("__BIAS__"), 1.);
     }
 }
 
@@ -125,7 +125,7 @@ read_stream(
 
     // If necessary, generate a bias attribute here to reserve feature #0.
     if (opt.generate_bias) {
-        int aid = (int)data.attributes("@bias");
+        int aid = (int)data.attributes("__BIAS__");
         if (aid != 0) {
             throw invalid_data("A bias attribute could not obtain #0", 0);
         }
@@ -170,7 +170,7 @@ finalize_data(
 {
     // If necessary, reserve early feature numbers for bias features.
     if (opt.generate_bias) {
-        int aid = (int)data.attributes("@bias");
+        int aid = (int)data.attributes("__BIAS__");
         if (aid != 0) {
             throw invalid_data("A bias attribute could not obtain #0", 0);
         }
@@ -202,12 +202,12 @@ output_model(
     std::ofstream os(opt.model.c_str());
 
     // Output a model type.
-    os << "@model" << '\t' << "attribute-label" << std::endl;
+    os << "@model" << opt.token_separator << "attribute-label" << std::endl;
 
     // Output a set of labels.
     os << "@labels";
     for (int_t l = 0;l < data.num_labels();++l) {
-        os << '\t' << data.labels.to_item(l);
+        os << opt.token_separator << data.labels.to_item(l);
     }
     os << std::endl;
 
@@ -217,8 +217,8 @@ output_model(
         if (w != 0.) {
             int_t a, l;
             data.feature_generator.backward(i, a, l);
-            os << w << '\t'
-                << data.attributes.to_item(a) << '\t'
+            os << w << opt.token_separator
+                << data.attributes.to_item(a) << opt.token_separator
                 << data.labels.to_item(l) << std::endl;
         }
     }

@@ -109,7 +109,7 @@ read_line(
 
     // Include a bias feature if necessary.
     if (opt.generate_bias) {
-        instance.append(features("@bias"), 1.);
+        instance.append(features("__BIAS__"), 1.);
     }
 }
 
@@ -130,7 +130,7 @@ read_stream(
 
     // If necessary, generate a bias attribute here to reserve feature #0.
     if (opt.generate_bias) {
-        int fid = (int)data.attributes("@bias");
+        int fid = (int)data.attributes("__BIAS__");
         if (fid != 0) {
             throw invalid_data("A bias attribute could not obtain #0", 0);
         }
