@@ -109,6 +109,9 @@ public:
         ON_OPTION(SHORTOPT('x') || LONGOPT("cross-validate"))
             cross_validation = true;
 
+        ON_OPTION_WITH_ARG(SHORTOPT('n') || LONGOPT("negative"))
+            negative_labels.insert(arg);
+
         ON_OPTION_WITH_ARG(SHORTOPT('s') || LONGOPT("token-separator"))
             if (strcmp(arg, " ") == 0 || strcasecmp(arg, "spc") == 0 || strcasecmp(arg, "space") == 0) {
                 token_separator = ' ';

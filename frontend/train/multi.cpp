@@ -168,9 +168,11 @@ finalize_data(
     const option& opt
     )
 {
+    typedef typename classias::int_t int_t;
+
     // If necessary, reserve early feature numbers for bias features.
     if (opt.generate_bias) {
-        int aid = (int)data.attributes("__BIAS__");
+        int_t aid = (int_t)data.attributes("__BIAS__");
         if (aid != 0) {
             throw invalid_data("A bias attribute could not obtain #0", 0);
         }
@@ -179,6 +181,13 @@ finalize_data(
 
     // Generate features that associate attributes and labels.
     data.generate_features();
+
+    // Set positive labels.
+    for (int_t l = 0;l < data.num_labels();++l) {
+        if (opt.negative_labels.find(data.labels.to_item(l)) == opt.negative_labels.end()) {
+            data.append_positive_label(l);
+        }
+    }
 }
 
 template <

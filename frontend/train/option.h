@@ -75,6 +75,7 @@ public:
     int         split;
     int         holdout;
     bool        cross_validation;
+    labels_type negative_labels;
 
     char        token_separator;
     char        value_separator;
