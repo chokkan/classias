@@ -33,6 +33,10 @@
 #ifndef __TRAIN_H__
 #define __TRAIN_H__
 
+#include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <string>
 #include <vector>
 #include "util.h"
 
@@ -58,6 +62,76 @@ set_parameters(
             name = *itp;
         }
         params.set(name, value);
+    }
+}
+
+template <class data_type>
+static int
+split_data(
+    data_type& data,
+    const option& opt
+    )
+{
+    int i = 0;
+    typename data_type::iterator it;
+    for (it = data.begin();it != data.end();++it, ++i) {
+        it->set_group(i % opt.split);
+    }
+    return opt.split;
+}
+
+template <class data_type>
+static void
+read_data(
+    data_type& data,
+    const option& opt
+    )
+{
+    std::ostream& os = std::cout;
+    std::ostream& es = std::cerr;
+
+    // Read files for training data.
+    if (opt.files.empty()) {
+        // Read the data from STDIN.
+        os << "STDIN" << std::endl;
+        read_stream(std::cin, data, opt, 0);
+    } else {
+        // Read the data from files.
+        for (int i = 0;i < (int)opt.files.size();++i) {
+            std::ifstream ifs(opt.files[i].c_str());
+            if (!ifs.fail()) {
+                os << "File (" << i+1 << "/" << opt.files.size() << ") : " << opt.files[i] << std::endl;
+                read_stream(ifs, data, opt, i);
+            }
+            ifs.close();
+        }
+    }
+}
+
+template <class data_type>
+static int
+read_dataset(
+    data_type& data,
+    const option& opt
+    )
+{
+    // Read the training data.
+    read_data(data, opt);
+
+    // Finalize the data.
+    finalize_data(data, opt);
+
+    // Shuffle instances if necessary.
+    if (opt.shuffle) {
+        std::random_shuffle(data.begin(), data.end());
+    }
+
+    // Split the training data if necessary.
+    if (0 < opt.split) {
+        split_data(data, opt);
+        return opt.split;
+    } else {
+        return (int)opt.files.size();
     }
 }
 

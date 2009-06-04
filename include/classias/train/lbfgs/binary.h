@@ -42,7 +42,7 @@
 
 #include "base.h"
 #include <classias/classify/linear/binary.h>
-#include "../../evaluation.h"
+#include <classias/evaluation.h>
 
 namespace classias
 {
@@ -148,7 +148,7 @@ public:
         const size_t K = data.num_features();
         this->initialize_weights(K);
         
-        os << "MAP estimation for a logistic regression model using L-BFGS" << std::endl;
+        os << "Binary logistic regression using L-BFGS" << std::endl;
         this->m_params.show(os);
         os << "lbfgs.regularization_start: " << data.get_user_feature_start() << std::endl;
         os << std::endl;
@@ -185,7 +185,6 @@ public:
 
             // Compute the score for the instance.
             cls.inner_product(iti->begin(), iti->end());
-
             int rl = static_cast<int>(iti->get_truth());
             int ml = static_cast<int>(static_cast<bool>(cls));
 

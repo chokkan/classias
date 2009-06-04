@@ -40,7 +40,7 @@
 
 #include "base.h"
 #include <classias/classify/linear/multi.h>
-#include "../../evaluation.h"
+#include <classias/evaluation.h>
 
 namespace classias
 {
@@ -171,7 +171,7 @@ public:
         }
 
         // Report the training parameters.
-        os << "MAP estimation for a multiple-logistic-regression model using L-BFGS" << std::endl;
+        os << "Multi-class logistic regression using L-BFGS" << std::endl;
         this->m_params.show(os);
         os << "lbfgs.regularization_start: " << data.get_user_feature_start() << std::endl;
         os << std::endl;
@@ -204,13 +204,13 @@ public:
 
     void holdout_evaluation()
     {
-        accuracy acc;
         std::ostream& os = *(this->m_os);
         const data_type& data = *(this->m_data);
-        const size_t L = data.num_labels();
-        confusion_matrix matrix(data.labels.size());
+        const int_t L = data.num_labels();
         const value_type *x = this->m_weights;
         classifier_type cls(x, const_cast<feature_generator_type&>(data.feature_generator));
+        accuracy acc;
+        confusion_matrix matrix(data.labels.size());
 
         // The number of labels is constant; reserve the work space.
         cls.resize(L);
@@ -222,18 +222,14 @@ public:
                 continue;
             }
 
-            int i;
-            typename instance_type::const_iterator itc;
-            for (i = 0;i < data.num_labels();++i) {
+            for (int i = 0;i < data.num_labels();++i) {
                 cls.inner_product(i, iti->begin(), iti->end(), i);
             }
-
             cls.finalize();
 
-            int idx_max = cls.argmax();
-
-            acc.set(iti->get_label() == idx_max);
-            matrix(iti->get_label(), idx_max)++;
+            int imax = cls.argmax();
+            acc.set(iti->get_label() == imax);
+            matrix(iti->get_label(), imax)++;
         }
 
         // Report accuracy, precision, recall, and f1 score.

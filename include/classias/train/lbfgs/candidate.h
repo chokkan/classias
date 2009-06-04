@@ -40,7 +40,7 @@
 
 #include "base.h"
 #include <classias/classify/linear/candidate.h>
-#include "../../evaluation.h"
+#include <classias/evaluation.h>
 
 namespace classias
 {
@@ -180,7 +180,7 @@ public:
         }
 
         // Report the training parameters.
-        os << "MAP estimation for a multiple-logistic-regression model using L-BFGS" << std::endl;
+        os << "Multi-candidate logistic regression using L-BFGS" << std::endl;
         this->m_params.show(os);
         os << "lbfgs.regularization_start: " << data.get_user_feature_start() << std::endl;
         os << std::endl;
@@ -224,10 +224,10 @@ public:
     {
         std::ostream& os = *(this->m_os);
         const data_type& data = *(this->m_data);
-        accuracy acc;
-        confusion_matrix matrix(data.labels.size());
         const value_type *x = this->m_weights;
         classifier_type cls(x);
+        accuracy acc;
+        confusion_matrix matrix(data.labels.size());
 
         // Loop over instances.
         for (const_iterator iti = data.begin();iti != data.end();++iti) {

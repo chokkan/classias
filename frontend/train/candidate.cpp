@@ -47,12 +47,13 @@
 /* Automatic generation of bias features is not supported. */
 
 /*
-<line>          ::= <comment> | <boi> | <eoi> | <candidate> | <br>
+<line>          ::= <comment> | <boi> | <eoi> | <unreg> | <candidate> | <br>
 <comment>       ::= "#" <string> <br>
 <boi>           ::= "@boi" [ <weight> ] <br>
 <eoi>           ::= "@eoi" <br>
+<unregularize>  ::= "@unregularize" ("\t" <label>)+ <br>
 <instance>      ::= <class> [ <label> ] ("\t" <feature>)+ <br>
-<class>         ::= "F" | "T"
+<class>         ::= "T" | "+" | "F" | "-"
 <label>         ::= <name>
 <feature>       ::= <name> [ ":" <weight> ]
 <name>          ::= <string>
@@ -90,7 +91,6 @@ read_line(
         throw invalid_data("an empty label found", lines);
     }
 
-    // Parse the instance label.
     name = *itv;
 
     // Set the truth value for this candidate.
@@ -100,7 +100,7 @@ read_line(
     } else if (name.compare(0, 1, "-") == 0 || name.compare(0, 1, "F") == 0) {
         truth = false;
     } else {
-        throw invalid_data("a class label must begins with either '+' or '-'", lines);
+        throw invalid_data("a class label must begins with '+', 'T', '-', or 'F'", lines);
     }
 
     // Create a new candidate.

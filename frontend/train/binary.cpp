@@ -92,7 +92,7 @@ read_line(
     } else if (name == "-1") {
         instance.set_truth(false);
     } else {
-        throw invalid_data("a class label must be either '+1' or '-1'", lines);
+        throw invalid_data("a class label must be either '+1', '1', or '-1'", lines);
     }
 
     // Set the instance weight.
@@ -124,7 +124,6 @@ read_stream(
     )
 {
     int lines = 0;
-    std::string comment;
     typedef typename data_type::instance_type instance_type;
 
     // If necessary, generate a bias attribute here to reserve feature #0.
@@ -161,7 +160,6 @@ read_stream(
 
         // Read the instance.
         read_line(line, inst, data.attributes, opt, lines);
-        comment.clear();
     }
 }
 
@@ -174,6 +172,7 @@ finalize_data(
     const option& opt
     )
 {
+    // Nothing to do.
 }
 
 template <
