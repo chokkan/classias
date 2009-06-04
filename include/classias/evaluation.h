@@ -34,6 +34,7 @@
 #ifndef __CLASSIAS_EVALUATION_H__
 #define __CLASSIAS_EVALUATION_H__
 
+#include <iomanip>
 #include <vector>
 
 namespace classias
@@ -63,7 +64,11 @@ public:
     void output(std::ostream& os) const
     {
         double acc = (0 < n ? c / (double)n : 0);
-        os << "Accuracy: " << acc << " (" << c << "/" << n << ")" << std::endl;
+        os << "Accuracy: " <<
+            std::fixed << std::setprecision(4) << acc <<
+            std::setprecision(6) << 
+            " (" << c << "/" << n << ")" << std::endl;
+        os.unsetf(std::ios::fixed);
     }
 };
 
@@ -208,10 +213,16 @@ public:
         double recall = divide(num_match, num_reference);
         double f1score = divide(2 * precision * recall, precision + recall);
 
-        os << "Micro-average P, R, F1: " <<
-            precision << " (" << num_match << "/" << num_prediction << ")" << ' ' <<
-            recall << " (" << num_match << "/" << num_reference << ")" << ' ' <<
-            f1score << std::endl;
+        os << "Micro P, R, F1: " <<
+            std::fixed << std::setprecision(4) << precision <<
+            std::setprecision(6) << 
+            " (" << num_match << "/" << num_prediction << ")" << ", " <<
+            std::fixed << std::setprecision(4) << recall <<
+            std::setprecision(6) <<
+            " (" << num_match << "/" << num_reference << ")" << ", " <<
+            std::fixed << std::setprecision(4) << f1score << std::endl;
+        os << std::setprecision(6);
+        os.unsetf(std::ios::fixed);
     }
 
     template <class positive_iterator_type>
@@ -256,7 +267,12 @@ public:
     {
         double precision = 0., recall = 0., f1 = 0.;
         compute_macro(pb, pe, precision, recall, f1);
-        os << "Macro-average P, R, F1: " << precision << " " << recall << " " << f1 << std::endl;
+        os << "Macro P, R, F1: " << 
+            std::fixed << std::setprecision(4) << precision << ", " <<
+            std::fixed << std::setprecision(4) << recall << ", " <<
+            std::fixed << std::setprecision(4) << f1 << std::endl;
+        os << std::setprecision(6);
+        os.unsetf(std::ios::fixed);
     }
 };
 
