@@ -164,6 +164,11 @@ train(option& opt)
     os << "Seconds required: " << sw.get() << std::endl;
     os << std::endl;
 
+    // Exit if the data set is empty.
+    if (data.empty()) {
+        throw invalid_data("The data set is empty", 0);
+    }
+
     // Start training.
     if (opt.cross_validation) {
         // Training with cross validation

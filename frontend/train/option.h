@@ -85,7 +85,7 @@ public:
         std::ostream& _es = std::cerr
         ) :
         is(_is), os(_os), es(_es),
-        mode(MODE_NORMAL), type(TYPE_NONE), model(""),
+        mode(MODE_NORMAL), type(TYPE_MULTI_DENSE), model(""),
         algorithm("logress.lbfgs"),        
         shuffle(false), generate_bias(false),
         split(0), holdout(-1), cross_validation(false),
