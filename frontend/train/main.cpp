@@ -11,10 +11,9 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Northwestern University, University of Tokyo,
- *       nor the names of its contributors may be used to endorse or promote
- *       products derived from this software without specific prior written
- *       permission.
+ *     * Neither the names of the authors nor the names of its contributors
+ *       may be used to endorse or promote products derived from this
+ *       software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -191,6 +190,8 @@ static void usage(std::ostream& os, const char *argv0)
     os << "                        for training" << std::endl;
     os << "  -x, --cross-validate  repeat holdout evaluations for #i in {1, ..., N}" << std::endl;
     os << "                        (N-fold cross validation)" << std::endl;
+    os << "  -n, --negative=LABEL  specify a negative label for computing precision," << std::endl;
+    os << "                        recall, and F1 scores" << std::endl;
     os << "  -s, --token-separator=SEP assume SEP character as a token separator:" << std::endl;
     os << "      '\t', tab                 a TAB ('\t') character (DEFAULT)" << std::endl;
     os << "      ' ',  spc, space          a SPACE (' ') character" << std::endl;
