@@ -182,8 +182,6 @@ read_stream(
 
         } else if (line == "@eoi") {
 
-        } else if (line.compare(0, 9, "@negative") == 0) {
-            // 
         } else {
             // A new candidate.
             read_line(line, data.back(), data.attributes, data.labels, opt, lines);
@@ -200,6 +198,14 @@ finalize_data(
     const option& opt
     )
 {
+    typedef classias::int_t int_t;
+
+    // Set positive labels.
+    for (int_t l = 0;l < data.num_labels();++l) {
+        if (opt.negative_labels.find(data.labels.to_item(l)) == opt.negative_labels.end()) {
+            data.append_positive_label(l);
+        }
+    }
 }
 
 template <
@@ -219,14 +225,14 @@ output_model(
     std::ofstream os(opt.model.c_str());
 
     // Output a model type.
-    os << "@model" << opt.token_separator << "candidate" << std::endl;
+    os << "@model" << '\t' << "candidate" << std::endl;
 
     // Store the feature weights.
     for (int_t i = 0;i < (int_t)data.attributes.size();++i) {
         value_type w = weights[i];
         if (w != 0.) {
             os <<
-                w << opt.token_separator <<
+                w << '\t' <<
                 data.attributes.to_item(i) << std::endl;
         }
     }
@@ -243,7 +249,7 @@ int candidate_train(option& opt)
     if (opt.algorithm == "logress.lbfgs") {
         return train<
             classias::cdata,
-            classias::trainer_lbfgs_candidate<classias::cdata, double>
+            classias::trainer_lbfgs_candidate<classias::cdata, classias::real_t>
         >(opt);
     } else {
         throw invalid_algorithm(opt.algorithm);
@@ -255,7 +261,7 @@ bool candidate_usage(option& opt)
 {
     // Branches for training algorithms.
     if (opt.algorithm == "logress.lbfgs") {
-        classias::trainer_lbfgs_candidate<classias::cdata, double> tr;
+        classias::trainer_lbfgs_candidate<classias::cdata, classias::real_t> tr;
         tr.params().help(opt.os);
         return true;
     }

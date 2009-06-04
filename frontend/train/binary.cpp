@@ -195,13 +195,13 @@ output_model(
     std::ofstream os(opt.model.c_str());
 
     // Output a model type.
-    os << "@model" << opt.token_separator << "binary" << std::endl;
+    os << "@model" << '\t' << "binary" << std::endl;
 
     // Store the feature weights.
     for (aid_type i = 0;i < attributes.size();++i) {
         value_type w = weights[i];
         if (w != 0.) {
-            os << w << opt.token_separator << attributes.to_item(i) << std::endl;
+            os << w << '\t' << attributes.to_item(i) << std::endl;
         }
     }
 }
@@ -212,7 +212,7 @@ int binary_train(option& opt)
     if (opt.algorithm == "logress.lbfgs") {
         return train<
             classias::bdata,
-            classias::trainer_lbfgs_binary<classias::bdata, double>
+            classias::trainer_lbfgs_binary<classias::bdata, classias::real_t>
         >(opt);
     } else {
         throw invalid_algorithm(opt.algorithm);
@@ -222,7 +222,7 @@ int binary_train(option& opt)
 bool binary_usage(option& opt)
 {
     if (opt.algorithm == "logress.lbfgs") {
-        classias::trainer_lbfgs_binary<classias::bdata, double> tr;
+        classias::trainer_lbfgs_binary<classias::bdata, classias::real_t> tr;
         tr.params().help(opt.os);
         return true;
     }

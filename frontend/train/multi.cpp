@@ -1,5 +1,5 @@
 /*
- *		Data I/O for attribute-based classification.
+ *		Data I/O for multi-class classification.
  *
  * Copyright (c) 2008,2009 Naoaki Okazaki
  * All rights reserved.
@@ -200,7 +200,7 @@ output_model(
     const option& opt
     )
 {
-    typedef typename classias::int_t int_t;
+    typedef classias::int_t int_t;
     typedef typename data_type::attributes_quark_type attributes_quark_type;
     typedef typename attributes_quark_type::item_type attribute_type;
     typedef typename data_type::labels_quark_type labels_quark_type;
@@ -210,12 +210,12 @@ output_model(
     std::ofstream os(opt.model.c_str());
 
     // Output a model type.
-    os << "@model" << opt.token_separator << "attribute-label" << std::endl;
+    os << "@model" << '\t' << "attribute-label" << std::endl;
 
     // Output a set of labels.
     os << "@labels";
     for (int_t l = 0;l < data.num_labels();++l) {
-        os << opt.token_separator << data.labels.to_item(l);
+        os << '\t' << data.labels.to_item(l);
     }
     os << std::endl;
 
@@ -225,8 +225,8 @@ output_model(
         if (w != 0.) {
             int_t a, l;
             data.feature_generator.backward(i, a, l);
-            os << w << opt.token_separator
-                << data.attributes.to_item(a) << opt.token_separator
+            os << w << '\t'
+                << data.attributes.to_item(a) << '\t'
                 << data.labels.to_item(l) << std::endl;
         }
     }
@@ -239,12 +239,12 @@ int multi_train(option& opt)
         if (opt.type == option::TYPE_MULTI_SPARSE) {
             return train<
                 classias::ndata,
-                classias::trainer_lbfgs_multi<classias::ndata, double>
+                classias::trainer_lbfgs_multi<classias::ndata, classias::real_t>
             >(opt);
         } else if (opt.type == option::TYPE_MULTI_DENSE) {
             return train<
                 classias::mdata,
-                classias::trainer_lbfgs_multi<classias::mdata, double>
+                classias::trainer_lbfgs_multi<classias::mdata, classias::real_t>
             >(opt);
         }
     }
@@ -254,7 +254,7 @@ int multi_train(option& opt)
 bool multi_usage(option& opt)
 {
     if (opt.algorithm == "logress.lbfgs") {
-        classias::trainer_lbfgs_multi<classias::mdata, double> tr;
+        classias::trainer_lbfgs_multi<classias::mdata, classias::real_t> tr;
         tr.params().help(opt.os);
         return true;
     }

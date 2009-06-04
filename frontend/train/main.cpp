@@ -1,7 +1,7 @@
 /*
  *		Classias frontend for training.
  *
- * Copyright (c) 2008,20009 Naoaki Okazaki
+ * Copyright (c) 2008,2009 Naoaki Okazaki
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@
 #include <config.h>
 #endif/*HAVE_CONFIG_H*/
 
-#include <os.h>
 #include <iostream>
 #include <classias/version.h>
 #include <optparse.h>
