@@ -73,6 +73,114 @@ public:
 
 class confusion_matrix
 {
+public:
+    struct label_stat
+    {
+        int num_match;
+        int num_reference;
+        int num_prediction;
+        label_stat() : num_match(0), num_reference(0), num_prediction(0)
+        {
+        }
+    };
+
+protected:
+    int m_n;
+    label_stat* m_stat;
+
+public:
+    confusion_matrix(int N) : m_n(N)
+    {
+        m_stat = new label_stat[N];
+    }
+
+    virtual ~confusion_matrix()
+    {
+        delete[] m_stat;
+    }
+
+    void set(int ref, int pred)
+    {
+        m_stat[ref].num_reference++;
+        m_stat[pred].num_prediction++;
+        if (ref == pred) m_stat[pred].num_match++;
+    }
+
+    template <typename value_type>
+    static inline double divide(value_type a, value_type b)
+    {
+        return (b != 0) ? (a / (double)b) : 0.;
+    }
+
+    template <class positive_iterator_type>
+    void output_micro(
+        std::ostream& os,
+        positive_iterator_type pb,
+        positive_iterator_type pe
+        ) const
+    {
+        int num_match = 0;
+        int num_reference = 0;
+        int num_prediction = 0;
+
+        for (positive_iterator_type it = pb;it != pe;++it) {
+            num_match += m_stat[*it].num_match;
+            num_reference += m_stat[*it].num_reference;
+            num_prediction += m_stat[*it].num_prediction;
+        }
+
+        double precision = divide(num_match, num_prediction);
+        double recall = divide(num_match, num_reference);
+        double f1score = divide(2 * precision * recall, precision + recall);
+
+        os << "Micro P, R, F1: " <<
+            std::fixed << std::setprecision(4) << precision <<
+            std::setprecision(6) << 
+            " (" << num_match << "/" << num_prediction << ")" << ", " <<
+            std::fixed << std::setprecision(4) << recall <<
+            std::setprecision(6) <<
+            " (" << num_match << "/" << num_reference << ")" << ", " <<
+            std::fixed << std::setprecision(4) << f1score << std::endl;
+        os << std::setprecision(6);
+        os.unsetf(std::ios::fixed);
+    }
+
+    template <class positive_iterator_type>
+    void output_macro(
+        std::ostream& os,
+        positive_iterator_type pb,
+        positive_iterator_type pe
+        ) const
+    {
+        int n = 0;
+        double precision = 0., recall = 0., f1 = 0.;
+
+        for (positive_iterator_type it = pb;it != pe;++it) {
+            double p = divide(m_stat[*it].num_match, m_stat[*it].num_prediction);
+            double r = divide(m_stat[*it].num_match, m_stat[*it].num_reference);
+            double f = divide(2 * p * r, p + r);
+            precision += p;
+            recall += r;
+            f1 += f;
+            ++n;
+        }
+
+        precision /= n;
+        recall /= n;
+        f1 /= n;
+
+        os << "Macro P, R, F1: " << 
+            std::fixed << std::setprecision(4) << precision << ", " <<
+            std::fixed << std::setprecision(4) << recall << ", " <<
+            std::fixed << std::setprecision(4) << f1 << std::endl;
+        os << std::setprecision(6);
+        os.unsetf(std::ios::fixed);
+    }
+};
+
+#if 0
+class confusion_matrix
+{
 protected:
     int n;
     int *matrix;
@@ -274,6 +382,8 @@ public:
         os.unsetf(std::ios::fixed);
     }
 };
+
+#endif
 
 };
 

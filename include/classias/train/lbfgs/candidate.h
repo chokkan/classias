@@ -252,7 +252,7 @@ public:
 
             int imax = cls.argmax();
             acc.set(itrue == imax);
-            matrix(inst[itrue].get_label(), inst[imax].get_label())++;
+            matrix.set(inst[itrue].get_label(), inst[imax].get_label());
         }
 
         // Report accuracy, precision, recall, and f1 score.

@@ -190,7 +190,7 @@ public:
 
             // Store the results.
             acc.set(rl == ml);
-            matrix(rl, ml)++;
+            matrix.set(rl, ml);
         }
 
         acc.output(os);
