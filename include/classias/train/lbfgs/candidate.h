@@ -227,7 +227,7 @@ public:
         const value_type *x = this->m_weights;
         classifier_type cls(x);
         accuracy acc;
-        confusion_matrix matrix(data.labels.size());
+        precall pr(data.labels.size());
 
         // Loop over instances.
         for (const_iterator iti = data.begin();iti != data.end();++iti) {
@@ -251,14 +251,14 @@ public:
             cls.finalize();
 
             int imax = cls.argmax();
-            acc.set(itrue == imax);
-            matrix.set(inst[itrue].get_label(), inst[imax].get_label());
+            acc.set(imax == itrue);
+            pr.set(inst[imax].get_label(), inst[itrue].get_label());
         }
 
         // Report accuracy, precision, recall, and f1 score.
         acc.output(os);
-        matrix.output_micro(os, data.positive_labels.begin(), data.positive_labels.end());
-        matrix.output_macro(os, data.positive_labels.begin(), data.positive_labels.end());
+        pr.output_micro(os, data.positive_labels.begin(), data.positive_labels.end());
+        pr.output_macro(os, data.positive_labels.begin(), data.positive_labels.end());
     }
 };
 

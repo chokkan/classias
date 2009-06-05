@@ -173,7 +173,7 @@ public:
         const value_type *x = this->m_weights;
         int positive_labels[] = {1};
         accuracy acc;
-        confusion_matrix matrix(2);
+        precall pr(2);
         classifier_type cls(x);
 
         // For each instance in the data.
@@ -189,12 +189,12 @@ public:
             int ml = static_cast<int>(static_cast<bool>(cls));
 
             // Store the results.
-            acc.set(rl == ml);
-            matrix.set(rl, ml);
+            acc.set(ml == rl);
+            pr.set(ml, rl);
         }
 
         acc.output(os);
-        matrix.output_micro(os, positive_labels, positive_labels+1);
+        pr.output_micro(os, positive_labels, positive_labels+1);
     }
 };
 

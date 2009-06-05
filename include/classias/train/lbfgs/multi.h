@@ -210,7 +210,7 @@ public:
         const value_type *x = this->m_weights;
         classifier_type cls(x, const_cast<feature_generator_type&>(data.feature_generator));
         accuracy acc;
-        confusion_matrix matrix(data.labels.size());
+        precall pr(data.labels.size());
 
         // The number of labels is constant; reserve the work space.
         cls.resize(L);
@@ -228,14 +228,14 @@ public:
             cls.finalize();
 
             int imax = cls.argmax();
-            acc.set(iti->get_label() == imax);
-            matrix.set(iti->get_label(), imax);
+            acc.set(imax == iti->get_label());
+            pr.set(imax, iti->get_label());
         }
 
         // Report accuracy, precision, recall, and f1 score.
         acc.output(os);
-        matrix.output_micro(os, data.positive_labels.begin(), data.positive_labels.end());
-        matrix.output_macro(os, data.positive_labels.begin(), data.positive_labels.end());
+        pr.output_micro(os, data.positive_labels.begin(), data.positive_labels.end());
+        pr.output_macro(os, data.positive_labels.begin(), data.positive_labels.end());
     }
 };
 

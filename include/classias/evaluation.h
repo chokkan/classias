@@ -39,79 +39,124 @@
 namespace classias
 {
 
+/**
+ * Accuracy counter.
+ */
 class accuracy
 {
 protected:
-    int c;
-    int n;
+    int m_m;    ///< The number of matches.
+    int m_n;    ///< The total number of instances.
 
 public:
-    accuracy() : n(0), c(0)
+    /**
+     * Constructs an object.
+     */
+    accuracy() : m_m(0), m_n(0)
     {
     }
 
+    /**
+     * Destructs the object.
+     */
     virtual ~accuracy()
     {
     }
 
+    /**
+     * Increments the number of correct/incorrect instances.
+     *  @param  b           A correctness of an instance.
+     */
     inline void set(bool b)
     {
-        c += static_cast<int>(b);
-        ++n;
+        m_m += static_cast<int>(b);
+        ++m_n;
     }
 
+    /**
+     * Gets the accuracy.
+     *  @return double      The accuracy.
+     */
+    inline operator double() const
+    {
+        return (0 < m_n ? m_m / (double)m_n : 0.);
+    }
+
+    /**
+     * Outputs the accuracy score.
+     *  @param  os          The output stream.
+     */
     void output(std::ostream& os) const
     {
-        double acc = (0 < n ? c / (double)n : 0);
+        double acc = (0 < m_n ? m_m / (double)m_n : 0);
         os << "Accuracy: " <<
-            std::fixed << std::setprecision(4) << acc <<
+            std::fixed << std::setprecision(4) << static_cast<double>(*this) <<
             std::setprecision(6) << 
-            " (" << c << "/" << n << ")" << std::endl;
+            " (" << m_m << "/" << m_n << ")" << std::endl;
         os.unsetf(std::ios::fixed);
     }
 };
 
-class confusion_matrix
+/**
+ * Counter for precision, recall, and F1 scores
+ */
+class precall
 {
-public:
+protected:
+    /// A counter for each label.
     struct label_stat
     {
         int num_match;
         int num_reference;
         int num_prediction;
-        label_stat() : num_match(0), num_reference(0), num_prediction(0)
+
+        label_stat() :
+            num_match(0), num_reference(0), num_prediction(0)
         {
         }
     };
 
-protected:
-    int m_n;
-    label_stat* m_stat;
+    int m_n;                ///< The number of labels.
+    label_stat* m_stat;     ///< The label-wise stats.
 
 public:
-    confusion_matrix(int N) : m_n(N)
+    /**
+     * Constructs an object.
+     *  @param  N           The number of labels.
+     */
+    precall(int N) : m_n(N)
     {
         m_stat = new label_stat[N];
     }
 
-    virtual ~confusion_matrix()
+    /**
+     * Destructs an object.
+     */
+    virtual ~precall()
     {
         delete[] m_stat;
     }
 
-    void set(int ref, int pred)
+    /**
+     * Sets a pair of predicted and reference labels.
+     *  @param  p           The predicted label.
+     *  @param  r           The reference label.
+     */
+    void set(int p, int r)
     {
-        m_stat[ref].num_reference++;
-        m_stat[pred].num_prediction++;
-        if (ref == pred) m_stat[pred].num_match++;
+        m_stat[r].num_reference++;
+        m_stat[p].num_prediction++;
+        if (r == p) m_stat[p].num_match++;
     }
 
-    template <typename value_type>
-    static inline double divide(value_type a, value_type b)
-    {
-        return (b != 0) ? (a / (double)b) : 0.;
-    }
-
+    /**
+     * Outputs micro-average precision, recall, F1 scores.
+     *  @param  os          The output stream.
+     *  @param  pb          The iterator for the first element of the
+     *                      positive labels.
+     *  @param  pe          The iterator just beyond the last element
+     *                      of the positive labels.
+     */
     template <class positive_iterator_type>
     void output_micro(
         std::ostream& os,
@@ -145,6 +190,14 @@ public:
         os.unsetf(std::ios::fixed);
     }
 
+    /**
+     * Outputs macro-average precision, recall, F1 scores.
+     *  @param  os          The output stream.
+     *  @param  pb          The iterator for the first element of the
+     *                      positive labels.
+     *  @param  pe          The iterator just beyond the last element
+     *                      of the positive labels.
+     */
     template <class positive_iterator_type>
     void output_macro(
         std::ostream& os,
@@ -176,214 +229,14 @@ public:
         os << std::setprecision(6);
         os.unsetf(std::ios::fixed);
     }
-};
 
-#if 0
-class confusion_matrix
-{
 protected:
-    int n;
-    int *matrix;
-
-public:
-    confusion_matrix(int N) : n(N)
-    {
-        matrix = new int[N * N];
-        clear();
-    }
-
-    virtual ~confusion_matrix()
-    {
-        delete[] matrix;
-    }
-
-    inline int& operator() (int x, int y)
-    {
-        return matrix[x + y * n];
-    }
-
-    inline const int& operator() (int x, int y) const
-    {
-        return matrix[x + y * n];
-    }
-
-    inline int xsum(int x) const
-    {
-        int sum = 0;
-        for (int y = 0;y < n;++y) {
-            sum += this->operator()(x, y);
-        }
-        return sum;
-    }
-
-    inline int ysum(int y) const
-    {
-        int sum = 0;
-        for (int x = 0;x < n;++x) {
-            sum += this->operator()(x, y);
-        }
-        return sum;
-    }
-
-    void clear()
-    {
-        for (int x = 0;x < n;++x) {
-            for (int y = 0;y < n;++y) {
-                this->operator()(x, y) = 0;
-            }
-        }
-    }
-
-    inline int match(int l) const
-    {
-        return this->operator()(l, l);
-    }
-
-    inline int correct() const
-    {
-        int sum = 0;
-        for (int l = 0;l < n;++l) {
-            sum += this->match(l);
-        }
-        return sum;
-    }
-
-    inline int reference(int x) const
-    {
-        int sum = 0;
-        for (int y = 0;y < n;++y) {
-            sum += this->operator()(x, y);
-        }
-        return sum;
-    }
-
-    inline int prediction(int y) const
-    {
-        int sum = 0;
-        for (int x = 0;x < n;++x) {
-            sum += this->operator()(x, y);
-        }
-        return sum;
-    }
-
-    inline int total() const
-    {
-        int sum = 0;
-        for (int x = 0;x < n;++x) {
-            for (int y = 0;y < n;++y) {
-                sum += this->operator()(x, y);
-            }
-        }
-        return sum;
-    }
-
     template <typename value_type>
     static inline double divide(value_type a, value_type b)
     {
         return (b != 0) ? (a / (double)b) : 0.;
     }
-
-    template <class positive_iterator_type>
-    void compute_micro(
-        positive_iterator_type pb,
-        positive_iterator_type pe,
-        int& num_match,
-        int& num_reference,
-        int& num_prediction
-        ) const
-    {
-        num_match = 0;
-        num_reference = 0;
-        num_prediction = 0;
-
-        for (positive_iterator_type it = pb;it != pe;++it) {
-            num_match += this->match(*it);
-            num_reference += this->xsum(*it);
-            num_prediction += this->ysum(*it);
-        }
-    }
-
-    template <class positive_iterator_type>
-    void output_micro(
-        std::ostream& os,
-        positive_iterator_type pb,
-        positive_iterator_type pe
-        ) const
-    {
-        int num_match = 0;
-        int num_reference = 0;
-        int num_prediction = 0;
-        compute_micro<positive_iterator_type>(
-            pb, pe, num_match, num_reference, num_prediction);
-
-        double precision = divide(num_match, num_prediction);
-        double recall = divide(num_match, num_reference);
-        double f1score = divide(2 * precision * recall, precision + recall);
-
-        os << "Micro P, R, F1: " <<
-            std::fixed << std::setprecision(4) << precision <<
-            std::setprecision(6) << 
-            " (" << num_match << "/" << num_prediction << ")" << ", " <<
-            std::fixed << std::setprecision(4) << recall <<
-            std::setprecision(6) <<
-            " (" << num_match << "/" << num_reference << ")" << ", " <<
-            std::fixed << std::setprecision(4) << f1score << std::endl;
-        os << std::setprecision(6);
-        os.unsetf(std::ios::fixed);
-    }
-
-    template <class positive_iterator_type>
-    void compute_macro(
-        positive_iterator_type pb,
-        positive_iterator_type pe,
-        double& precision,
-        double& recall,
-        double& f1
-        ) const
-    {
-        int n = 0;
-        int num_match = 0;
-        int num_reference = 0;
-        int num_prediction = 0;
-        precision = recall = f1 = 0.;
-
-        for (positive_iterator_type it = pb;it != pe;++it) {
-            num_match = this->match(*it);
-            num_reference = this->xsum(*it);
-            num_prediction = this->ysum(*it);
-            double p = divide(num_match, num_prediction);
-            double r = divide(num_match, num_reference);
-            double f = divide(2 * p * r, p + r);
-            precision += p;
-            recall += r;
-            f1 += f;
-            ++n;
-        }
-
-        precision /= n;
-        recall /= n;
-        f1 /= n;
-    }
-
-    template <class positive_iterator_type>
-    void output_macro(
-        std::ostream& os,
-        positive_iterator_type pb,
-        positive_iterator_type pe
-        ) const
-    {
-        double precision = 0., recall = 0., f1 = 0.;
-        compute_macro(pb, pe, precision, recall, f1);
-        os << "Macro P, R, F1: " << 
-            std::fixed << std::setprecision(4) << precision << ", " <<
-            std::fixed << std::setprecision(4) << recall << ", " <<
-            std::fixed << std::setprecision(4) << f1 << std::endl;
-        os << std::setprecision(6);
-        os.unsetf(std::ios::fixed);
-    }
 };
-
-#endif
 
 };
 
