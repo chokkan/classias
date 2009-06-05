@@ -218,11 +218,11 @@ int main(int argc, char *argv[])
     std::ostream& es = opt.es;
 
     // Show the copyright information.
-    es << CLASSIAS_NAME " ";
-    es << CLASSIAS_MAJOR_VERSION << "." << CLASSIAS_MINOR_VERSION << " ";
-    es << "trainer ";
-    es << CLASSIAS_COPYRIGHT << std::endl;
-    es << std::endl;
+    os << CLASSIAS_NAME " ";
+    os << CLASSIAS_MAJOR_VERSION << "." << CLASSIAS_MINOR_VERSION << " ";
+    os << "trainer ";
+    os << CLASSIAS_COPYRIGHT << std::endl;
+    os << std::endl;
 
     // Parse the command-line options.
     try { 
