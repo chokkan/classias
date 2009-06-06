@@ -118,7 +118,13 @@ read_data(
                 decomp = "text";
             }
 
-            os << decomp << " (" << i+1 << "/" << opt.files.size() << ") : " << file;
+            // Output the file name (and its decompressor).
+            os << i+1 << '/' << opt.files.size();
+            if (!decomp.empty()) {
+                os << " (" << decomp << ")";
+            }
+            os << ": " << file;
+
             if (decomp_cmd.empty()) {
                 std::ifstream ifs(file.c_str());
                 if (!ifs.fail()) {
