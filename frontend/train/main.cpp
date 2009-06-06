@@ -154,8 +154,8 @@ static void usage(std::ostream& os, const char *argv0)
     os << "          are specified, this utility assumes a data set to be split into N" << std::endl;
     os << "          groups and sets a group number (1...N) to the instances in each file;" << std::endl;
     os << "          if no file is specified, the tool reads a data set from STDIN;" << std::endl;
-    os << "          if a file name has an extension '.gz', '.bz2', and '.xz', this" << std::endl;
-    os << "          utility uses 'gzip', 'bzip2', and 'xv' to decompress the file" << std::endl;
+    os << "          if a file name has an extension '.gz', '.bz2', and '.xz', the utility" << std::endl;
+    os << "          uses 'gzip', 'bzip2', and 'xv' to decompress the input file" << std::endl;
     os << std::endl;
     os << "OPTIONS:" << std::endl;
     os << "  -t, --type=TYPE       specify a task type (DEFAULT='multi-dense'):" << std::endl;
