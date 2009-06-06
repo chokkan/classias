@@ -38,6 +38,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <libexecstream/exec-stream.h>
 #include "util.h"
 
 template <
@@ -98,12 +99,45 @@ read_data(
     } else {
         // Read the data from files.
         for (int i = 0;i < (int)opt.files.size();++i) {
-            std::ifstream ifs(opt.files[i].c_str());
-            if (!ifs.fail()) {
-                os << "File (" << i+1 << "/" << opt.files.size() << ") : " << opt.files[i] << std::endl;
-                read_stream(ifs, data, opt, i);
+            std::string decomp, decomp_cmd, decomp_arg;
+            const std::string& file = opt.files[i];
+
+            if (file.compare(file.length()-3, 3, ".gz") == 0) {
+                decomp = "gzip";
+                decomp_cmd = "gzip";
+                decomp_arg = "-dc ";
+            } else if (file.compare(file.length()-3, 3, ".bz") == 0) {
+                decomp = "bzip";
+                decomp_cmd = "bzip2";
+                decomp_arg = "-dck ";
+            } else if (file.compare(file.length()-3, 3, ".xz") == 0) {
+                decomp = "xz";
+                decomp_cmd = "xz";
+                decomp_arg = "-dc ";
+            } else {
+                decomp = "text";
             }
-            ifs.close();
+
+            os << decomp << " (" << i+1 << "/" << opt.files.size() << ") : " << file;
+            if (decomp_cmd.empty()) {
+                std::ifstream ifs(file.c_str());
+                if (!ifs.fail()) {
+                    read_stream(ifs, data, opt, i);
+                } else {
+                    os << ": failed";
+                }
+            } else {
+                exec_stream_t proc;
+                proc.set_text_mode(exec_stream_t::s_out);
+                proc.start(decomp_cmd, decomp_arg + file);
+                std::istream& ifs = proc.out();
+                if (!ifs.fail()) {
+                    read_stream(ifs, data, opt, i);
+                } else {
+                    os << ": failed (" << proc.exit_code() << ")";
+                }
+            }
+            os << std::endl;
         }
     }
 }
