@@ -5,6 +5,7 @@ bin_PROGRAMS = classias-train
 #EXTRA_DIST = ${man_MANS}
 
 classias_train_SOURCES = \
+	../contrib/libexecstream/exec-stream.cpp \
 	option.h \
 	optparse.h \
 	tokenize.h \
@@ -16,5 +17,6 @@ classias_train_SOURCES = \
 	main.cpp
 
 AM_CXXFLAGS = @CXXFLAGS@
-INCLUDES = @INCLUDES@ -I../include
+INCLUDES = @INCLUDES@ -I../contrib -I../include
 AM_LDFLAGS = @LDFLAGS@
+

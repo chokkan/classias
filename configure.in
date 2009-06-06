@@ -20,24 +20,23 @@ dnl Checks for system
 dnl ------------------------------------------------------------------
 AC_CANONICAL_HOST
 AC_AIX
-AC_MINIX
+AC_GNU_SOURCE
 AC_ISC_POSIX
+AC_MINIX
 
 
 dnl ------------------------------------------------------------------
 dnl Initialization for automake
 dnl ------------------------------------------------------------------
-AM_INIT_AUTOMAKE(trankin, 0.1)
+AM_INIT_AUTOMAKE(classias, 0.4)
 AC_CONFIG_HEADERS(config.h)
 AM_MAINTAINER_MODE
-AM_C_PROTOTYPES
 
 
 dnl ------------------------------------------------------------------
 dnl Checks for program
 dnl ------------------------------------------------------------------
 AC_PROG_CXX
-AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 AC_PROG_LN_S
 
@@ -54,7 +53,7 @@ dnl ------------------------------------------------------------------
 dnl Checks for header files.
 dnl ------------------------------------------------------------------
 AC_HEADER_STDC
-AC_CHECK_HEADERS(fcntl.h limits.h malloc.h strings.h unistd.h stdint.h)
+AC_CHECK_HEADERS(stdint.h)
 
 
 dnl ------------------------------------------------------------------
@@ -96,13 +95,10 @@ fi
 dnl ------------------------------------------------------------------
 dnl Checks for library functions.
 dnl ------------------------------------------------------------------
-AC_FUNC_ALLOCA
-AC_FUNC_MEMCMP
-AC_FUNC_VPRINTF
-AC_CHECK_FUNCS(strdup strerror strtol strtoul)
 
 dnl Check for math library
 AC_CHECK_LIB(m, rand)
+AC_CHECK_LIB(pthread, pthread_create)
 
 AC_ARG_WITH(
 	liblbfgs,
@@ -111,7 +107,7 @@ AC_ARG_WITH(
 )
 AC_CHECK_LIB(lbfgs, lbfgs)
 
-INCLUDES="-I\$(top_srcdir) -I\$(top_srcdir)/include -I\$(srcdir)i ${INCLUDES}"
+INCLUDES="-I\$(top_srcdir) -I\$(top_srcdir)/include -I\$(srcdir) ${INCLUDES}"
 
 dnl ------------------------------------------------------------------
 dnl Export variables

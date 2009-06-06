@@ -12,10 +12,10 @@ else
     FORCE_MISSING=
 fi
 
-libtoolize --copy $FORCE 2>&1 | sed '/^You should/d' || {
-    echo "libtoolize failed!"
-    exit 1
-}
+#libtoolize --copy $FORCE 2>&1 | sed '/^You should/d' || {
+#    echo "libtoolize failed!"
+#    exit 1
+#}
 
 aclocal $FORCE || {
     echo "aclocal failed!"

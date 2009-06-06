@@ -106,8 +106,8 @@ read_data(
                 decomp = "gzip";
                 decomp_cmd = "gzip";
                 decomp_arg = "-dc ";
-            } else if (file.compare(file.length()-3, 3, ".bz") == 0) {
-                decomp = "bzip";
+            } else if (file.compare(file.length()-4, 4, ".bz2") == 0) {
+                decomp = "bzip2";
                 decomp_cmd = "bzip2";
                 decomp_arg = "-dck ";
             } else if (file.compare(file.length()-3, 3, ".xz") == 0) {
