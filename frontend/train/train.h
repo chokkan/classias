@@ -103,27 +103,22 @@ read_data(
             const std::string& file = opt.files[i];
 
             if (file.compare(file.length()-3, 3, ".gz") == 0) {
-                decomp = "gzip";
+                decomp = " (gzip)";
                 decomp_cmd = "gzip";
                 decomp_arg = "-dc ";
             } else if (file.compare(file.length()-4, 4, ".bz2") == 0) {
-                decomp = "bzip2";
+                decomp = " (bzip2)";
                 decomp_cmd = "bzip2";
                 decomp_arg = "-dck ";
             } else if (file.compare(file.length()-3, 3, ".xz") == 0) {
-                decomp = "xz";
+                decomp = " (xz)";
                 decomp_cmd = "xz";
-                decomp_arg = "-dc ";
-            } else {
-                decomp = "text";
+                decomp_arg = "-dck ";
             }
 
             // Output the file name (and its decompressor).
-            os << i+1 << '/' << opt.files.size();
-            if (!decomp.empty()) {
-                os << " (" << decomp << ")";
-            }
-            os << ": " << file;
+            os << "- " << i+1 << decomp << ": " << file;
+            os.flush();
 
             if (decomp_cmd.empty()) {
                 std::ifstream ifs(file.c_str());
@@ -144,6 +139,7 @@ read_data(
                 }
             }
             os << std::endl;
+            os.flush();
         }
     }
 }
@@ -192,7 +188,7 @@ train(option& opt)
     os << std::endl;
 
     // Read the source data.
-    os << "Reading the data set" << std::endl;
+    os << "Reading the data set from " << opt.files.size() << " files" << std::endl;
     sw.start();
     num_groups = read_dataset(data, opt);
     sw.stop();
