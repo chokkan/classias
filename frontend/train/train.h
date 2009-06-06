@@ -102,18 +102,19 @@ read_data(
             std::string decomp, decomp_cmd, decomp_arg;
             const std::string& file = opt.files[i];
 
+            // Set a compressor and its arguments.
             if (file.compare(file.length()-3, 3, ".gz") == 0) {
                 decomp = " (gzip)";
                 decomp_cmd = "gzip";
-                decomp_arg = "-dc ";
+                decomp_arg = "-dc";
             } else if (file.compare(file.length()-4, 4, ".bz2") == 0) {
                 decomp = " (bzip2)";
                 decomp_cmd = "bzip2";
-                decomp_arg = "-dck ";
+                decomp_arg = "-dck";
             } else if (file.compare(file.length()-3, 3, ".xz") == 0) {
                 decomp = " (xz)";
                 decomp_cmd = "xz";
-                decomp_arg = "-dck ";
+                decomp_arg = "-dck";
             }
 
             // Output the file name (and its decompressor).
@@ -121,6 +122,7 @@ read_data(
             os.flush();
 
             if (decomp_cmd.empty()) {
+                // Read an uncompressed file.
                 std::ifstream ifs(file.c_str());
                 if (!ifs.fail()) {
                     read_stream(ifs, data, opt, i);
@@ -128,12 +130,17 @@ read_data(
                     os << ": failed";
                 }
             } else {
+                // Read a compressed file from an external decompressor.
                 exec_stream_t proc;
                 proc.set_text_mode(exec_stream_t::s_out);
-                proc.start(decomp_cmd, decomp_arg + file);
+                proc.start(decomp_cmd, decomp_arg.c_str(), file.c_str());
                 std::istream& ifs = proc.out();
                 if (!ifs.fail()) {
                     read_stream(ifs, data, opt, i);
+                    proc.close();
+                    if (proc.exit_code() != 0) {
+                        os << ": (exit_code = " << proc.exit_code() << ")";
+                    }
                 } else {
                     os << ": failed (" << proc.exit_code() << ")";
                 }
