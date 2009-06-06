@@ -209,18 +209,22 @@ public:
         double precision = 0., recall = 0., f1 = 0.;
 
         for (positive_iterator_type it = pb;it != pe;++it) {
-            double p = divide(m_stat[*it].num_match, m_stat[*it].num_prediction);
-            double r = divide(m_stat[*it].num_match, m_stat[*it].num_reference);
-            double f = divide(2 * p * r, p + r);
-            precision += p;
-            recall += r;
-            f1 += f;
-            ++n;
+            if (0 < m_stat[*it].num_prediction || 0 < m_stat[*it].num_reference) {
+                double p = divide(m_stat[*it].num_match, m_stat[*it].num_prediction);
+                double r = divide(m_stat[*it].num_match, m_stat[*it].num_reference);
+                double f = divide(2 * p * r, p + r);
+                precision += p;
+                recall += r;
+                f1 += f;
+                ++n;
+            }
         }
 
-        precision /= n;
-        recall /= n;
-        f1 /= n;
+        if (0 < n) {
+            precision /= n;
+            recall /= n;
+            f1 /= n;
+        }
 
         os << "Macro P, R, F1: " << 
             std::fixed << std::setprecision(4) << precision << ", " <<

@@ -111,11 +111,11 @@ public:
             negative_labels.insert(arg);
 
         ON_OPTION_WITH_ARG(SHORTOPT('s') || LONGOPT("token-separator"))
-            if (strcmp(arg, " ") == 0 || strcasecmp(arg, "spc") == 0 || strcasecmp(arg, "space") == 0) {
+            if (strcmp(arg, " ") == 0 || strcasecmp(arg, "s") == 0 || strcasecmp(arg, "spc") == 0 || strcasecmp(arg, "space") == 0) {
                 token_separator = ' ';
-            } else if (strcmp(arg, ",") == 0 || strcasecmp(arg, "comma") == 0) {
+            } else if (strcmp(arg, ",") == 0 || strcasecmp(arg, "c") == 0 || strcasecmp(arg, "comma") == 0) {
                 token_separator = ',';
-            } else if (strcmp(arg, "\t") == 0 || strcasecmp(arg, "tab") == 0) {
+            } else if (strcmp(arg, "\t") == 0 || strcasecmp(arg, "t") == 0 || strcasecmp(arg, "tab") == 0) {
                 token_separator = '\t';
             } else {
                 std::stringstream ss;
@@ -124,11 +124,11 @@ public:
             }
 
         ON_OPTION_WITH_ARG(SHORTOPT('c') || LONGOPT("value-separator"))
-            if (strcmp(arg, ":") == 0 || strcasecmp(arg, "colon") == 0) {
+            if (strcmp(arg, ":") == 0 || strcasecmp(arg, "c") == 0 || strcasecmp(arg, "colon") == 0) {
                 value_separator = ':';
-            } else if (strcmp(arg, "=") == 0 || strcasecmp(arg, "eq") == 0 || strcasecmp(arg, "equal") == 0) {
+            } else if (strcmp(arg, "=") == 0 || strcasecmp(arg, "e") == 0 || strcasecmp(arg, "eq") == 0 || strcasecmp(arg, "equal") == 0) {
                 value_separator = '=';
-            } else if (strcmp(arg, "|") == 0 || strcasecmp(arg, "bar") == 0) {
+            } else if (strcmp(arg, "|") == 0 || strcasecmp(arg, "b") == 0 || strcasecmp(arg, "bar") == 0) {
                 value_separator = '|';
             } else {
                 std::stringstream ss;
@@ -196,13 +196,13 @@ static void usage(std::ostream& os, const char *argv0)
     os << "  -n, --negative=LABEL  specify a negative label for computing precision," << std::endl;
     os << "                        recall, and F1 scores" << std::endl;
     os << "  -s, --token-separator=SEP assume SEP character as a token separator:" << std::endl;
-    os << "      '\t', tab                 a TAB ('\t') character (DEFAULT)" << std::endl;
-    os << "      ' ',  spc, space          a SPACE (' ') character" << std::endl;
-    os << "      ',',  comma               a COMMA (',') character" << std::endl;
+    os << "      '\t', t, tab              a TAB ('\t') character (DEFAULT)" << std::endl;
+    os << "      ' ',  s, spc, space       a SPACE (' ') character" << std::endl;
+    os << "      ',',  c, comma            a COMMA (',') character" << std::endl;
     os << "  -c, --value-separator=SEP assume SEP character as a value separator:" << std::endl;
-    os << "      ':',  colon               a COLON (':') character (DEFAULT)" << std::endl;
-    os << "      '=',  equal               a EQUAL ('=') character" << std::endl;
-    os << "      '|',  bar                 a BAR ('|') character" << std::endl;
+    os << "      ':',  c, colon            a COLON (':') character (DEFAULT)" << std::endl;
+    os << "      '=',  e, equal            a EQUAL ('=') character" << std::endl;
+    os << "      '|',  b, bar              a BAR ('|') character" << std::endl;
     os << "  -h, --help            show this help message and exit" << std::endl;
     os << "  -H, --help-parameters show the help message of algorithm-specific parameters;" << std::endl;
     os << "                        specify an algorithm with '-a' or '--algorithm' option" << std::endl;
