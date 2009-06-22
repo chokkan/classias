@@ -109,7 +109,7 @@ public:
     }
 };
 
-static void
+inline static void
 get_name_value(
     const std::string& str, std::string& name, double& value, char separator)
 {

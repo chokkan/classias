@@ -107,6 +107,10 @@ public:
         ON_OPTION(SHORTOPT('x') || LONGOPT("cross-validate"))
             cross_validation = true;
 
+        ON_OPTION_WITH_ARG(SHORTOPT('F') || LONGOPT("filter"))
+            ignore_filter = false;
+            filter = arg;
+
         ON_OPTION_WITH_ARG(SHORTOPT('n') || LONGOPT("negative"))
             negative_labels.insert(arg);
 
