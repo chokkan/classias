@@ -113,7 +113,9 @@ read_line(
         if (!itv->empty()) {
             double value;
             get_name_value(*itv, name, value, opt.value_separator);
-            cand.append(features(name), value);
+            if (opt.ignore_filter || std::tr1::regex_search(name, opt.filter)) {
+                cand.append(features(name), value);
+            }
         }
     }
 }

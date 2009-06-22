@@ -198,6 +198,7 @@ static void usage(std::ostream& os, const char *argv0)
     os << "                        for training" << std::endl;
     os << "  -x, --cross-validate  repeat holdout evaluations for #i in {1, ..., N}" << std::endl;
     os << "                        (N-fold cross validation)" << std::endl;
+    os << "  -F, --filter=REGEX    filter attributes whose names are matched by REGEX" << std::endl;
     os << "  -n, --negative=LABEL  specify a negative label for computing precision," << std::endl;
     os << "                        recall, and F1 scores" << std::endl;
     os << "  -s, --token-separator=SEP assume SEP character as a token separator:" << std::endl;

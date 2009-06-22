@@ -98,7 +98,9 @@ read_line(
             double value;
             std::string name;
             get_name_value(*itv, name, value, opt.value_separator);
-            instance.append(attributes(name), value);
+            if (opt.ignore_filter || std::tr1::regex_search(name, opt.filter)) {
+                instance.append(attributes(name), value);
+            }
         }
     }
 
