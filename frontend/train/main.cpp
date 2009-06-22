@@ -35,6 +35,7 @@
 #endif/*HAVE_CONFIG_H*/
 
 #include <iostream>
+#include <typeinfo>
 #include <classias/version.h>
 #include <optparse.h>
 #include <tokenize.h>

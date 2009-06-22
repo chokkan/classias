@@ -33,6 +33,7 @@
 #ifndef __CLASSIAS_LBFGS_BASE_H__
 #define __CLASSIAS_LBFGS_BASE_H__
 
+#include <limits.h>
 #include <ctime>
 #include <iostream>
 #include <lbfgs.h>

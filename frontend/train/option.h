@@ -36,7 +36,12 @@
 #include <vector>
 #include <set>
 #include <string>
+
+#if defined _MSC_VER
 #include <regex>
+#elif defined __GNUC__
+#include <tr1/regex>
+#endif
 
 class option
 {

@@ -33,7 +33,7 @@
 #ifndef __CLASSIAS_PARAMS_H__
 #define __CLASSIAS_PARAMS_H__
 
-#include <cstdio>
+#include <cstdlib>
 #include <map>
 #include <sstream>
 #include <string>
