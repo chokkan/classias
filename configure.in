@@ -47,7 +47,9 @@ dnl ------------------------------------------------------------------
 CXXFLAGS="${ac_save_CXXFLAGS}"
 LDFLAGS="${ac_save_LDFLAGS}"
 INCLUDES="${ac_save_INCLUDES}"
-
+BOOST_INCLUDES=""
+BOOST_LDFLAGS=""
+BOOST_POSTFIX=""
 
 dnl ------------------------------------------------------------------
 dnl Checks for header files.
@@ -106,6 +108,32 @@ AC_ARG_WITH(
 	[INCLUDES="-I${withval}/include ${INCLUDES}"; LDFLAGS="-L${withval}/lib ${LDFLAGS}"]
 )
 AC_CHECK_LIB(lbfgs, lbfgs)
+
+AC_ARG_WITH(
+	boost,
+	[AS_HELP_STRING([--with-boost=DIR],[boost directory])],
+	[BOOST_INCLUDES="-I${withval}/include"; BOOST_LDFLAGS="-L${withval}/lib"]
+)
+AC_ARG_WITH(
+	boost-include,
+	[AS_HELP_STRING([--with-boost-include=DIR],[boost include directory])],
+	[BOOST_INCLUDES="-I${withval}"]
+)
+AC_ARG_WITH(
+	boost-lib,
+	[AS_HELP_STRING([--with-boost-lib=DIR],[boost library directory])],
+	[BOOST_LDFLAGS="-L${withval}"]
+)
+AC_ARG_WITH(
+	boost-postfix,
+	[AS_HELP_STRING([--with-boost-postfix=STR],[boost postfix])],
+	[BOOST_POSTFIX="${withval}"]
+)
+INCLUDES="${BOOST_INCLUDES} ${INCLUDES}"
+LDFLAGS="${BOOST_LDFLAGS} ${LDFLAGS}"
+
+AC_CHECK_HEADERS(boost/regex.hpp)
+AC_CHECK_LIB(boost_regex${BOOST_POSTFIX}, main)
 
 INCLUDES="-I\$(top_srcdir) -I\$(top_srcdir)/include -I\$(srcdir) ${INCLUDES}"
 

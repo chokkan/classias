@@ -39,8 +39,14 @@
 
 #if defined _MSC_VER
 #include <regex>
+#define REGEX std::tr1::regex
+#define REGEX_SEARCH std::tr1::regex_search
+
 #elif defined __GNUC__
-#include <tr1/regex>
+#include <boost/regex.hpp>
+#define REGEX boost::regex
+#define REGEX_SEARCH boost::regex_search
+
 #endif
 
 class option
@@ -80,7 +86,7 @@ public:
     int         split;
     int         holdout;
     bool        ignore_filter;
-    std::tr1::regex filter;
+    REGEX       filter;
     bool        cross_validation;
     labels_type negative_labels;
 

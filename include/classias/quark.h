@@ -35,8 +35,32 @@
 
 #if defined _MSC_VER
 #include <unordered_map>
+#define UNORDERED_MAP   std::tr1::unordered_map
+namespace std {
+    namespace tr1 {
+        template<>
+        struct hash<std::pair<int, int> > {
+            size_t operator()(const std::pair<int, int>& item) const
+            {
+                return (size_t)((item.first << 8) + (item.second & 0xFF));
+            }
+        };
+    };
+};
+
 #elif defined __GNUC__
-#include <tr1/unordered_map>
+#include <boost/unordered_map.hpp>
+#define UNORDERED_MAP   boost::unordered_map
+namespace boost {
+    template<>
+    struct hash<std::pair<int, int> > {
+        size_t operator()(const std::pair<int, int>& item) const
+        {
+            return (size_t)((item.first << 8) + (item.second & 0xFF));
+        }
+    };
+};
+
 #endif
 
 #include <map>
@@ -68,7 +92,7 @@ public:
 
     typedef std::vector<item_type> inverse_map_type;
     typedef typename inverse_map_type::size_type value_type;
-    typedef std::tr1::unordered_map<item_type, value_type> forward_map_type;
+    typedef UNORDERED_MAP<item_type, value_type> forward_map_type;
 
 protected:
     /// Forward mapping: (item0, item1) -> value.
@@ -160,7 +184,7 @@ public:
     typedef std::pair<item0_type, item1_type> elem_type;
     typedef std::vector<elem_type> inverse_map_type;
     typedef typename inverse_map_type::size_type value_type;
-    typedef std::tr1::unordered_map<elem_type, value_type> forward_map_type;
+    typedef UNORDERED_MAP<elem_type, value_type> forward_map_type;
 
 protected:
     /// Forward mapping: (item0, item1) -> value.
@@ -239,18 +263,6 @@ public:
 
 typedef quark_base<std::string> quark;
 
-};
-
-namespace std {
-    namespace tr1 {
-        template<>
-        struct hash<std::pair<int, int> > {
-            size_t operator()(const std::pair<int, int>& item) const
-            {
-                return (size_t)((item.first << 8) + (item.second & 0xFF));
-            }
-        };
-    };
 };
 
 #endif/*__CLASSIAS_QUARK_H__*/
