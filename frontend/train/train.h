@@ -192,6 +192,7 @@ train(option& opt)
 
 	// Report the start time.
     os << "Start time: " << timestamp << std::endl;
+    os << "Attribute filter: " << opt.filter_string << std::endl;
     os << std::endl;
 
     // Read the source data.

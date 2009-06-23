@@ -113,7 +113,7 @@ read_line(
         if (!itv->empty()) {
             double value;
             get_name_value(*itv, name, value, opt.value_separator);
-            if (opt.ignore_filter || REGEX_SEARCH(name, opt.filter)) {
+            if (opt.filter_string.empty() || REGEX_SEARCH(name, opt.filter)) {
                 cand.append(features(name), value);
             }
         }

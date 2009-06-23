@@ -85,8 +85,8 @@ public:
     bool        generate_bias;
     int         split;
     int         holdout;
-    bool        ignore_filter;
     REGEX       filter;
+    std::string filter_string;
     bool        cross_validation;
     labels_type negative_labels;
 
@@ -102,7 +102,6 @@ public:
         mode(MODE_NORMAL), type(TYPE_MULTI_DENSE), model(""),
         algorithm("logress.lbfgs"),        
         shuffle(false), generate_bias(false),
-        ignore_filter(true),
         split(0), holdout(-1), cross_validation(false),
         token_separator('\t'), value_separator(':')
     {
