@@ -192,13 +192,12 @@ train(option& opt)
     std::ostream& os = opt.os;
 
 	// Report the start time and global configurations.
-    os << "Start time: " << timestamp << std::endl;
     os << "Task type: ";
     switch (opt.type) {
-    case option::TYPE_BINARY:       os << "binary";
-    case option::TYPE_MULTI_DENSE:  os << "multi-dense";
-    case option::TYPE_MULTI_SPARSE: os << "multi-sparse";    
-    case option::TYPE_CANDIDATE:    os << "candidate";
+    case option::TYPE_BINARY:       os << "binary";         break;
+    case option::TYPE_MULTI_DENSE:  os << "multi-dense";    break;
+    case option::TYPE_MULTI_SPARSE: os << "multi-sparse";   break;
+    case option::TYPE_CANDIDATE:    os << "candidate";      break;
     }
     os << std::endl;
     os << "Training algorithm: " << opt.algorithm << std::endl;
@@ -209,6 +208,7 @@ train(option& opt)
     os << "Holdout group: " << opt.holdout << std::endl;
     os << "Cross validation: " << std::boolalpha << opt.cross_validation << std::endl;
     os << "Attribute filter: " << opt.filter_string << std::endl;
+    os << "Start time: " << timestamp << std::endl;
     os << std::endl;
 
     // Read the source data.
