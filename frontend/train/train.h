@@ -35,6 +35,7 @@
 
 #include <algorithm>
 #include <fstream>
+#include <ios>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -190,8 +191,23 @@ train(option& opt)
     int num_groups = 0;
     std::ostream& os = opt.os;
 
-	// Report the start time.
+	// Report the start time and global configurations.
     os << "Start time: " << timestamp << std::endl;
+    os << "Task type: ";
+    switch (opt.type) {
+    case option::TYPE_BINARY:       os << "binary";
+    case option::TYPE_MULTI_DENSE:  os << "multi-dense";
+    case option::TYPE_MULTI_SPARSE: os << "multi-sparse";    
+    case option::TYPE_CANDIDATE:    os << "candidate";
+    }
+    os << std::endl;
+    os << "Training algorithm: " << opt.algorithm << std::endl;
+    os << "Instance shuffle: " << std::boolalpha << opt.shuffle << std::endl;
+    os << "Bias feature generation: " << std::boolalpha << opt.generate_bias << std::endl;
+    os << "Model file: " << opt.model << std::endl;
+    os << "Instance splitting: " << opt.split << std::endl;
+    os << "Holdout group: " << opt.holdout << std::endl;
+    os << "Cross validation: " << std::boolalpha << opt.cross_validation << std::endl;
     os << "Attribute filter: " << opt.filter_string << std::endl;
     os << std::endl;
 
