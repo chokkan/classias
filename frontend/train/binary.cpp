@@ -75,12 +75,12 @@ read_line(
     tokenizer values(line, opt.token_separator);
     tokenizer::iterator itv = values.begin();
     if (itv == values.end()) {
-        throw invalid_data("no field found in the line", lines);
+        throw invalid_data("no field found in the line", line, lines);
     }
 
     // Make sure that the first token (class) is not empty.
     if (itv->empty()) {
-        throw invalid_data("an empty label found", lines);
+        throw invalid_data("an empty label found", line, lines);
     }
 
     // Parse the instance label.
@@ -92,7 +92,7 @@ read_line(
     } else if (name == "-1") {
         instance.set_truth(false);
     } else {
-        throw invalid_data("a class label must be either '+1', '1', or '-1'", lines);
+        throw invalid_data("a class label must be either '+1', '1', or '-1'", line, lines);
     }
 
     // Set the instance weight.
@@ -132,7 +132,7 @@ read_stream(
     if (opt.generate_bias) {
         int fid = (int)data.attributes("__BIAS__");
         if (fid != 0) {
-            throw invalid_data("A bias attribute could not obtain #0", 0);
+            throw invalid_data("A bias attribute could not obtain #0");
         }
         data.set_user_feature_start(fid+1);
     }
@@ -196,7 +196,7 @@ output_model(
     std::ofstream os(opt.model.c_str());
 
     // Output a model type.
-    os << "@model" << '\t' << "binary" << std::endl;
+    os << "@classias\tlinear\tbinary" << std::endl;
 
     // Store the feature weights.
     for (aid_type i = 0;i < attributes.size();++i) {

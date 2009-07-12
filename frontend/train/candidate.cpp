@@ -83,12 +83,12 @@ read_line(
     tokenizer values(line, opt.token_separator);
     tokenizer::iterator itv = values.begin();
     if (itv == values.end()) {
-        throw invalid_data("no field found in the line", lines);
+        throw invalid_data("no field found in the line", line, lines);
     }
 
     // Make sure that the first token (class) is not empty.
     if (itv->empty()) {
-        throw invalid_data("an empty label found", lines);
+        throw invalid_data("an empty label found", line, lines);
     }
 
     name = *itv;
@@ -100,7 +100,7 @@ read_line(
     } else if (name.compare(0, 1, "-") == 0 || name.compare(0, 1, "F") == 0) {
         truth = false;
     } else {
-        throw invalid_data("a class label must begins with '+', 'T', '-', or 'F'", lines);
+        throw invalid_data("a class label must begins with '+', 'T', '-', or 'F'", line, lines);
     }
 
     // Create a new candidate.
@@ -156,7 +156,7 @@ read_stream(
         // Read features that should not be regularized.
         if (line.compare(0, 13, "@unregularize") == 0) {
             if (!data.empty()) {
-                throw invalid_data("Declarative @unregularize must precede an instance", lines);
+                throw invalid_data("Declarative @unregularize must precede an instance", line, lines);
             }
 
             // Feature names for unregularization.
@@ -227,7 +227,7 @@ output_model(
     std::ofstream os(opt.model.c_str());
 
     // Output a model type.
-    os << "@model" << '\t' << "candidate" << std::endl;
+    os << "@classias\tlinear\tcandidate" << std::endl;
 
     // Store the feature weights.
     for (int_t i = 0;i < (int_t)data.attributes.size();++i) {

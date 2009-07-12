@@ -40,7 +40,7 @@
 #include <string>
 #include <vector>
 #include <libexecstream/exec-stream.h>
-#include "util.h"
+#include <util.h>
 
 template <
     class trainer_type,

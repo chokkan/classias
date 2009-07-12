@@ -77,12 +77,12 @@ read_line(
     tokenizer values(line, opt.token_separator);
     tokenizer::iterator itv = values.begin();
     if (itv == values.end()) {
-        throw invalid_data("no field found in the line", lines);
+        throw invalid_data("no field found in the line", line, lines);
     }
 
     // Make sure that the first token (class) is not empty.
     if (itv->empty()) {
-        throw invalid_data("an empty label found", lines);
+        throw invalid_data("an empty label found", line, lines);
     }
 
     // Parse the instance label.
@@ -128,7 +128,7 @@ read_stream(
     if (opt.generate_bias) {
         int aid = (int)data.attributes("__BIAS__");
         if (aid != 0) {
-            throw invalid_data("A bias attribute could not obtain #0", 0);
+            throw invalid_data("A bias attribute could not obtain #0");
         }
         // We will reserve the bias feature(s) in finalize_data() function.
     }
@@ -175,7 +175,7 @@ finalize_data(
     if (opt.generate_bias) {
         int_t aid = (int_t)data.attributes("__BIAS__");
         if (aid != 0) {
-            throw invalid_data("A bias attribute could not obtain #0", 0);
+            throw invalid_data("A bias attribute could not obtain #0");
         }
         data.generate_bias_features(aid);
     }
@@ -212,14 +212,13 @@ output_model(
     std::ofstream os(opt.model.c_str());
 
     // Output a model type.
-    os << "@model" << '\t' << "attribute-label" << std::endl;
+    os << "@classias\tlinear\tmulti\t";
+    os << data.feature_generator.name() << std::endl;
 
     // Output a set of labels.
-    os << "@labels";
     for (int_t l = 0;l < data.num_labels();++l) {
-        os << '\t' << data.labels.to_item(l);
+        os << "@label\t" << data.labels.to_item(l);
     }
-    os << std::endl;
 
     // Store the feature weights.
     for (int_t i = 0;i < data.num_features();++i) {

@@ -1,3 +1,3 @@
 # $Id$
 
-SUBDIRS = train
+SUBDIRS = train tag

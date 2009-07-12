@@ -83,6 +83,16 @@ public:
     }
 
     /**
+     * Returns the name of the feature generator.
+     *  @return const char* The feature name.
+     */
+    const char* name() const
+    {
+        static const char *str = "dense";
+        return str;
+    }
+
+    /**
      * Returns the total number of labels.
      *  @return int         The total number of labels.
      */
@@ -243,6 +253,16 @@ public:
      */
     virtual ~sparse_feature_generator_base()
     {
+    }
+
+    /**
+     * Returns the name of the feature generator.
+     *  @return const char* The feature name.
+     */
+    const char* name() const
+    {
+        static const char *str = "sparse";
+        return str;
     }
 
     /**

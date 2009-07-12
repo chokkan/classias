@@ -44,10 +44,19 @@ protected:
     std::string message;
 
 public:
-    invalid_data(const char *const& msg, int lines)
+    explicit invalid_data(
+        const std::string& msg, const std::string& line = "", int lines=0
+        )
     {
         std::stringstream ss;
-        ss << "in lines " << lines << ", " << msg;
+
+        ss << msg;
+        if (lines != 0) {
+            ss << ": lines " << lines;
+        }
+        if (!line.empty()) {
+            ss << ": " << line;
+        }
         message = ss.str();
     }
 
@@ -68,6 +77,15 @@ public:
     virtual const char *what() const throw()
     {
         return message.c_str();
+    }
+};
+
+class invalid_model : public invalid_data
+{
+public:
+    explicit invalid_model(const std::string& msg, const std::string& line = "")
+        : invalid_data(msg, line)
+    {
     }
 };
 
