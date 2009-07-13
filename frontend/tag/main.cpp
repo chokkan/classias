@@ -121,13 +121,8 @@ public:
 
 static void usage(std::ostream& os, const char *argv0)
 {
-    os << "USAGE: " << argv0 << " [OPTIONS] [DATA1] [DATA2] ..." << std::endl;
-    os << "This utility tags labels for data set(s) by using a model." << std::endl;
-    os << std::endl;
-    os << "  DATA    file(s) corresponding to a data set for training; if no file is" << std::endl;
-    os << "          specified, the tool reads a data set from STDIN; if a file name" << std::endl;
-    os << "          has an extension '.gz', '.bz2', and '.xz', the utility uses" << std::endl;
-    os << "          'gzip', 'bzip2', and 'xv' to decompress the input file" << std::endl;
+    os << "USAGE: " << argv0 << " [OPTIONS]" << std::endl;
+    os << "This utility tags labels for a data set read from STDIN." << std::endl;
     os << std::endl;
     os << "OPTIONS:" << std::endl;
     os << "  -m, --model=FILE      load the model from FILE" << std::endl;
