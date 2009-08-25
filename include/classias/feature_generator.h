@@ -193,7 +193,7 @@ public:
         ) const
     {
         for (iterator_type it = first;it != last;++it) {
-            int_t fid = static_cast<int_t>(it->first);
+            feature_type fid = static_cast<feature_type>(it->first);
             m[fid] += value * it->second;
         }
     }
@@ -357,7 +357,7 @@ public:
         ) const
     {
         for (iterator_type it = first;it != last;++it) {
-            int_t fid = this->forward(it->first, label);
+            feature_type fid = this->forward(it->first, label);
             if (0 <= fid) {
                 m[fid] += value * it->second;
             }
@@ -511,7 +511,7 @@ public:
         ) const
     {
         for (iterator_type it = first;it != last;++it) {
-            int_t fid = this->forward(it->first, label);
+            feature_type fid = this->forward(it->first, label);
             if (0 <= fid) {
                 m[fid] += value * it->second;
             }

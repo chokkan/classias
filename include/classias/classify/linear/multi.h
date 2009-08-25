@@ -131,7 +131,7 @@ public:
 
     /**
      * Returns the argmax index.
-     *  @return int         The index of the candidate that yields the
+     *  @return int         The label of the candidate that yields the
      *                      highest score.
      */
     inline int argmax() const
@@ -141,7 +141,7 @@ public:
 
     /**
      * Returns the score of a candidate.
-     *  @param  i           The candidate index.
+     *  @param  l           The label for the candidate.
      *  @return value_type  The score.
      */
     inline value_type score(int l)
@@ -169,7 +169,6 @@ public:
      *  @param  first       The iterator for the first element of attributes.
      *  @param  last        The iterator for the element just beyond the
      *                      last element of attributes.
-     *  @param  l           The label for the candidate.
      *  @param  reset       Specify \c true to reset the current result
      *                      before computing the inner product.
      */
@@ -277,12 +276,12 @@ public:
 
     /**
      * Returns the log of the probability for a label.
-     *  @param  i           The candidate index.
+     *  @param  l           The label for the candidate.
      *  @return value_type  The probability.
      */
-    inline value_type logprob(int i)
+    inline value_type logprob(int l)
     {
-        return (this->m_scores[i] - m_lognorm);
+        return (this->m_scores[l] - m_lognorm);
     }
 
     /**
@@ -299,8 +298,8 @@ public:
         // Compute the partition factor, starting from the maximum value.
         value_type sum = 0.;
         value_type max = this->m_scores[this->m_argmax];
-        for (int i = 0;i < this->size();++i) {
-            sum += std::exp(this->m_scores[i] - max);
+        for (int l = 0;l < this->size();++l) {
+            sum += std::exp(this->m_scores[l] - max);
         }
         m_lognorm = max + std::log(sum);
     }

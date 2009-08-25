@@ -46,7 +46,7 @@ namespace classify
  *
  *  @param  attribute_tmpl  The type of an attribute.
  *  @param  value_tmpl      The type of a feature weight.
- *  @param  model_tmpl      The type of a model (array of feature weights).
+ *  @param  model_tmpl      The type of a model (container of feature weights).
  */
 template <
     class attribute_tmpl,
@@ -185,7 +185,7 @@ public:
     }
 
     /**
-     * Compute the probability for the instance being positive.
+     * Computes the probability for the instance being positive.
      *  @return value_type  The probability.
      */
     inline value_type prob() const
@@ -198,7 +198,7 @@ public:
     }
 
     /**
-     * Compute the error of the classification result.
+     * Computes the error of the classification result.
      *  @param  b           The reference label for this instance.
      *  @return value_type  The error.
      */
@@ -217,7 +217,7 @@ public:
     }
 
     /**
-     * Compute the error of the classification result.
+     * Computes the error of the classification result.
      *  @param  b           The reference label for this instance.
      *  @param  loss        The negative of the log of the probability of the
      *                      instance being classified to the reference label.
