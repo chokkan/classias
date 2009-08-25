@@ -160,10 +160,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\include\classias\classify\linear\candidate.h"
-					>
-				</File>
-				<File
 					RelativePath="..\include\classias\classify\linear\multi.h"
 					>
 				</File>
@@ -209,10 +205,6 @@
 				</File>
 				<File
 					RelativePath="..\include\classias\train\lbfgs\binary.h"
-					>
-				</File>
-				<File
-					RelativePath="..\include\classias\train\lbfgs\candidate.h"
 					>
 				</File>
 				<File

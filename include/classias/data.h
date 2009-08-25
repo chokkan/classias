@@ -259,7 +259,8 @@ public:
 template <
     class instance_tmpl,
     class attributes_quark_tmpl,
-    class labels_quark_tmpl
+    class labels_quark_tmpl,
+    class feature_generator_tmpl
 >
 class candidate_data_base :
     public binary_data_base<instance_tmpl, attributes_quark_tmpl>
@@ -273,6 +274,8 @@ public:
     typedef labels_quark_tmpl labels_quark_type;
     /// The type of a label.
     typedef typename labels_quark_type::value_type label_type;
+    /// The type of the feature-generator class.
+    typedef feature_generator_tmpl feature_generator_type;
 
     /// The base class.
     typedef binary_data_base<instance_tmpl, attributes_quark_tmpl> base_type;
@@ -292,6 +295,9 @@ public:
     labels_quark_type labels;
     /// A set of positive labels in the data set.
     positive_labels_type positive_labels;
+
+    /// The feature generator.
+    feature_generator_type feature_generator;
 
     /**
      * Constructs the object.
@@ -345,7 +351,7 @@ template <
     class feature_generator_tmpl
 >
 class multi_data_base :
-    public candidate_data_base<instance_tmpl, attributes_quark_tmpl, labels_quark_tmpl>
+    public candidate_data_base<instance_tmpl, attributes_quark_tmpl, labels_quark_tmpl, feature_generator_tmpl>
 {
 public:
     /// The type of an instance.
@@ -360,7 +366,7 @@ public:
     typedef feature_generator_tmpl feature_generator_type;
  
     /// The base class.
-    typedef candidate_data_base<instance_tmpl, attributes_quark_tmpl, labels_quark_tmpl> base_type;
+    typedef candidate_data_base<instance_tmpl, attributes_quark_tmpl, labels_quark_tmpl, feature_generator_tmpl> base_type;
     /// A type providing a container of instances.
     typedef typename base_type::instances_type instances_type;
     /// A type counting the number of pairs in a container.
@@ -369,9 +375,6 @@ public:
     typedef typename base_type::iterator iterator;
     /// A type providing a read-only random-access iterator.
     typedef typename base_type::const_iterator const_iterator;
-
-    /// The feature generator.
-    feature_generator_type feature_generator;
 
 public:
     /**
@@ -394,13 +397,13 @@ public:
      */
     int_t num_features() const
     {
-        return feature_generator.num_features();
+        return this->feature_generator.num_features();
     }
 
     void generate_bias_features(const attribute_type& a)
     {
-        feature_generator.set_num_labels(this->labels.size());
-        feature_generator.set_num_attributes(this->attributes.size());
+        this->feature_generator.set_num_labels(this->labels.size());
+        this->feature_generator.set_num_attributes(this->attributes.size());
 
         int_t max = -1;
         for (int_t l = 0;l < this->num_labels();++l) {
@@ -418,10 +421,10 @@ public:
      */
     void generate_features()
     {
-        feature_generator.set_num_labels(this->labels.size());
-        feature_generator.set_num_attributes(this->attributes.size());
+        this->feature_generator.set_num_labels(this->labels.size());
+        this->feature_generator.set_num_attributes(this->attributes.size());
 
-        if (feature_generator.needs_registration()) {
+        if (this->feature_generator.needs_registration()) {
             iterator iti;
             for (iti = this->begin();iti != this->end();++iti) {
                 typename instance_type::iterator it;

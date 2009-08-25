@@ -41,69 +41,37 @@ namespace classias
 {
 
 /**
- * Candidate class.
- *
- *  This class implements a candidate for a candidate-classification instance.
- *
- *  @param  attributes_tmpl The type of attribute vector.
- *  @param  label_tmpl      The type of candidate label.
- */
-template <
-    class attributes_tmpl,
-    class label_tmpl
->
-class candidate_base : 
-    public attributes_tmpl,
-    public truth_base,
-    public label_base<label_tmpl>
-{
-public:
-    /// The type of a feature vector.
-    typedef attributes_tmpl attributes_type;
-
-    /**
-     * Constructs a candidate.
-     */
-    candidate_base()
-    {
-    }
-
-    /**
-     * Destructs a candidate.
-     */
-    virtual ~candidate_base()
-    {
-    }
-};
-
-
-
-/**
  * Binary instance.
  *
  *  This class implements an instance for binary classification.
  *
- *  @param  features_tmpl   The type of feature vector.
+ *  @param  features_tmpl   The type of feature (=attribute) vector.
+ *  @param  weight_base     The base class implementing instance weighting.
+ *  @param  group_base      The base class managing group numbers.
  */
 template <
     class features_tmpl
 >
 class binary_instance_base :
     public features_tmpl,
-    public truth_base,
     public weight_base,
     public group_base
 {
 public:
     /// The type of a feature vector.
     typedef features_tmpl features_type;
-    /// The type of an attribute name (identifier).
+    /// The type of an attribute identifier.
     typedef typename features_type::identifier_type attribute_type;
 
+protected:
+    /// The label (truth) of this instance.
+    bool m_label;
+
+public:
     /**
      * Constructs an object.
      */
-    binary_instance_base()
+    binary_instance_base() : m_label(false)
     {
     }
 
@@ -112,6 +80,24 @@ public:
      */
     virtual ~binary_instance_base()
     {
+    }
+
+    /**
+     * Sets the label.
+     *  @param  l           The label.
+     */
+    inline void set_label(bool l)
+    {
+        m_label = l;
+    }
+
+    /**
+     * Gets the label.
+     *  @return bool        The label of this instance.
+     */
+    inline bool get_label() const
+    {
+        return m_label;
     }
 };
 
@@ -122,29 +108,33 @@ public:
  *
  *  This class implements an instance for multi-class classification.
  *
- *  @param  features_tmpl   The type of feature vector.
- *  @param  label_tmpl      The type of label.
+ *  @param  attributes_tmpl The type of attribute vector.
+ *  @param  weight_base     The base class implementing instance weighting.
+ *  @param  group_base      The base class managing group numbers.
  */
 template <
-    class attributes_tmpl,
-    class label_tmpl
+    class attributes_tmpl
 >
 class multi_instance_base :
     public attributes_tmpl,
-    public label_base<label_tmpl>,
     public group_base,
     public weight_base
 {
 public:
     /// The type of an attribute vector.
     typedef attributes_tmpl attributes_type;
-    /// The type of an attribute name (identifier).
+    /// The type of an attribute identifier.
     typedef typename attributes_type::identifier_type attribute_type;
 
+protected:
+    /// The label of this instance.
+    int m_label;
+
+public:
     /**
      * Constructs an object.
      */
-    multi_instance_base()
+    multi_instance_base() : m_label(-1)
     {
     }
 
@@ -153,6 +143,60 @@ public:
      */
     virtual ~multi_instance_base()
     {
+    }
+
+    /**
+     * Sets the label.
+     *  @param  l           The label.
+     */
+    inline void set_label(int l)
+    {
+        m_label = l;
+    }
+
+    /**
+     * Gets the label.
+     *  @return bool        The label of this instance.
+     */
+    inline int get_label() const
+    {
+        return m_label;
+    }
+
+    /**
+     * Returns the number of possible labels that can be assigned.
+     *  @param  L           The total number of labels in the dataset.
+     *  @return int         The number of possible labels for this instance.
+     *                      The return value is always identical to L for
+     *                      multi-class instances.
+     */
+    inline int num_labels(const int L) const
+    {
+        return L;
+    }
+
+    /**
+     * Returns a read-only access to the attribute vector.
+     *  @param  l           Reserved only for the compatibility with
+     *                      candidate_instance_base class.
+     *  @return const attributes_type&  The reference to the attribute vector
+     *                                  associated with this instance.
+     */
+    inline const attributes_type& attributes(int l) const
+    {
+        return *this;
+    }
+
+    /**
+     * Returns an access to the attribute vector.
+     *  @param  l           Reserved only for the compatibility with
+     *                      candidate_instance_base class.
+     *  @return attributes_type&        The reference to the attribute vector
+     *                                  associated with this instance.
+     */
+    inline attributes_type& attributes(int l)
+    {
+        return *this;
     }
 };
 
@@ -165,7 +209,7 @@ public:
  *  @param  candidate_tmpl  The type of a candidate.
  */
 template <
-    class candidate_tmpl
+    class attributes_tmpl
 >
 class candidate_instance_base :
     public weight_base,
@@ -173,8 +217,10 @@ class candidate_instance_base :
 
 {
 public:
-    /// A type representing a candidate.
-    typedef candidate_tmpl candidate_type;
+    /// A type representing an attribute vector.
+    typedef attributes_tmpl attributes_type;
+    /// A type representing a candidate (equivalent to attributes_type).
+    typedef attributes_type candidate_type;
     /// A type providing a container of all candidates.
     typedef std::vector<candidate_type> candidates_type;
     /// A type counting the number of candidates in the instance.
@@ -187,12 +233,14 @@ public:
 protected:
     /// A container of all candidates associated with the instance.
     candidates_type candidates;
+    /// The label of this instance.
+    int m_label;
 
 public:
     /**
      * Constructs an object.
      */
-    candidate_instance_base()
+    candidate_instance_base() : m_label(-1)
     {
     }
 
@@ -302,13 +350,66 @@ public:
     }
 
     /**
-     * Create a new candidate.
+     * Creates a new candidate.
      *  @retval candidate_type& The reference to the new candidate.
      */
     inline candidate_type& new_element()
     {
         candidates.push_back(candidate_type());
         return candidates.back();
+    }
+
+    /**
+     * Sets the label.
+     *  @param  l           The label.
+     */
+    inline void set_label(int l)
+    {
+        m_label = l;
+    }
+
+    /**
+     * Gets the label.
+     *  @return bool        The label of this instance.
+     */
+    inline int get_label() const
+    {
+        return m_label;
+    }
+
+    /**
+     * Returns the number of candidates associated with the instance.
+     *  @param  L           Ignored. Reserved only for the compatibility with
+     *                      multi_instance_base class.
+     *  @return int         The number of candidates associated with this
+     *                      instance.
+     */
+    inline int num_labels(const int L) const
+    {
+        return this->size();
+    }
+
+    /**
+     * Returns a read-only access to the attribute vector of a candidate.
+     *  @param  l           The candidate label (index).
+     *  @return const attributes_type&  The reference to the attribute vector
+     *                                  associated for the candidate #l.
+     */
+    inline const attributes_type& attributes(int l) const
+    {
+        return this->operator[](l);
+    }
+
+    /**
+     * Returns an access to the attribute vector of a candidate.
+     *  @param  l           Reserved only for the compatibility with
+     *                      candidate_instance_base class.
+     *  @return attributes_type&        The reference to the attribute vector
+     *                                  associated for the candidate #l.
+     */
+    inline attributes_type& attributes(int l)
+    {
+        return this->operator[](l);
     }
 };
 

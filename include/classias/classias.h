@@ -41,22 +41,22 @@
 namespace classias
 {
 
-typedef dense_feature_generator_base<int_t, int_t, int_t> dense_feature_generator;
-typedef sparse_feature_generator_base<int_t, int_t, int_t> sparse_feature_generator;
+typedef dense_feature_generator_base<int, int, int> dense_feature_generator;
+typedef sparse_feature_generator_base<int, int, int> sparse_feature_generator;
+typedef thru_feature_generator_base<int, int, int> thru_feature_generator;
 
-typedef sparse_vector_base<int_t, real_t> sparse_attributes;
+typedef sparse_vector_base<int, double> sparse_attributes;
 
 typedef binary_instance_base<sparse_attributes> binstance;
 typedef binary_data_base<binstance, quark> bdata;
 
-typedef candidate_base<sparse_attributes, int_t> ccandidate;
-typedef candidate_instance_base<ccandidate> cinstance;
-typedef candidate_data_base<cinstance, quark, quark> cdata;
+typedef candidate_instance_base<sparse_attributes> cinstance;
+typedef candidate_data_base<cinstance, quark, quark, thru_feature_generator> cdata;
 
-typedef multi_instance_base<sparse_attributes, int_t> minstance;
+typedef multi_instance_base<sparse_attributes> minstance;
 typedef multi_data_base<minstance, quark, quark, dense_feature_generator> mdata;
 
-typedef multi_instance_base<sparse_attributes, int_t> ninstance;
+typedef multi_instance_base<sparse_attributes> ninstance;
 typedef multi_data_base<ninstance, quark, quark, sparse_feature_generator> ndata;
 
 };

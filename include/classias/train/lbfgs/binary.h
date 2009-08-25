@@ -124,7 +124,7 @@ public:
 
             // Compute the error.
             value_type nlogp = 0.;
-            value_type err = cls.error(iti->get_truth(), nlogp);
+            value_type err = cls.error(iti->get_label(), nlogp);
 
             // Update the loss.
             loss += (iti->get_weight() * nlogp);
@@ -185,7 +185,7 @@ public:
 
             // Compute the score for the instance.
             cls.inner_product(iti->begin(), iti->end());
-            int rl = static_cast<int>(iti->get_truth());
+            int rl = static_cast<int>(iti->get_label());
             int ml = static_cast<int>(static_cast<bool>(cls));
 
             // Store the results.

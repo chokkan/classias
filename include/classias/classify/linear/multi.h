@@ -52,7 +52,6 @@ namespace classify
  */
 template <
     class attribute_tmpl,
-    class label_tmpl,
     class value_tmpl,
     class model_tmpl,
     class features_tmpl
@@ -62,8 +61,6 @@ class linear_multi
 public:
     /// The type of an attribute.
     typedef attribute_tmpl attribute_type;
-    /// The type of a label.
-    typedef label_tmpl label_type;
     /// The type of a feature weight.
     typedef value_tmpl value_type;
     /// The type of a model.
@@ -109,8 +106,8 @@ public:
     inline void clear()
     {
         m_argmax = -1;
-        for (int i = 0;i < this->size();++i) {
-            m_scores[i] = 0.;
+        for (int l = 0;l < this->size();++l) {
+            m_scores[l] = 0.;
         }
     }
 
@@ -147,29 +144,28 @@ public:
      *  @param  i           The candidate index.
      *  @return value_type  The score.
      */
-    inline value_type score(int i)
+    inline value_type score(int l)
     {
-        return m_scores[i];
+        return m_scores[l];
     }
 
     /**
      * Sets an attribute for a candidate.
-     *  @param  i           The candidate index.
-     *  @param  a           The attribute identifier.
      *  @param  l           The label for the candidate.
+     *  @param  a           The attribute identifier.
      *  @param  value       The attribute value.
      */
-    inline void operator()(int i, const attribute_type& a, const label_type& l, const value_type& value)
+    inline void operator()(int l, const attribute_type& a, const value_type& value)
     {
         int_t fid = m_feature_generator.forward(a, l);
         if (0 <= fid) {
-            m_scores[i] += m_model[fid] * value;
+            m_scores[l] += m_model[fid] * value;
         }
     }
 
     /**
      * Sets an array of attributes for a candidate.
-     *  @param  i           The candidate index.
+     *  @param  l           The label for the candidate.
      *  @param  first       The iterator for the first element of attributes.
      *  @param  last        The iterator for the element just beyond the
      *                      last element of attributes.
@@ -178,13 +174,13 @@ public:
      *                      before computing the inner product.
      */
     template <class iterator_type>
-    inline void inner_product(int i, iterator_type first, iterator_type last, const label_type& l, bool reset=true)
+    inline void inner_product(int l, iterator_type first, iterator_type last, bool reset=true)
     {
         if (reset) {
-            m_scores[i] = 0.;
+            m_scores[l] = 0.;
         }
         for (iterator_type it = first;it != last;++it) {
-            this->operator()(i, it->first, l, it->second);
+            this->operator()(l, it->first, it->second);
         }
     }
 
@@ -200,10 +196,10 @@ public:
         // Find the argmax index.
         m_argmax = 0;
         double vmax = m_scores[0];
-        for (int i = 0;i < this->size();++i) {
-            if (vmax < m_scores[i]) {
-                m_argmax = i;
-                vmax = m_scores[i];
+        for (int l = 0;l < this->size();++l) {
+            if (vmax < m_scores[l]) {
+                m_argmax = l;
+                vmax = m_scores[l];
             }
         }
     }
@@ -213,26 +209,22 @@ public:
  * Linear multi-class classifier with sigmoid function (maximum entropy).
  *
  *  @param  attribute_tmpl  The type of an attribute.
- *  @param  label_tmpl      The type of a label.
  *  @param  value_tmpl      The type of a feature weight.
  *  @param  model_tmpl      The type of a model (array of feature weights).
  *  @param  features_tmpl   The type of a feature generator.
  */
 template <
     class attribute_tmpl,
-    class label_tmpl,
     class value_tmpl,
     class model_tmpl,
     class features_tmpl
 >
 class linear_multi_logistic :
-    public linear_multi<attribute_tmpl, label_tmpl, value_tmpl, model_tmpl, features_tmpl>
+    public linear_multi<attribute_tmpl, value_tmpl, model_tmpl, features_tmpl>
 {
 public:
     /// The type of an attribute.
     typedef attribute_tmpl attribute_type;
-    /// The type of a label.
-    typedef label_tmpl label_type;
     /// The type of a feature weight.
     typedef value_tmpl value_type;
     /// The type of a model.
@@ -240,7 +232,7 @@ public:
     /// The type of a feature generator.
     typedef features_tmpl features_type;
     /// The type of the base class.
-    typedef linear_multi<attribute_tmpl, label_tmpl, value_tmpl, model_tmpl, features_tmpl> base_type;
+    typedef linear_multi<attribute_tmpl, value_tmpl, model_tmpl, features_tmpl> base_type;
 
 protected:
     value_type  m_lognorm;
@@ -275,12 +267,12 @@ public:
 
     /**
      * Returns the probability for a label.
-     *  @param  i           The candidate index.
+     *  @param  l           The label for the candidate.
      *  @return value_type  The probability.
      */
-    inline value_type prob(int i)
+    inline value_type prob(int l)
     {
-        return std::exp(this->m_scores[i] - m_lognorm);
+        return std::exp(this->m_scores[l] - m_lognorm);
     }
 
     /**

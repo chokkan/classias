@@ -38,7 +38,7 @@
 #include <string>
 
 #include <classias/classias.h>
-#include <classias/train/lbfgs/candidate.h>
+#include <classias/train/lbfgs/multi.h>
 
 #include "option.h"
 #include "tokenize.h"
@@ -105,8 +105,9 @@ read_line(
 
     // Create a new candidate.
     candidate_type& cand = instance.new_element();
-    cand.set_truth(truth);
-    cand.set_label(labels(name));
+    if (truth) {
+        instance.set_label(instance.size()-1);
+    }
 
     // Set featuress for the instance.
     for (++itv;itv != values.end();++itv) {
@@ -251,7 +252,7 @@ int candidate_train(option& opt)
     if (opt.algorithm == "logress.lbfgs") {
         return train<
             classias::cdata,
-            classias::trainer_lbfgs_candidate<classias::cdata, classias::real_t>
+            classias::trainer_lbfgs_multi<classias::cdata, classias::real_t>
         >(opt);
     } else {
         throw invalid_algorithm(opt.algorithm);
@@ -263,7 +264,7 @@ bool candidate_usage(option& opt)
 {
     // Branches for training algorithms.
     if (opt.algorithm == "logress.lbfgs") {
-        classias::trainer_lbfgs_candidate<classias::cdata, classias::real_t> tr;
+        classias::trainer_lbfgs_multi<classias::cdata, classias::real_t> tr;
         tr.params().help(opt.os);
         return true;
     }

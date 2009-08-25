@@ -38,6 +38,169 @@
 namespace classias
 {
 
+
+
+/**
+ * Feature generator for any combinations of attributes and labels.
+ *
+ *  @param  attribute_tmpl  The type of an attribute.
+ *  @param  label_tmpl      The type of a label.
+ *  @param  feature_tmpl    The type of a feature.
+ */
+template <
+    class attribute_tmpl,
+    class label_tmpl,
+    class feature_tmpl
+>
+class thru_feature_generator_base
+{
+public:
+    /// The type of an attribute.
+    typedef attribute_tmpl attribute_type;
+    /// The type of a label.
+    typedef label_tmpl label_type;
+    /// The type of a feature.
+    typedef feature_tmpl feature_type;
+
+protected:
+    /// The total number of attributes.
+    size_t m_num_attributes;
+
+public:
+    /**
+     * Constructs an object.
+     */
+    thru_feature_generator_base() :
+        m_num_attributes(0)
+    {
+    }
+
+    /**
+     * Destructs an object.
+     */
+    virtual ~thru_feature_generator_base()
+    {
+    }
+
+    /**
+     * Returns the name of the feature generator.
+     *  @return const char* The feature name.
+     */
+    const char* name() const
+    {
+        static const char *str = "thru";
+        return str;
+    }
+
+    /**
+     * Returns the total number of labels.
+     *  @return int         The total number of labels.
+     */
+    size_t num_labels() const
+    {
+        return 0;
+    }
+
+    /**
+     * Returns the total number of attributes.
+     *  @return int         The total number of attributes.
+     */
+    size_t num_attributes() const
+    {
+        return m_num_attributes;
+    }
+
+    /**
+     * Returns the total number of features.
+     *  @return int         The total number of features.
+     */
+    size_t num_features() const
+    {
+        return m_num_attributes;
+    }
+
+    /**
+     * Sets the total number of attributes.
+     *  @param  num_attributes  The total number of attributes.
+     */
+    void set_num_attributes(size_t num_attributes)
+    {
+        m_num_attributes = num_attributes;
+    }
+
+    /**
+     * Sets the total number of labels.
+     *  @param  num_labels  The total number of labels.
+     */
+    void set_num_labels(size_t num_labels)
+    {
+    }
+
+    /**
+     * Returns if this class requires registration.
+     *  @return bool    This class always returns \c true
+     */
+    inline bool needs_registration() const
+    {
+        return false;
+    }
+
+    /**
+     * Registers an association between an attribute and label.
+     *  @param  a       An attribute.
+     *  @param  l       A label.
+     */
+    inline feature_type regist(const attribute_type& a, const label_type& l)
+    {
+        return a;
+    }
+
+    /**
+     * Returns the feature identifier associated with a pair of an attribute
+     *  and label.
+     *  @param  a               An attribute.
+     *  @param  l               A label.
+     *  @return feature_type    The feature identifier.
+     */
+    inline feature_type forward(const attribute_type& a, const label_type& l) const
+    {
+        return a;
+    }
+
+    /**
+     * Returns the attribute and label associated with a feature identifier.
+     *  @param  f               The feature identifier.
+     *  @param  a               The attribute associated with the feature.
+     *  @param  l               The label associated with the feature.
+     */
+    inline void backward(
+        const feature_type& f,
+        attribute_type& a,
+        label_type& l
+        ) const
+    {
+        a = f;
+        l = 0;
+    }
+
+    template <class value_type, class iterator_type>
+    inline void add_to(
+        value_type* m,
+        iterator_type first,
+        iterator_type last,
+        const label_type& label,
+        value_type value
+        ) const
+    {
+        for (iterator_type it = first;it != last;++it) {
+            int_t fid = static_cast<int_t>(it->first);
+            m[fid] += value * it->second;
+        }
+    }
+};
+
+
+
 /**
  * Feature generator for any combinations of attributes and labels.
  *
@@ -355,6 +518,8 @@ public:
         }
     }
 };
+
+
 
 };
 

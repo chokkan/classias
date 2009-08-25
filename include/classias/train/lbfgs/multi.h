@@ -69,15 +69,14 @@ protected:
     typedef typename data_type::instance_type instance_type;
     /// A type providing a read-only random-access iterator for instances.
     typedef typename data_type::const_iterator const_iterator;
+    typedef typename instance_type::attributes_type attributes_type;
     /// A type representing a feature generator.
     typedef typename data_type::feature_generator_type feature_generator_type;
     /// A type representing a candidate for an instance.
     typedef typename data_type::attribute_type attribute_type;
-    /// A type representing a label.
-    typedef typename instance_type::label_type label_type;
     /// The type of a classifier.
     typedef classify::linear_multi_logistic<
-        attribute_type, label_type, value_type, value_type const*, feature_generator_type> classifier_type;
+        attribute_type, value_type, value_type const*, feature_generator_type> classifier_type;
 
 
     /// An array [K] of observation expectations.
@@ -115,11 +114,8 @@ public:
     {
         value_type loss = 0;
         const data_type& data = *m_data;
-        const int_t L = data.num_labels();
+        const int L = data.num_labels();
         classifier_type cls(x, const_cast<feature_generator_type&>(data.feature_generator));
-
-        // The number of labels is constant; reserve the work space.
-        cls.resize(L);
 
         // Initialize the gradients with (the negative of) observation expexcations.
         for (int i = 0;i < n;++i) {
@@ -135,16 +131,21 @@ public:
                 continue;
             }
 
-            // Compute the probability prob[i] for each label #i.
-            for (int_t i = 0;i < L;++i) {
-                cls.inner_product(i, inst.begin(), inst.end(), i);
+            // Tell the classifier the number of possible labels.
+            cls.resize(inst.num_labels(L));
+
+            // Compute the probability prob[l] for each label #l.
+            for (int l = 0;l < inst.num_labels(L);++l) {
+                const attributes_type& v = inst.attributes(l);
+                cls.inner_product(l, v.begin(), v.end());
             }
             cls.finalize();
 
             // Accumulate the model expectations of features.
-            for (int_t i = 0;i < L;++i) {
+            for (int l = 0;l < inst.num_labels(L);++l) {
+                const attributes_type& v = inst.attributes(l);
                 data.feature_generator.add_to(
-                    g, inst.begin(), inst.end(), i, cls.prob(i));
+                    g, v.begin(), v.end(), l, cls.prob(l));
             }
 
             // Accumulate the loss for predicting the instance.
@@ -184,8 +185,10 @@ public:
             }
 
             // Compute the observation expectations.
+            const int l = iti->get_label();
+            const attributes_type& v = iti->attributes(l);
             data.feature_generator.add_to(
-                m_oexps, iti->begin(), iti->end(), iti->get_label(), 1.0);
+                m_oexps, v.begin(), v.end(), l, 1.0);
         }
 
         // Call the L-BFGS solver.
@@ -206,30 +209,33 @@ public:
     {
         std::ostream& os = *(this->m_os);
         const data_type& data = *(this->m_data);
-        const int_t L = data.num_labels();
-        const value_type *x = this->m_weights;
-        classifier_type cls(x, const_cast<feature_generator_type&>(data.feature_generator));
+        const int L = data.num_labels();
+        const value_type *w = this->m_weights;
+        classifier_type cls(w, const_cast<feature_generator_type&>(data.feature_generator));
         accuracy acc;
         precall pr(data.labels.size());
 
-        // The number of labels is constant; reserve the work space.
-        cls.resize(L);
-
         // Loop over instances.
         for (const_iterator iti = data.begin();iti != data.end();++iti) {
+            const instance_type& inst = *iti;
+
             // Exclude instances for holdout evaluation.
-            if (iti->get_group() != this->m_holdout) {
+            if (inst.get_group() != this->m_holdout) {
                 continue;
             }
 
-            for (int i = 0;i < data.num_labels();++i) {
-                cls.inner_product(i, iti->begin(), iti->end(), i);
+            // Tell the classifier the number of possible labels.
+            cls.resize(inst.num_labels(L));
+
+            for (int l = 0;l < inst.num_labels(L);++l) {
+                const attributes_type& v = inst.attributes(l);
+                cls.inner_product(l, v.begin(), v.end());
             }
             cls.finalize();
 
-            int imax = cls.argmax();
-            acc.set(imax == iti->get_label());
-            pr.set(imax, iti->get_label());
+            int argmax = cls.argmax();
+            acc.set(argmax == inst.get_label());
+            pr.set(argmax, inst.get_label());
         }
 
         // Report accuracy, precision, recall, and f1 score.
