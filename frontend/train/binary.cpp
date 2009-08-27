@@ -41,6 +41,7 @@
 #include <classias/train/lbfgs/binary.h>
 #include <classias/train/averaged_perceptron.h>
 #include <classias/train/pegasos.h>
+#include <classias/train/truncated_gradient.h>
 #include <classias/train/online_scheduler.h>
 
 #include "option.h"
@@ -232,6 +233,14 @@ int binary_train(option& opt)
             classias::train::online_scheduler_binary<
                 classias::bdata,
                 classias::train::pegasos_binary_logistic_loss
+                >
+            >(opt);
+    } else if (opt.algorithm == "logress.truncated_gradient") {
+        return train<
+            classias::bdata,
+            classias::train::online_scheduler_binary<
+                classias::bdata,
+                classias::train::truncated_gradient_binary_logistic_loss
                 >
             >(opt);
     } else {

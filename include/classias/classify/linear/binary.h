@@ -221,9 +221,9 @@ public:
     {
         value_type p = 0.;
         const value_type score = this->m_score;
-        if (score < -100.) {
+        if (score < -30.) {
             p = 0.;
-        } else if (100. < score) {
+        } else if (30. < score) {
             p = 1.;
         } else {
             p = 1. / (1. + std::exp(-score));
@@ -242,10 +242,10 @@ public:
     {
         value_type p = 0.;
         const value_type score = this->m_score;
-        if (score < -100.) {
+        if (score < -30.) {
             p = 0.;
             loss = -static_cast<double>(b) * score;
-        } else if (100. < score) {
+        } else if (30. < score) {
             p = 1.;
             loss = -(static_cast<double>(b) - 1.) * score;
         } else {

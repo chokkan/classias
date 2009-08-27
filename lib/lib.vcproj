@@ -201,7 +201,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\include\classias\train\online_scheduler.h"
+				>
+			</File>
+			<File
 				RelativePath="..\include\classias\train\pegasos.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\classias\train\truncated_gradient.h"
 				>
 			</File>
 			<Filter
@@ -217,14 +225,6 @@
 				</File>
 				<File
 					RelativePath="..\include\classias\train\lbfgs\multi.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="Online Scheduler"
-				>
-				<File
-					RelativePath="..\include\classias\train\online_scheduler.h"
 					>
 				</File>
 			</Filter>

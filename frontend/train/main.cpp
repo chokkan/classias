@@ -81,6 +81,8 @@ public:
                 algorithm = "logress.lbfgs";
             } else if (strcasecmp(arg, "logress.pegasos") == 0) {
                 algorithm = "logress.pegasos";
+            } else if (strcasecmp(arg, "logress.tg") == 0) {
+                algorithm = "logress.truncated_gradient";
             } else if (strcasecmp(arg, "averaged_perceptron") == 0 || strcasecmp(arg, "ap") == 0) {
                 algorithm = "averaged_perceptron";
             } else {
