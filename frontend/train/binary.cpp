@@ -39,7 +39,7 @@
 
 #include <classias/classias.h>
 #include <classias/train/lbfgs/binary.h>
-#include <classias/train/averaged_perceptron/binary.h>
+#include <classias/train/averaged_perceptron.h>
 #include <classias/train/pegasos.h>
 #include <classias/train/online_scheduler.h>
 
@@ -218,20 +218,20 @@ int binary_train(option& opt)
             classias::bdata,
             classias::train::logistic_regression_binary_lbfgs<classias::bdata, classias::real_t>
         >(opt);
-    } else if (opt.algorithm == "logress.pegasos") {
-        return train<
-            classias::bdata,
-            classias::train::online_scheduler_binary<
-                classias::bdata,
-                classias::train::pegasos_binary_logistic_loss
-                >
-            >(opt);
     } else if (opt.algorithm == "averaged_perceptron") {
         return train<
             classias::bdata,
             classias::train::online_scheduler_binary<
                 classias::bdata,
                 classias::train::averaged_perceptron_binary
+                >
+            >(opt);
+    } else if (opt.algorithm == "logress.pegasos") {
+        return train<
+            classias::bdata,
+            classias::train::online_scheduler_binary<
+                classias::bdata,
+                classias::train::pegasos_binary_logistic_loss
                 >
             >(opt);
     } else {

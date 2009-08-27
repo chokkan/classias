@@ -152,12 +152,12 @@ public:
     }
 
     /**
-     * Finishes a training process.
+     * Terminates a training process.
      *  This function performs a post-processing after a training process.
      */
     void finish()
     {
-        rescale_weights();
+        this->rescale_weights();
     }
 
 public:
@@ -171,7 +171,7 @@ public:
     }
 
     /**
-     * Report of the current state of the training process.
+     * Reports the current state of the training process.
      *  @param  os          The output stream.
      */
     void report(std::ostream& os)
@@ -412,6 +412,7 @@ public:
     /**
      * Receives a training instance and updates feature weights.
      *  @param  it          An interator for the training instance.
+     *  @param  fgen        The feature generator.
      *  @return value_type  The loss computed for the instance.
      */
     template <class iterator_type, class feature_generator_type>

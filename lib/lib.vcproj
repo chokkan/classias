@@ -197,6 +197,10 @@
 			Name="Training algorithms"
 			>
 			<File
+				RelativePath="..\include\classias\train\averaged_perceptron.h"
+				>
+			</File>
+			<File
 				RelativePath="..\include\classias\train\pegasos.h"
 				>
 			</File>
@@ -221,14 +225,6 @@
 				>
 				<File
 					RelativePath="..\include\classias\train\online_scheduler.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="Averaged Perceptron"
-				>
-				<File
-					RelativePath="..\include\classias\train\averaged_perceptron\binary.h"
 					>
 				</File>
 			</Filter>

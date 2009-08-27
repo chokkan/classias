@@ -39,6 +39,7 @@
 
 #include <classias/classias.h>
 #include <classias/train/lbfgs/multi.h>
+#include <classias/train/averaged_perceptron.h>
 #include <classias/train/pegasos.h>
 #include <classias/train/online_scheduler.h>
 
@@ -249,6 +250,24 @@ int multi_train(option& opt)
                 classias::mdata,
                 classias::train::logistic_regression_multi_lbfgs<classias::mdata, classias::real_t>
             >(opt);
+        }
+    } else if (opt.algorithm == "averaged_perceptron") {
+        if (opt.type == option::TYPE_MULTI_SPARSE) {
+            return train<
+                classias::ndata,
+                classias::train::online_scheduler_multi<
+                    classias::ndata,
+                    classias::train::averaged_perceptron_multi
+                    >
+                >(opt);
+        } else if (opt.type == option::TYPE_MULTI_DENSE) {
+            return train<
+                classias::mdata,
+                classias::train::online_scheduler_multi<
+                    classias::mdata,
+                    classias::train::averaged_perceptron_multi
+                    >
+                >(opt);
         }
     } else if (opt.algorithm == "logress.pegasos") {
         if (opt.type == option::TYPE_MULTI_SPARSE) {
