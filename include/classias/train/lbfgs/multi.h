@@ -79,7 +79,7 @@ protected:
     typedef typename data_type::attribute_type attribute_type;
     /// The type of a classifier.
     typedef classify::linear_multi_logistic<
-        attribute_type, value_type, value_type const*, feature_generator_type> classifier_type;
+        attribute_type, value_type, value_type const*> classifier_type;
 
 
     /// An array [K] of observation expectations.
@@ -118,7 +118,7 @@ public:
         value_type loss = 0;
         const data_type& data = *m_data;
         const int L = data.num_labels();
-        classifier_type cls(x, const_cast<feature_generator_type&>(data.feature_generator));
+        classifier_type cls(x);
 
         // Initialize the gradients with (the negative of) observation expexcations.
         for (int i = 0;i < n;++i) {
@@ -140,7 +140,7 @@ public:
             // Compute the probability prob[l] for each label #l.
             for (int l = 0;l < inst.num_labels(L);++l) {
                 const attributes_type& v = inst.attributes(l);
-                cls.inner_product(l, v.begin(), v.end());
+                cls.inner_product(l, data.feature_generator, v.begin(), v.end());
             }
             cls.finalize();
 
@@ -214,7 +214,7 @@ public:
         const data_type& data = *(this->m_data);
         const int L = data.num_labels();
         const value_type *w = this->m_weights;
-        classifier_type cls(w, const_cast<feature_generator_type&>(data.feature_generator));
+        classifier_type cls(w);
         accuracy acc;
         precall pr(data.labels.size());
 
@@ -232,7 +232,7 @@ public:
 
             for (int l = 0;l < inst.num_labels(L);++l) {
                 const attributes_type& v = inst.attributes(l);
-                cls.inner_product(l, v.begin(), v.end());
+                cls.inner_product(l, data.feature_generator, v.begin(), v.end());
             }
             cls.finalize();
 

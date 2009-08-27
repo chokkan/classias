@@ -255,7 +255,7 @@ int multi_train(option& opt)
             classias::mdata,
             classias::train::online_scheduler_multi<
                 classias::mdata,
-                classias::train::pegasos_multi_dense_logistic_regression
+                classias::train::pegasos_multi_logistic_regression
                 >
             >(opt);
     }

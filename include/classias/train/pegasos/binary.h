@@ -384,11 +384,12 @@ public:
 
         // Compute the error for the instance.
         value_type nlogp = 0.;
-        error_type cls(model, fgen);
+        error_type cls(model);
         cls.resize(it->num_labels(L));
         for (int l = 0;l < it->num_labels(L);++l) {
             cls.inner_product_scaled(
                 l,
+                fgen,
                 it->attributes(l).begin(),
                 it->attributes(l).end(),
                 scale
@@ -479,15 +480,9 @@ typedef pegasos_binary_base<
     > pegasos_binary_logistic_regression;
 
 typedef pegasos_multi_base<
-    classify::linear_multi_logistic<int, double, weight_vector, dense_feature_generator>,
+    classify::linear_multi_logistic<int, double, weight_vector>,
     weight_vector
-    > pegasos_multi_dense_logistic_regression;
-
-typedef pegasos_multi_base<
-    classify::linear_multi_logistic<int, double, weight_vector, sparse_feature_generator>,
-    weight_vector
-    > pegasos_multi_sparse_logistic_regression;
-
+    > pegasos_multi_logistic_regression;
 
 };
 

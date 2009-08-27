@@ -48,13 +48,11 @@ namespace classify
  *  @param  label_tmpl      The type of a label.
  *  @param  value_tmpl      The type of a feature weight.
  *  @param  model_tmpl      The type of a model (array of feature weights).
- *  @param  features_tmpl   The type of a feature generator.
  */
 template <
     class attribute_tmpl,
     class value_tmpl,
-    class model_tmpl,
-    class features_tmpl
+    class model_tmpl
 >
 class linear_multi
 {
@@ -65,8 +63,6 @@ public:
     typedef value_tmpl value_type;
     /// The type of a model.
     typedef model_tmpl model_type;
-    /// The type of a feature generator.
-    typedef features_tmpl features_type;
 
 protected:
     /// The type representing an array of scores.
@@ -76,8 +72,6 @@ protected:
     model_type&     m_model;
     /// The scores of labels.
     scores_type     m_scores;
-    /// The feature generator.
-    features_type&  m_feature_generator;
     /// The index of the label that gives the highest score.
     int             m_argmax;
 
@@ -85,10 +79,9 @@ public:
     /**
      * Constructs an instance.
      *  @param  model       The model associated with the classifier.
-     *  @param  feature_generator   The feature generator.
      */
-    linear_multi(model_type& model, features_type& feature_generator)
-        : m_model(model), m_feature_generator(feature_generator)
+    linear_multi(model_type& model)
+        : m_model(model)
     {
         clear();
     }
@@ -155,9 +148,10 @@ public:
      *  @param  a           The attribute identifier.
      *  @param  value       The attribute value.
      */
-    inline void operator()(int l, const attribute_type& a, const value_type& value)
+    template <class feature_generator_type>
+    inline void set(int l, feature_generator_type& fgen, const attribute_type& a, const value_type& value)
     {
-        int_t fid = m_feature_generator.forward(a, l);
+        int_t fid = fgen.forward(a, l);
         if (0 <= fid) {
             m_scores[l] += m_model[fid] * value;
         }
@@ -172,19 +166,19 @@ public:
      *  @param  reset       Specify \c true to reset the current result
      *                      before computing the inner product.
      */
-    template <class iterator_type>
-    inline void inner_product(int l, iterator_type first, iterator_type last)
+    template <class feature_generator_type, class iterator_type>
+    inline void inner_product(int l, feature_generator_type& fgen, iterator_type first, iterator_type last)
     {
         m_scores[l] = 0.;
         for (iterator_type it = first;it != last;++it) {
-            this->operator()(l, it->first, it->second);
+            this->set(l, fgen, it->first, it->second);
         }
     }
 
-    template <class iterator_type>
-    inline void inner_product_scaled(int l, iterator_type first, iterator_type last, const value_type& scale)
+    template <class feature_generator_type, class iterator_type>
+    inline void inner_product_scaled(int l, feature_generator_type& fgen, iterator_type first, iterator_type last, const value_type& scale)
     {
-        this->inner_product(l, first, last);
+        this->inner_product(l, fgen, first, last);
         this->scale(l, scale);
     }
 
@@ -226,16 +220,14 @@ public:
  *  @param  attribute_tmpl  The type of an attribute.
  *  @param  value_tmpl      The type of a feature weight.
  *  @param  model_tmpl      The type of a model (array of feature weights).
- *  @param  features_tmpl   The type of a feature generator.
  */
 template <
     class attribute_tmpl,
     class value_tmpl,
-    class model_tmpl,
-    class features_tmpl
+    class model_tmpl
 >
 class linear_multi_logistic :
-    public linear_multi<attribute_tmpl, value_tmpl, model_tmpl, features_tmpl>
+    public linear_multi<attribute_tmpl, value_tmpl, model_tmpl>
 {
 public:
     /// The type of an attribute.
@@ -244,10 +236,8 @@ public:
     typedef value_tmpl value_type;
     /// The type of a model.
     typedef model_tmpl model_type;
-    /// The type of a feature generator.
-    typedef features_tmpl features_type;
     /// The type of the base class.
-    typedef linear_multi<attribute_tmpl, value_tmpl, model_tmpl, features_tmpl> base_type;
+    typedef linear_multi<attribute_tmpl, value_tmpl, model_tmpl> base_type;
 
 protected:
     value_type  m_lognorm;
@@ -258,8 +248,8 @@ public:
      *  @param  model       The model associated with the classifier.
      *  @param  feature_generator   The feature generator.
      */
-    linear_multi_logistic(model_type& model, features_tmpl& feature_generator)
-        : base_type(model, feature_generator), m_lognorm(0)
+    linear_multi_logistic(model_type& model)
+        : base_type(model), m_lognorm(0)
     {
         clear();
     }
