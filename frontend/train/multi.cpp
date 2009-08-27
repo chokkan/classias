@@ -39,6 +39,8 @@
 
 #include <classias/classias.h>
 #include <classias/train/lbfgs/multi.h>
+#include <classias/train/pegasos/binary.h>
+#include <classias/train/online_scheduler.h>
 
 #include "option.h"
 #include "tokenize.h"
@@ -248,6 +250,14 @@ int multi_train(option& opt)
                 classias::train::logistic_regression_multi_lbfgs<classias::mdata, classias::real_t>
             >(opt);
         }
+    } else if (opt.algorithm == "logress.pegasos") {
+        return train<
+            classias::mdata,
+            classias::train::online_scheduler_multi<
+                classias::mdata,
+                classias::train::pegasos_multi_dense_logistic_regression
+                >
+            >(opt);
     }
     throw invalid_algorithm(opt.algorithm);
 }

@@ -173,14 +173,24 @@ public:
      *                      before computing the inner product.
      */
     template <class iterator_type>
-    inline void inner_product(int l, iterator_type first, iterator_type last, bool reset=true)
+    inline void inner_product(int l, iterator_type first, iterator_type last)
     {
-        if (reset) {
-            m_scores[l] = 0.;
-        }
+        m_scores[l] = 0.;
         for (iterator_type it = first;it != last;++it) {
             this->operator()(l, it->first, it->second);
         }
+    }
+
+    template <class iterator_type>
+    inline void inner_product_scaled(int l, iterator_type first, iterator_type last, const value_type& scale)
+    {
+        this->inner_product(l, first, last);
+        this->scale(l, scale);
+    }
+
+    inline void scale(int l, const value_type& scale)
+    {
+        m_scores[l] *= scale;
     }
 
     /**
@@ -201,6 +211,12 @@ public:
                 vmax = m_scores[l];
             }
         }
+    }
+
+    static const char *name()
+    {
+        const static char *str = "linear classifier (multi)";
+        return str;
     }
 };
 
@@ -284,6 +300,11 @@ public:
         return (this->m_scores[l] - m_lognorm);
     }
 
+    inline value_type error(int l, int r)
+    {
+        return prob(l) - (l == r);
+    }
+
     /**
      * Finalize the classification.
      */
@@ -302,6 +323,12 @@ public:
             sum += std::exp(this->m_scores[l] - max);
         }
         m_lognorm = max + std::log(sum);
+    }
+
+    static const char *name()
+    {
+        const static char *str = "linear classifier (multi) with logistic loss";
+        return str;
     }
 };
 

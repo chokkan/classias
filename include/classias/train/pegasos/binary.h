@@ -37,6 +37,7 @@
 
 #include <classias/types.h>
 #include <classias/classify/linear/binary.h>
+#include <classias/classify/linear/multi.h>
 
 namespace classias
 {
@@ -54,7 +55,7 @@ template <
     class error_tmpl,
     class model_tmpl
 >
-class pegasos_binary_base
+class pegasos_base
 {
 public:
     /// The type implementing an error function.
@@ -64,7 +65,7 @@ public:
     /// The type representing a value.
     typedef typename model_type::value_type value_type;
     /// This class.
-    typedef pegasos_binary_base<error_tmpl, model_tmpl> this_class;
+    typedef pegasos_base<error_tmpl, model_tmpl> this_class;
 
 protected:
     /// The array of feature weights.
@@ -89,20 +90,28 @@ protected:
     parameter_exchange m_params;
     /// The lambda (coefficient for L2 regularization).
     value_type m_lambda;
-    value_type m_c;
     /// The initial learning rate.
     value_type m_eta0;
 
 public:
-    pegasos_binary_base()
+    /**
+     * Constructs the object.
+     */
+    pegasos_base()
     {
         clear();
     }
 
-    virtual ~pegasos_binary_base()
+    /**
+     * Destructs the object.
+     */
+    virtual ~pegasos_base()
     {
     }
 
+    /**
+     * Resets the internal states and parameters to default.
+     */
     void clear()
     {
         // Clear the weight vector.
@@ -116,7 +125,10 @@ public:
             "Initial learning rate");
     }
 
-public:
+    /**
+     * Sets the number of features.
+     *  @param  size        The number of features.
+     */
     void set_num_features(size_t size)
     {
         m_model.resize(size);
@@ -124,6 +136,9 @@ public:
     }
 
 public:
+    /**
+     * Starts a training process.
+     */
     void start()
     {
         this->initialize_weights();
@@ -131,74 +146,28 @@ public:
         m_t0 = 1.0 / (m_lambda * m_eta0);
     }
 
+    /**
+     * Finishes a training process.
+     */
     void finish()
     {
         rescale_weights();
     }
 
 public:
-    template <class iterator_type>
-    value_type update(iterator_type it)
-    {
-        // Learning rate: eta = 1. / (lambda * (t0 + t)).
-        m_eta = 1. / (m_lambda * (m_t0 + m_t));
-
-        // Compute the error for the instance.
-        value_type nlogp = 0.;
-        error_type cls(m_model);
-        cls.inner_product_scaled(it->begin(), it->end(), m_scale);
-        value_type err = cls.error(it->get_label(), nlogp);
-        value_type loss = (it->get_weight() * nlogp);
-
-        // W *= (1 - eta * lambda), equivalent to L2 regularization.
-        // Insted of applying the decay factor to the weight vector,
-        // let W = (decay * proj) * V and remember the products of
-        // decay factors. This avoids an O(K) computation for every
-        // updates.
-        m_decay *= (1. - m_eta * m_lambda);
-        m_scale = m_decay * m_proj;
-
-        // W -= (err * eta * x) <==> V -= (err * eta * x) / (decay * proj).
-        // Thus, gain = eta / (decay * proj).
-        value_type gain = 1;
-        if (0 < m_decay) {
-            gain = m_eta / m_scale;
-        } else {
-            // decay = 0 implies that W should be initialized to 0.
-            this->initialize_weights();
-            gain = 1;
-        }
-
-        // Update the feature weights.
-        update_weights(it->begin(), it->end(), -gain * err * it->get_weight());
-
-        // Project the weight vector within an L2 ball.
-        if (1 < m_lambda * m_norm22 * m_scale * m_scale) {
-            m_proj = 1.0 / (sqrt(m_lambda * m_norm22) * m_scale);
-        }
-
-        // Increment the update count.
-        ++m_t;
-
-        return loss;
-    }
-
-    template <class iterator_type>
-    inline value_type update(iterator_type first, iterator_type last)
-    {
-        value_type loss = 0;
-        for (iterator_type it = first;it != last;++it) {
-            loss += this->update(it);
-        }
-        return loss;
-    }
-
-public:
+    /**
+     * Shows the copyright information.
+     *  @param  os          The output stream.
+     */
     void copyright(std::ostream& os)
     {
-        os << "Binary logistic regression using Pegasos" << std::endl;
+        os << "Pegasos for " << error_type::name() << std::endl;
     }
 
+    /**
+     * Shows the current report of the training process.
+     *  @param  os          The output stream.
+     */
     void report(std::ostream& os)
     {
         os << "Feature L2-norm: " << std::sqrt(m_norm22) * m_scale << std::endl;
@@ -207,17 +176,6 @@ public:
     }
 
 protected:
-    template <class iterator_type>
-    inline void update_weights(iterator_type first, iterator_type last, value_type delta)
-    {
-        for (iterator_type it = first;it != last;++it) {
-            value_type w = m_model[it->first];
-            value_type d = delta * it->second;
-            m_model[it->first] += d;
-            m_norm22 += d * (d + w + w);
-        }
-    }
-
     void initialize_weights()
     {
         for (size_t i = 0;i < m_model.size();++i) {
@@ -265,10 +223,270 @@ public:
     }
 };
 
+template <
+    class error_tmpl,
+    class model_tmpl
+>
+class pegasos_binary_base :
+    public pegasos_base<error_tmpl, model_tmpl>
+{
+public:
+    /// The type implementing an error function.
+    typedef error_tmpl error_type;
+    /// The type implementing a model (weight vector for features).
+    typedef model_tmpl model_type;
+    /// The type representing a value.
+    typedef typename model_type::value_type value_type;
+    /// The base class.
+    typedef pegasos_base<error_tmpl, model_tmpl> base_class;
+    /// This class.
+    typedef pegasos_binary_base<error_tmpl, model_tmpl> this_class;
+
+public:
+    /**
+     * Receives a training instance and updates feature weights.
+     *  @param  it          An interator to the training instance.
+     *  @return value_type  The loss computed for the instance.
+     */
+    template <class iterator_type>
+    value_type update(iterator_type it)
+    {
+        // Use synonyms to avoid "this->" for every access to member variables.
+        model_type& model = this->m_model;
+        value_type& eta = this->m_eta;
+        value_type& lambda = this->m_lambda;
+        value_type& decay = this->m_decay;
+        value_type& proj = this->m_proj;
+        value_type& scale = this->m_scale;
+        value_type& norm22 = this->m_norm22;
+        int& t = this->m_t;
+        value_type& t0 = this->m_t0;
+
+        // Learning rate: eta = 1. / (lambda * (t0 + t)).
+        eta = 1. / (lambda * (t0 + t));
+
+        // Compute the error for the instance.
+        value_type nlogp = 0.;
+        error_type cls(model);
+        cls.inner_product_scaled(it->begin(), it->end(), scale);
+        value_type err = cls.error(it->get_label(), nlogp);
+        value_type loss = (it->get_weight() * nlogp);
+
+        // W *= (1 - eta * lambda), equivalent to L2 regularization.
+        // Insted of applying the decay factor to the weight vector,
+        // let W = (decay * proj) * V and remember the products of
+        // decay factors. This avoids an O(K) computation for every
+        // updates.
+        decay *= (1. - eta * lambda);
+        scale = decay * proj;
+
+        // W -= (err * eta * x) <==> V -= (err * eta * x) / (decay * proj).
+        // Thus, gain = eta / (decay * proj).
+        value_type gain = 1;
+        if (0 < decay) {
+            gain = eta / scale;
+        } else {
+            // decay = 0 implies that W should be initialized to 0.
+            this->initialize_weights();
+            gain = 1;
+        }
+
+        // Update the feature weights.
+        update_weights(it->begin(), it->end(), -gain * err * it->get_weight());
+
+        // Project the weight vector within an L2 ball.
+        if (1 < lambda * norm22 * scale * scale) {
+            proj = 1.0 / (sqrt(lambda * norm22) * scale);
+        }
+
+        // Increment the update count.
+        ++t;
+        return loss;
+    }
+
+    /**
+     * Receives multiple training instances and updates feature weights.
+     *  @param  first       The iterator pointing to the first instance.
+     *  @param  last        The iterator pointing just beyond the last
+     *                      instance.
+     *  @return value_type  The loss computed for the instances.
+     */
+    template <class iterator_type>
+    inline value_type update(iterator_type first, iterator_type last)
+    {
+        value_type loss = 0;
+        for (iterator_type it = first;it != last;++it) {
+            loss += this->update(it);
+        }
+        return loss;
+    }
+
+protected:
+    template <class iterator_type>
+    inline void update_weights(iterator_type first, iterator_type last, value_type delta)
+    {
+        model_type& model = this->m_model;
+        value_type& norm22 = this->m_norm22;
+
+        for (iterator_type it = first;it != last;++it) {
+            value_type w = model[it->first];
+            value_type d = delta * it->second;
+            model[it->first] += d;
+            norm22 += d * (d + w + w);
+        }
+    }
+};
+
+
+template <
+    class error_tmpl,
+    class model_tmpl
+>
+class pegasos_multi_base :
+    public pegasos_base<error_tmpl, model_tmpl>
+{
+public:
+    /// The type implementing an error function.
+    typedef error_tmpl error_type;
+    /// The type implementing a model (weight vector for features).
+    typedef model_tmpl model_type;
+    /// The type representing a value.
+    typedef typename model_type::value_type value_type;
+    /// The base class.
+    typedef pegasos_base<error_tmpl, model_tmpl> base_class;
+    /// This class.
+    typedef pegasos_binary_base<error_tmpl, model_tmpl> this_class;
+
+public:
+    /**
+     * Receives a training instance and updates feature weights.
+     *  @param  it          An interator to the training instance.
+     *  @return value_type  The loss computed for the instance.
+     */
+    template <class iterator_type, class feature_generator_type>
+    value_type update(iterator_type it, feature_generator_type& fgen)
+    {
+        const int L = (int)fgen.num_labels();
+
+        // Use synonyms to avoid "this->" for every access to member variables.
+        model_type& model = this->m_model;
+        value_type& eta = this->m_eta;
+        value_type& lambda = this->m_lambda;
+        value_type& decay = this->m_decay;
+        value_type& proj = this->m_proj;
+        value_type& scale = this->m_scale;
+        value_type& norm22 = this->m_norm22;
+        int& t = this->m_t;
+        value_type& t0 = this->m_t0;
+
+        // Learning rate: eta = 1. / (lambda * (t0 + t)).
+        eta = 1. / (lambda * (t0 + t));
+
+        // Compute the error for the instance.
+        value_type nlogp = 0.;
+        error_type cls(model, fgen);
+        cls.resize(it->num_labels(L));
+        for (int l = 0;l < it->num_labels(L);++l) {
+            cls.inner_product_scaled(
+                l,
+                it->attributes(l).begin(),
+                it->attributes(l).end(),
+                scale
+                );
+        }
+        cls.finalize();
+        value_type loss = it->get_weight() * cls.logprob(it->get_label());
+
+        // W *= (1 - eta * lambda), equivalent to L2 regularization.
+        // Insted of applying the decay factor to the weight vector,
+        // let W = (decay * proj) * V and remember the products of
+        // decay factors. This avoids an O(K) computation for every
+        // updates.
+        decay *= (1. - eta * lambda);
+        scale = decay * proj;
+
+        // W -= (err * eta * x) <==> V -= (err * eta * x) / (decay * proj).
+        // Thus, gain = eta / (decay * proj).
+        value_type gain = 1;
+        if (0 < decay) {
+            gain = eta / scale;
+        } else {
+            // decay = 0 implies that W should be initialized to 0.
+            this->initialize_weights();
+            gain = 1;
+        }
+
+        for (int l = 0;l < it->num_labels(L);++l) {
+            value_type err = cls.error(l, it->get_label());
+            // Update the feature weights.
+            update_weights(
+                l,
+                it->attributes(l).begin(),
+                it->attributes(l).end(),
+                -gain * err * it->get_weight(),
+                fgen);
+        }
+
+
+        // Project the weight vector within an L2 ball.
+        if (1 < lambda * norm22 * scale * scale) {
+            proj = 1.0 / (sqrt(lambda * norm22) * scale);
+        }
+
+        // Increment the update count.
+        ++t;
+        return loss;
+    }
+
+    /**
+     * Receives multiple training instances and updates feature weights.
+     *  @param  first       The iterator pointing to the first instance.
+     *  @param  last        The iterator pointing just beyond the last
+     *                      instance.
+     *  @return value_type  The loss computed for the instances.
+     */
+    template <class iterator_type>
+    inline value_type update(iterator_type first, iterator_type last)
+    {
+        value_type loss = 0;
+        for (iterator_type it = first;it != last;++it) {
+            loss += this->update(it);
+        }
+        return loss;
+    }
+
+protected:
+    template <class iterator_type, class feature_generator_type>
+    inline void update_weights(int l, iterator_type first, iterator_type last, value_type delta, feature_generator_type& fgen)
+    {
+        model_type& model = this->m_model;
+        value_type& norm22 = this->m_norm22;
+
+        for (iterator_type it = first;it != last;++it) {
+            int fid = fgen.forward(it->first, l);
+            value_type w = model[fid];
+            value_type d = delta * it->second;
+            model[fid] += d;
+            norm22 += d * (d + w + w);
+        }
+    }
+};
+
+
 typedef pegasos_binary_base<
     classify::linear_binary_logistic<int, double, weight_vector>,
     weight_vector
     > pegasos_binary_logistic_regression;
+
+typedef pegasos_multi_base<
+    classify::linear_multi_logistic<int, double, weight_vector, dense_feature_generator>,
+    weight_vector
+    > pegasos_multi_dense_logistic_regression;
+
+typedef pegasos_multi_base<
+    classify::linear_multi_logistic<int, double, weight_vector, sparse_feature_generator>,
+    weight_vector
+    > pegasos_multi_sparse_logistic_regression;
 
 
 };

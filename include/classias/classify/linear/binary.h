@@ -141,16 +141,19 @@ public:
     template <class iterator_type>
     inline void inner_product_scaled(iterator_type first, iterator_type last, const value_type& scale)
     {
-        this->clear();
-        for (iterator_type it = first;it != last;++it) {
-            this->operator()(it->first, it->second);
-        }
+        this->inner_product(first, last);
         this->scale(scale);
     }
 
     inline void scale(const value_type& scale)
     {
         m_score *= scale;
+    }
+
+    static const char *name()
+    {
+        const static char *str = "linear classifier (binary)";
+        return str;
     }
 };
 
@@ -250,6 +253,12 @@ public:
             loss = b ? -std::log(p) : -std::log(1.-p);
         }
         return (p - static_cast<double>(b));
+    }
+
+    static const char *name()
+    {
+        const static char *str = "linear classifier (binary) with logistic loss";
+        return str;
     }
 };
 
