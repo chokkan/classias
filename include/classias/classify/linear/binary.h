@@ -74,7 +74,7 @@ public:
      * Constructs an object.
      *  @param  model       The model associated with the classifier.
      */
-    linear_binary(model_type& model)
+    linear_binary(model_type& model, const value_type scale = 1)
         : m_model(model)
     {
         clear();
@@ -120,7 +120,7 @@ public:
      */
     inline void operator()(const attribute_type& a, const value_type& value)
     {
-        m_score += m_model[a] * value;        
+        m_score += (m_model[a] * value);
     }
 
     /**
@@ -128,18 +128,29 @@ public:
      *  @param  first       The iterator for the first element of attributes.
      *  @param  last        The iterator for the element just beyond the
      *                      last element of attributes.
-     *  @param  reset       Specify \c true to reset the current result
-     *                      before computing the inner product.
      */
     template <class iterator_type>
-    inline void inner_product(iterator_type first, iterator_type last, bool reset=true)
+    inline void inner_product(iterator_type first, iterator_type last)
     {
-        if (reset) {
-            this->clear();
-        }
+        this->clear();
         for (iterator_type it = first;it != last;++it) {
             this->operator()(it->first, it->second);
         }
+    }
+
+    template <class iterator_type>
+    inline void inner_product_scaled(iterator_type first, iterator_type last, const value_type& scale)
+    {
+        this->clear();
+        for (iterator_type it = first;it != last;++it) {
+            this->operator()(it->first, it->second);
+        }
+        this->scale(scale);
+    }
+
+    inline void scale(const value_type& scale)
+    {
+        m_score *= scale;
     }
 };
 
@@ -173,7 +184,8 @@ public:
      * Constructs an object.
      *  @param  model       The model associated with the classifier.
      */
-    linear_binary_logistic(model_type& model) : base_type(model)
+    linear_binary_logistic(model_type& model)
+        : base_type(model)
     {
     }
 

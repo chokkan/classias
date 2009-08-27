@@ -240,12 +240,12 @@ int multi_train(option& opt)
         if (opt.type == option::TYPE_MULTI_SPARSE) {
             return train<
                 classias::ndata,
-                classias::trainer_lbfgs_multi<classias::ndata, classias::real_t>
+                classias::train::logistic_regression_multi_lbfgs<classias::ndata, classias::real_t>
             >(opt);
         } else if (opt.type == option::TYPE_MULTI_DENSE) {
             return train<
                 classias::mdata,
-                classias::trainer_lbfgs_multi<classias::mdata, classias::real_t>
+                classias::train::logistic_regression_multi_lbfgs<classias::mdata, classias::real_t>
             >(opt);
         }
     }
@@ -255,7 +255,7 @@ int multi_train(option& opt)
 bool multi_usage(option& opt)
 {
     if (opt.algorithm == "logress.lbfgs") {
-        classias::trainer_lbfgs_multi<classias::mdata, classias::real_t> tr;
+        classias::train::logistic_regression_multi_lbfgs<classias::mdata, classias::real_t> tr;
         tr.params().help(opt.os);
         return true;
     }

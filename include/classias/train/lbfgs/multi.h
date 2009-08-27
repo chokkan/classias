@@ -45,6 +45,9 @@
 namespace classias
 {
 
+namespace train
+{
+
 /**
  * Training a log-linear model using the maximum entropy modeling.
  *  @param  data_tmpl           Training data class.
@@ -54,7 +57,7 @@ template <
     class data_tmpl,
     class value_tmpl = double
 >
-class trainer_lbfgs_multi : public lbfgs_base<value_tmpl>
+class logistic_regression_multi_lbfgs : public lbfgs_base<value_tmpl>
 {
 protected:
     /// A type representing a data set for training.
@@ -64,7 +67,7 @@ protected:
     /// A synonym of the base class.
     typedef lbfgs_base<value_tmpl> base_class;
     /// A synonym of this class.
-    typedef trainer_lbfgs_multi<data_type, value_type> this_class;
+    typedef logistic_regression_multi_lbfgs<data_type, value_type> this_class;
     /// A type representing an instance in the training data.
     typedef typename data_type::instance_type instance_type;
     /// A type providing a read-only random-access iterator for instances.
@@ -85,14 +88,14 @@ protected:
     const data_type* m_data;
 
 public:
-    trainer_lbfgs_multi()
+    logistic_regression_multi_lbfgs()
     {
         m_oexps = NULL;
         m_data = NULL;
         clear();
     }
 
-    virtual ~trainer_lbfgs_multi()
+    virtual ~logistic_regression_multi_lbfgs()
     {
         clear();
     }
@@ -243,6 +246,8 @@ public:
         pr.output_micro(os, data.positive_labels.begin(), data.positive_labels.end());
         pr.output_macro(os, data.positive_labels.begin(), data.positive_labels.end());
     }
+};
+
 };
 
 };

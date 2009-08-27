@@ -212,6 +212,30 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Pegasos"
+				>
+				<File
+					RelativePath="..\include\classias\train\pegasos\binary.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Online Scheduler"
+				>
+				<File
+					RelativePath="..\include\classias\train\online_scheduler.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Averaged Perceptron"
+				>
+				<File
+					RelativePath="..\include\classias\train\averaged_perceptron\binary.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Utilities"

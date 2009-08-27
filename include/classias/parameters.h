@@ -73,6 +73,8 @@ public:
         int         type;
         /// The pointer to the parameter.
         void*       pointer;
+        /// The time stamp when the parameter is set.
+        int         stamp;
         /// The help message.
         std::string message;
     };
@@ -86,11 +88,13 @@ public:
     parameter_map   pmap;
     /// A parameter list.
     parameter_list  plist;
+    /// A time stamp.
+    int stamp;
 
     /**
      * Constructs the object.
      */
-    parameter_exchange()
+    parameter_exchange() : stamp(0)
     {
     }
 
@@ -109,6 +113,7 @@ public:
             value_type v;
             v.type = VT_INT;
             v.pointer = var;
+            v.stamp = 0;
             v.message = message;
             pmap.insert(parameter_map::value_type(name, v));
             plist.push_back(name);
@@ -123,6 +128,7 @@ public:
             value_type v;
             v.type = VT_DOUBLE;
             v.pointer = var;
+            v.stamp = 0;
             v.message = message;
             pmap.insert(parameter_map::value_type(name, v));
             plist.push_back(name);
@@ -137,13 +143,14 @@ public:
             value_type v;
             v.type = VT_STRING;
             v.pointer = var;
+            v.stamp = 0;
             v.message = message;
             pmap.insert(parameter_map::value_type(name, v));
             plist.push_back(name);
         }
     }
 
-    void set(const std::string& name, const int value)
+    void set(const std::string& name, const int value, bool unk=true)
     {
         parameter_map::iterator it = pmap.find(name);
         if (it != pmap.end()) {
@@ -156,12 +163,13 @@ public:
                 ss << value;
                 *reinterpret_cast<std::string*>(it->second.pointer) = ss.str();
             }
-        } else {
+            it->second.stamp = ++stamp;
+        } else if (unk) {
             throw unknown_parameter(name);
         }
     }
 
-    void set(const std::string& name, const double value)
+    void set(const std::string& name, const double value, bool unk=true)
     {
         parameter_map::iterator it = pmap.find(name);
         if (it != pmap.end()) {
@@ -174,12 +182,13 @@ public:
                 ss << value;
                 *reinterpret_cast<std::string*>(it->second.pointer) = ss.str();
             }
-        } else {
+            it->second.stamp = ++stamp;
+        } else if (unk) {
             throw unknown_parameter(name);
         }
     }
 
-    void set(const std::string& name, const std::string& value)
+    void set(const std::string& name, const std::string& value, bool unk=true)
     {
         parameter_map::iterator it = pmap.find(name);
         if (it != pmap.end()) {
@@ -190,9 +199,16 @@ public:
             } else if (it->second.type == VT_STRING) {
                 *reinterpret_cast<std::string*>(it->second.pointer) = value;
             }
-        } else {
+            it->second.stamp = ++stamp;
+        } else if (unk) {
             throw unknown_parameter(name);
         }
+    }
+
+    int get_stamp(const std::string& name)
+    {
+        parameter_map::iterator it = pmap.find(name);
+        return (it != pmap.end() ? it->second.stamp : -1);
     }
 
     std::ostream& show(std::ostream& os)

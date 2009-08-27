@@ -42,6 +42,9 @@
 namespace classias
 {
 
+namespace train
+{
+
 template <
     class value_tmpl = double
 >
@@ -308,6 +311,8 @@ public:
         ) = 0;
 
     virtual void holdout_evaluation() = 0;
+};
+
 };
 
 };

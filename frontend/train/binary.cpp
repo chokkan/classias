@@ -39,6 +39,9 @@
 
 #include <classias/classias.h>
 #include <classias/train/lbfgs/binary.h>
+#include <classias/train/averaged_perceptron/binary.h>
+#include <classias/train/pegasos/binary.h>
+#include <classias/train/online_scheduler.h>
 
 #include "option.h"
 #include "tokenize.h"
@@ -89,7 +92,7 @@ read_line(
     // Set the class label of this instance.
     if (name == "+1" || name == "1") {
         instance.set_label(true);
-    } else if (name == "-1") {
+    } else if (name == "-1" || name == "0") {
         instance.set_label(false);
     } else {
         throw invalid_data("a class label must be either '+1', '1', or '-1'", line, lines);
@@ -200,7 +203,7 @@ output_model(
 
     // Store the feature weights.
     for (aid_type i = 0;i < attributes.size();++i) {
-        value_type w = weights[i];
+        value_type w     = weights[i];
         if (w != 0.) {
             os << w << '\t' << attributes.to_item(i) << std::endl;
         }
@@ -213,8 +216,24 @@ int binary_train(option& opt)
     if (opt.algorithm == "logress.lbfgs") {
         return train<
             classias::bdata,
-            classias::trainer_lbfgs_binary<classias::bdata, classias::real_t>
+            classias::train::logistic_regression_binary_lbfgs<classias::bdata, classias::real_t>
         >(opt);
+    } else if (opt.algorithm == "logress.pegasos") {
+        return train<
+            classias::bdata,
+            classias::train::online_scheduler_binary<
+                classias::bdata,
+                classias::train::pegasos_binary_logistic_regression
+                >
+            >(opt);
+    } else if (opt.algorithm == "averaged_perceptron") {
+        return train<
+            classias::bdata,
+            classias::train::online_scheduler_binary<
+                classias::bdata,
+                classias::train::averaged_perceptron_binary
+                >
+            >(opt);
     } else {
         throw invalid_algorithm(opt.algorithm);
     }
@@ -223,7 +242,7 @@ int binary_train(option& opt)
 bool binary_usage(option& opt)
 {
     if (opt.algorithm == "logress.lbfgs") {
-        classias::trainer_lbfgs_binary<classias::bdata, classias::real_t> tr;
+        classias::train::logistic_regression_binary_lbfgs<classias::bdata, classias::real_t> tr;
         tr.params().help(opt.os);
         return true;
     }

@@ -79,8 +79,10 @@ public:
         ON_OPTION_WITH_ARG(SHORTOPT('a') || LONGOPT("algorithm"))
             if (strcasecmp(arg, "logress") == 0 || strcasecmp(arg, "logress.lbfgs") == 0) {
                 algorithm = "logress.lbfgs";
-            } else if (strcasecmp(arg, "logress.sgd") == 0) {
-                algorithm = "logress.sgd";
+            } else if (strcasecmp(arg, "logress.pegasos") == 0) {
+                algorithm = "logress.pegasos";
+            } else if (strcasecmp(arg, "averaged_perceptron") == 0 || strcasecmp(arg, "ap") == 0) {
+                algorithm = "averaged_perceptron";
             } else {
                 std::stringstream ss;
                 ss << "unknown training algorithm specified: " << arg;

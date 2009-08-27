@@ -62,6 +62,8 @@ public:
     typedef features_tmpl features_type;
     /// The type of an attribute identifier.
     typedef typename features_type::identifier_type attribute_type;
+    /// The type of an attribute value.
+    typedef typename features_type::value_type value_type;
 
 protected:
     /// The label (truth) of this instance.

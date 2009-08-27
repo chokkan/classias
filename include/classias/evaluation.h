@@ -242,6 +242,46 @@ protected:
     }
 };
 
+
+template <
+    class iterator_type,
+    class model_type,
+    class classifier_type
+>
+static void holdout_evaluation_binary(
+    std::ostream& os,
+    iterator_type first,
+    iterator_type last,
+    model_type& model,
+    int holdout
+    )
+{
+    accuracy acc;
+    precall pr(2);
+    classifier_type cls(model);
+    static const int positive_labels[] = {1};
+
+    // For each instance in the data.
+    for (iterator_type it = first;it != last;++it) {
+        // Skip instances for training.
+        if (it->get_group() != holdout) {
+            continue;
+        }
+
+        // Compute the score for the instance.
+        cls.inner_product(it->begin(), it->end());
+        int rl = static_cast<int>(it->get_label());
+        int ml = static_cast<int>(static_cast<bool>(cls));
+
+        // Store the results.
+        acc.set(ml == rl);
+        pr.set(ml, rl);
+    }
+
+    acc.output(os);
+    pr.output_micro(os, positive_labels, positive_labels+1);
+}
+
 };
 
 #endif/*__CLASSIAS_EVALUATION_H__*/

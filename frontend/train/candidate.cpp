@@ -252,7 +252,7 @@ int candidate_train(option& opt)
     if (opt.algorithm == "logress.lbfgs") {
         return train<
             classias::cdata,
-            classias::trainer_lbfgs_multi<classias::cdata, classias::real_t>
+            classias::train::logistic_regression_multi_lbfgs<classias::cdata, classias::real_t>
         >(opt);
     } else {
         throw invalid_algorithm(opt.algorithm);
@@ -264,7 +264,7 @@ bool candidate_usage(option& opt)
 {
     // Branches for training algorithms.
     if (opt.algorithm == "logress.lbfgs") {
-        classias::trainer_lbfgs_multi<classias::cdata, classias::real_t> tr;
+        classias::train::logistic_regression_multi_lbfgs<classias::cdata, classias::real_t> tr;
         tr.params().help(opt.os);
         return true;
     }

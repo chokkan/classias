@@ -389,7 +389,7 @@ public:
     }
 };
 
-
+typedef std::vector<double> weight_vector;
 
 };
 

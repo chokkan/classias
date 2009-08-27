@@ -47,6 +47,9 @@
 namespace classias
 {
 
+namespace train
+{
+
 /**
  * Training a logistic regression model.
  */
@@ -54,7 +57,7 @@ template <
     class data_tmpl,
     class value_tmpl = double
 >
-class trainer_lbfgs_binary : public lbfgs_base<value_tmpl>
+class logistic_regression_binary_lbfgs : public lbfgs_base<value_tmpl>
 {
 public:
     /// A type representing a data set for training.
@@ -64,7 +67,7 @@ public:
     /// A synonym of the base class.
     typedef lbfgs_base<value_tmpl> base_class;
     /// A synonym of this class.
-    typedef trainer_lbfgs_binary<data_tmpl, value_tmpl> this_class;
+    typedef logistic_regression_binary_lbfgs<data_tmpl, value_tmpl> this_class;
     /// A type representing an instance in the training data.
     typedef typename data_type::instance_type instance_type;
     /// A type providing a read-only random-access iterator for instances.
@@ -82,11 +85,11 @@ protected:
     const data_type* m_data;
 
 public:
-    trainer_lbfgs_binary()
+    logistic_regression_binary_lbfgs()
     {
     }
 
-    virtual ~trainer_lbfgs_binary()
+    virtual ~logistic_regression_binary_lbfgs()
     {
     }
 
@@ -169,36 +172,19 @@ public:
 
     void holdout_evaluation()
     {
-        std::ostream& os = *(this->m_os);
-        const value_type *x = this->m_weights;
-        int positive_labels[] = {1};
-        accuracy acc;
-        precall pr(2);
-        classifier_type cls(x);
-
-        // For each instance in the data.
-        for (const_iterator iti = m_data->begin();iti != m_data->end();++iti) {
-            // Skip instances for training.
-            if (iti->get_group() != this->m_holdout) {
-                continue;
-            }
-
-            // Compute the score for the instance.
-            cls.inner_product(iti->begin(), iti->end());
-            int rl = static_cast<int>(iti->get_label());
-            int ml = static_cast<int>(static_cast<bool>(cls));
-
-            // Store the results.
-            acc.set(ml == rl);
-            pr.set(ml, rl);
-        }
-
-        acc.output(os);
-        pr.output_micro(os, positive_labels, positive_labels+1);
+        double const* w = this->m_weights;
+        holdout_evaluation_binary<data_type::const_iterator, double const*, classifier_type>(
+            *this->m_os,
+            this->m_data->begin(),
+            this->m_data->end(),
+            w,
+            this->m_holdout
+            );
     }
 };
 
 };
 
-#endif/*__CLASSIAS_LBFGS_BINARY_H__*/
+};
 
+#endif/*__CLASSIAS_LBFGS_BINARY_H__*/
