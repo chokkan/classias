@@ -40,7 +40,7 @@
 #include <classias/classias.h>
 #include <classias/train/lbfgs/binary.h>
 #include <classias/train/averaged_perceptron/binary.h>
-#include <classias/train/pegasos/binary.h>
+#include <classias/train/pegasos.h>
 #include <classias/train/online_scheduler.h>
 
 #include "option.h"
@@ -223,7 +223,7 @@ int binary_train(option& opt)
             classias::bdata,
             classias::train::online_scheduler_binary<
                 classias::bdata,
-                classias::train::pegasos_binary_logistic_regression
+                classias::train::pegasos_binary_logistic_loss
                 >
             >(opt);
     } else if (opt.algorithm == "averaged_perceptron") {

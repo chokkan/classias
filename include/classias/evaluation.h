@@ -282,6 +282,57 @@ static void holdout_evaluation_binary(
     pr.output_micro(os, positive_labels, positive_labels+1);
 }
 
+template <
+    class iterator_type,
+    class classifier_type,
+    class feature_generator_type,
+    class label_iterator_type
+>
+static void holdout_evaluation_multi(
+    std::ostream& os,
+    iterator_type first,
+    iterator_type last,
+    classifier_type& cls,
+    feature_generator_type& fgen,
+    int holdout,
+    label_iterator_type label_first,
+    label_iterator_type label_last
+    )
+{
+    const int L = fgen.num_labels();
+    accuracy acc;
+    precall pr(L);
+
+    // For each instance in the data.
+    for (iterator_type it = first;it != last;++it) {
+        // Exclude instances for holdout evaluation.
+        if (it->get_group() != holdout) {
+            continue;
+        }
+
+        // Tell the classifier the number of possible labels.
+        cls.resize(it->num_labels(L));
+
+        for (int l = 0;l < it->num_labels(L);++l) {
+            cls.inner_product(
+                l, fgen,
+                it->attributes(l).begin(),
+                it->attributes(l).end()
+                );
+        }
+        cls.finalize();
+
+        int argmax = cls.argmax();
+        acc.set(argmax == it->get_label());
+        pr.set(argmax, it->get_label());
+    }
+
+    // Report accuracy, precision, recall, and f1 score.
+    acc.output(os);
+    pr.output_micro(os, label_first, label_last);
+    pr.output_macro(os, label_first, label_last);
+}
+
 };
 
 #endif/*__CLASSIAS_EVALUATION_H__*/

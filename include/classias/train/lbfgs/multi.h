@@ -210,41 +210,19 @@ public:
 
     void holdout_evaluation()
     {
-        std::ostream& os = *(this->m_os);
-        const data_type& data = *(this->m_data);
-        const int L = data.num_labels();
-        const value_type *w = this->m_weights;
-        classifier_type cls(w);
-        accuracy acc;
-        precall pr(data.labels.size());
+        double const* w = this->m_weights;
+        classifier_type cla(w);
 
-        // Loop over instances.
-        for (const_iterator iti = data.begin();iti != data.end();++iti) {
-            const instance_type& inst = *iti;
-
-            // Exclude instances for holdout evaluation.
-            if (inst.get_group() != this->m_holdout) {
-                continue;
-            }
-
-            // Tell the classifier the number of possible labels.
-            cls.resize(inst.num_labels(L));
-
-            for (int l = 0;l < inst.num_labels(L);++l) {
-                const attributes_type& v = inst.attributes(l);
-                cls.inner_product(l, data.feature_generator, v.begin(), v.end());
-            }
-            cls.finalize();
-
-            int argmax = cls.argmax();
-            acc.set(argmax == inst.get_label());
-            pr.set(argmax, inst.get_label());
-        }
-
-        // Report accuracy, precision, recall, and f1 score.
-        acc.output(os);
-        pr.output_micro(os, data.positive_labels.begin(), data.positive_labels.end());
-        pr.output_macro(os, data.positive_labels.begin(), data.positive_labels.end());
+        holdout_evaluation_multi(
+            *this->m_os,
+            this->m_data->begin(),
+            this->m_data->end(),
+            cla,
+            this->m_data->feature_generator,
+            this->m_holdout,
+            this->m_data->positive_labels.begin(),
+            this->m_data->positive_labels.end()
+            );
     }
 };
 

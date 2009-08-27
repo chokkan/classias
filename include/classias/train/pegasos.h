@@ -1,5 +1,5 @@
 /*
- *      Pegasos for binary classification.
+ *      Primal Estimated sub-GrAdient SOlver (Pegasos).
  *
  * Copyright (c) 2008,2009 Naoaki Okazaki
  * All rights reserved.
@@ -30,8 +30,8 @@
 
 /* $Id$ */
 
-#ifndef __CLASSIAS_TRAIN_PEGASOS_BINARY_H__
-#define __CLASSIAS_TRAIN_PEGASOS_BINARY_H__
+#ifndef __CLASSIAS_TRAIN_PEGASOS_H__
+#define __CLASSIAS_TRAIN_PEGASOS_H__
 
 #include <iostream>
 
@@ -46,7 +46,9 @@ namespace train
 {
 
 /**
- * Primal Estimated sub-GrAdient SOlver (Pegasos) for binary classification.
+ * The base class for Primal Estimated sub-GrAdient SOlver (Pegasos).
+ *  This class implements internal variables, operations, and interface
+ *  that are common for training a binary/multi classification.
  *
  *  @param  error_tmpl  The type of the error (loss) function.
  *  @param  model_tmpl  The type of a weight vector for features.
@@ -64,7 +66,7 @@ public:
     typedef model_tmpl model_type;
     /// The type representing a value.
     typedef typename model_type::value_type value_type;
-    /// This class.
+    /// A synonym of this class.
     typedef pegasos_base<error_tmpl, model_tmpl> this_class;
 
 protected:
@@ -119,7 +121,7 @@ public:
         this->initialize_weights();
 
         // Initialize the parameters.
-        m_params.init("lambda", &m_lambda, 0.01,
+        m_params.init("lambda", &m_lambda, 0.001,
             "Coefficient (lambda) for L2-regularization.");
         m_params.init("eta", &m_eta0, 0.1,
             "Initial learning rate");
@@ -127,6 +129,7 @@ public:
 
     /**
      * Sets the number of features.
+     *  This function resizes the weight vector.
      *  @param  size        The number of features.
      */
     void set_num_features(size_t size)
@@ -138,6 +141,8 @@ public:
 public:
     /**
      * Starts a training process.
+     *  This function resets the internal states, and prepares for a training
+     *  process.
      */
     void start()
     {
@@ -148,6 +153,7 @@ public:
 
     /**
      * Finishes a training process.
+     *  This function performs a post-processing after a training process.
      */
     void finish()
     {
@@ -165,7 +171,7 @@ public:
     }
 
     /**
-     * Shows the current report of the training process.
+     * Report of the current state of the training process.
      *  @param  os          The output stream.
      */
     void report(std::ostream& os)
@@ -176,6 +182,10 @@ public:
     }
 
 protected:
+    /**
+     * Initializes the weight vector.
+     *  This function sets W = 0.
+     */
     void initialize_weights()
     {
         for (size_t i = 0;i < m_model.size();++i) {
@@ -187,6 +197,11 @@ protected:
         m_scale = 1;
     }
 
+    /**
+     * Finalizes the weight vector.
+     *  This function computes the actual weight vector W from the internal
+     *  representation (V, decay, proj).
+     */
     void rescale_weights()
     {
         m_norm22 = 0;
@@ -202,12 +217,21 @@ protected:
 
 
 public:
+    /**
+     * Obtains the parameter interface.
+     *  @return parameter_exchange& The parameter interface associated with
+     *                              this algorithm.
+     */
     parameter_exchange& params()
     {
         return m_params;
     }
 
 public:
+    /**
+     * Obtains an access to the weight vector (model).
+     *  @return model_type&         The weight vector (model).
+     */
     model_type& model()
     {
         if (m_scale != 1.) {
@@ -216,6 +240,10 @@ public:
         return m_model;
     }
 
+    /**
+     * Obtains a read-only access to the weight vector (model).
+     *  @return const model_type&   The weight vector (model).
+     */
     const model_type& model() const
     {
         // Force to remove the const modifier for rescaling.
@@ -223,6 +251,14 @@ public:
     }
 };
 
+
+
+/**
+ * Pegasos for binary classification.
+ *
+ *  @param  error_tmpl  The type of the error (loss) function.
+ *  @param  model_tmpl  The type of a weight vector for features.
+ */
 template <
     class error_tmpl,
     class model_tmpl
@@ -237,21 +273,21 @@ public:
     typedef model_tmpl model_type;
     /// The type representing a value.
     typedef typename model_type::value_type value_type;
-    /// The base class.
+    /// A synonym of the base class.
     typedef pegasos_base<error_tmpl, model_tmpl> base_class;
-    /// This class.
+    /// A synonym of this class.
     typedef pegasos_binary_base<error_tmpl, model_tmpl> this_class;
 
 public:
     /**
      * Receives a training instance and updates feature weights.
-     *  @param  it          An interator to the training instance.
+     *  @param  it          An interator for the training instance.
      *  @return value_type  The loss computed for the instance.
      */
     template <class iterator_type>
     value_type update(iterator_type it)
     {
-        // Use synonyms to avoid "this->" for every access to member variables.
+        // Define synonyms to avoid using "this->" for member variables.
         model_type& model = this->m_model;
         value_type& eta = this->m_eta;
         value_type& lambda = this->m_lambda;
@@ -322,6 +358,14 @@ public:
     }
 
 protected:
+    /**
+     * Adds a value to weights associated with a feature vector.
+     *  @param  first       The iterator pointing to the first element of
+     *                      the feature vector.
+     *  @param  last        The iterator pointing just beyond the last
+     *                      element of the feature vector.
+     *  @param  delta       The value to be added to the weights.
+     */
     template <class iterator_type>
     inline void update_weights(iterator_type first, iterator_type last, value_type delta)
     {
@@ -338,6 +382,13 @@ protected:
 };
 
 
+
+/**
+ * Pegasos for multi classification.
+ *
+ *  @param  error_tmpl  The type of the error (loss) function.
+ *  @param  model_tmpl  The type of a weight vector for features.
+ */
 template <
     class error_tmpl,
     class model_tmpl
@@ -352,15 +403,15 @@ public:
     typedef model_tmpl model_type;
     /// The type representing a value.
     typedef typename model_type::value_type value_type;
-    /// The base class.
+    /// A synonym of the base class.
     typedef pegasos_base<error_tmpl, model_tmpl> base_class;
-    /// This class.
+    /// A synonym of this class.
     typedef pegasos_binary_base<error_tmpl, model_tmpl> this_class;
 
 public:
     /**
      * Receives a training instance and updates feature weights.
-     *  @param  it          An interator to the training instance.
+     *  @param  it          An interator for the training instance.
      *  @return value_type  The loss computed for the instance.
      */
     template <class iterator_type, class feature_generator_type>
@@ -368,7 +419,7 @@ public:
     {
         const int L = (int)fgen.num_labels();
 
-        // Use synonyms to avoid "this->" for every access to member variables.
+        // Define synonyms to avoid using "this->" for member variables.
         model_type& model = this->m_model;
         value_type& eta = this->m_eta;
         value_type& lambda = this->m_lambda;
@@ -382,7 +433,7 @@ public:
         // Learning rate: eta = 1. / (lambda * (t0 + t)).
         eta = 1. / (lambda * (t0 + t));
 
-        // Compute the error for the instance.
+        // Compute the scores for the labels (candidates) in the instance.
         value_type nlogp = 0.;
         error_type cls(model);
         cls.resize(it->num_labels(L));
@@ -396,7 +447,9 @@ public:
                 );
         }
         cls.finalize();
-        value_type loss = it->get_weight() * cls.logprob(it->get_label());
+
+        // Compute the loss for the instance.
+        value_type loss = -it->get_weight() * cls.logprob(it->get_label());
 
         // W *= (1 - eta * lambda), equivalent to L2 regularization.
         // Insted of applying the decay factor to the weight vector,
@@ -416,16 +469,21 @@ public:
             this->initialize_weights();
             gain = 1;
         }
+        gain *= it->get_weight();
 
+        // Updates the feature weights.
         for (int l = 0;l < it->num_labels(L);++l) {
+            // Computes the error for the label (candidate).
             value_type err = cls.error(l, it->get_label());
+
             // Update the feature weights.
             update_weights(
                 l,
+                fgen,
                 it->attributes(l).begin(),
                 it->attributes(l).end(),
-                -gain * err * it->get_weight(),
-                fgen);
+                -err * gain
+                );
         }
 
 
@@ -457,8 +515,24 @@ public:
     }
 
 protected:
-    template <class iterator_type, class feature_generator_type>
-    inline void update_weights(int l, iterator_type first, iterator_type last, value_type delta, feature_generator_type& fgen)
+    /**
+     * Adds a value to weights associated with a feature vector.
+     *  @param  l           The label or candidate index.
+     *  @param  fgen        The feature generator.
+     *  @param  first       The iterator pointing to the first element of
+     *                      the feature vector.
+     *  @param  last        The iterator pointing just beyond the last
+     *                      element of the feature vector.
+     *  @param  delta       The value to be added to the weights.
+     */
+    template <class feature_generator_type, class iterator_type>
+    inline void update_weights(
+        int l,
+        feature_generator_type& fgen,
+        iterator_type first,
+        iterator_type last,
+        value_type delta
+        )
     {
         model_type& model = this->m_model;
         value_type& norm22 = this->m_norm22;
@@ -474,15 +548,17 @@ protected:
 };
 
 
+/** Pegasos for binary classification with logistic loss. */
 typedef pegasos_binary_base<
     classify::linear_binary_logistic<int, double, weight_vector>,
     weight_vector
-    > pegasos_binary_logistic_regression;
+    > pegasos_binary_logistic_loss;
 
+/** Pegasos for multi-class classification with logistic loss. */
 typedef pegasos_multi_base<
     classify::linear_multi_logistic<int, double, weight_vector>,
     weight_vector
-    > pegasos_multi_logistic_regression;
+    > pegasos_multi_logistic_loss;
 
 };
 
@@ -561,4 +637,4 @@ This is the final version of the efficient implementation:
 
 */
 
-#endif/*__CLASSIAS_TRAIN_PEGASOS_BINARY_H__*/
+#endif/*__CLASSIAS_TRAIN_PEGASOS_H__*/

@@ -429,6 +429,15 @@ public:
     }
 
     /**
+     * Returns the total number of labels.
+     *  @return int         The total number of labels.
+     */
+    size_t num_labels() const
+    {
+        return m_num_labels;
+    }
+
+    /**
      * Returns the total number of features.
      *  @return int         The total number of features.
      */

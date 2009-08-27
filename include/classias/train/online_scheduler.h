@@ -259,15 +259,18 @@ public:
             m_trainer.report(os);
 
             if (holdout != -1) {
-                /*
-                holdout_evaluation_binary<typename data_type::const_iterator, model_type, error_type>(
+                error_type cla(m_trainer.model());
+
+                holdout_evaluation_multi(
                     os,
                     data.begin(),
                     data.end(),
-                    m_trainer.model(),
-                    holdout
+                    cla,
+                    data.feature_generator,
+                    holdout,
+                    data.positive_labels.begin(),
+                    data.positive_labels.end()
                     );
-                    */
             }
 
             os << std::endl;

@@ -39,7 +39,7 @@
 
 #include <classias/classias.h>
 #include <classias/train/lbfgs/multi.h>
-#include <classias/train/pegasos/binary.h>
+#include <classias/train/pegasos.h>
 #include <classias/train/online_scheduler.h>
 
 #include "option.h"
@@ -251,13 +251,23 @@ int multi_train(option& opt)
             >(opt);
         }
     } else if (opt.algorithm == "logress.pegasos") {
-        return train<
-            classias::mdata,
-            classias::train::online_scheduler_multi<
+        if (opt.type == option::TYPE_MULTI_SPARSE) {
+            return train<
+                classias::ndata,
+                classias::train::online_scheduler_multi<
+                    classias::ndata,
+                    classias::train::pegasos_multi_logistic_loss
+                    >
+                >(opt);
+        } else if (opt.type == option::TYPE_MULTI_DENSE) {
+            return train<
                 classias::mdata,
-                classias::train::pegasos_multi_logistic_regression
-                >
-            >(opt);
+                classias::train::online_scheduler_multi<
+                    classias::mdata,
+                    classias::train::pegasos_multi_logistic_loss
+                    >
+                >(opt);
+        }
     }
     throw invalid_algorithm(opt.algorithm);
 }
