@@ -218,7 +218,7 @@ int binary_train(option& opt)
     if (opt.algorithm == "logress.lbfgs") {
         return train<
             classias::bdata,
-            classias::train::logistic_regression_binary_lbfgs<classias::bdata>
+            classias::train::lbfgs_logistic_binary<classias::bdata>
         >(opt);
     } else if (opt.algorithm == "averaged_perceptron") {
         return train<
@@ -233,7 +233,7 @@ int binary_train(option& opt)
             classias::bdata,
             classias::train::online_scheduler_binary<
                 classias::bdata,
-                classias::train::pegasos_binary_logistic_loss
+                classias::train::pegasos_logistic_binary
                 >
             >(opt);
     } else if (opt.algorithm == "logress.truncated_gradient") {
@@ -241,7 +241,7 @@ int binary_train(option& opt)
             classias::bdata,
             classias::train::online_scheduler_binary<
                 classias::bdata,
-                classias::train::truncated_gradient_binary_logistic_loss
+                classias::train::truncated_gradient_logistic_binary
                 >
             >(opt);
     } else {
@@ -252,7 +252,7 @@ int binary_train(option& opt)
 bool binary_usage(option& opt)
 {
     if (opt.algorithm == "logress.lbfgs") {
-        classias::train::logistic_regression_binary_lbfgs<classias::bdata> tr;
+        classias::train::lbfgs_logistic_binary<classias::bdata> tr;
         tr.params().help(opt.os);
         return true;
     }

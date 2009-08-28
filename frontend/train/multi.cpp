@@ -245,12 +245,12 @@ int multi_train(option& opt)
         if (opt.type == option::TYPE_MULTI_SPARSE) {
             return train<
                 classias::ndata,
-                classias::train::logistic_regression_multi_lbfgs<classias::ndata>
+                classias::train::lbfgs_logistic_multi<classias::ndata>
             >(opt);
         } else if (opt.type == option::TYPE_MULTI_DENSE) {
             return train<
                 classias::mdata,
-                classias::train::logistic_regression_multi_lbfgs<classias::mdata>
+                classias::train::lbfgs_logistic_multi<classias::mdata>
             >(opt);
         }
     } else if (opt.algorithm == "averaged_perceptron") {
@@ -277,7 +277,7 @@ int multi_train(option& opt)
                 classias::ndata,
                 classias::train::online_scheduler_multi<
                     classias::ndata,
-                    classias::train::pegasos_multi_logistic_loss
+                    classias::train::pegasos_logistic_multi
                     >
                 >(opt);
         } else if (opt.type == option::TYPE_MULTI_DENSE) {
@@ -285,7 +285,7 @@ int multi_train(option& opt)
                 classias::mdata,
                 classias::train::online_scheduler_multi<
                     classias::mdata,
-                    classias::train::pegasos_multi_logistic_loss
+                    classias::train::pegasos_logistic_multi
                     >
                 >(opt);
         }
@@ -295,7 +295,7 @@ int multi_train(option& opt)
                 classias::ndata,
                 classias::train::online_scheduler_multi<
                     classias::ndata,
-                    classias::train::truncated_gradient_multi_logistic_loss
+                    classias::train::truncated_gradient_logistic_multi
                     >
                 >(opt);
         } else if (opt.type == option::TYPE_MULTI_DENSE) {
@@ -303,7 +303,7 @@ int multi_train(option& opt)
                 classias::mdata,
                 classias::train::online_scheduler_multi<
                     classias::mdata,
-                    classias::train::truncated_gradient_multi_logistic_loss
+                    classias::train::truncated_gradient_logistic_multi
                     >
                 >(opt);
         }
@@ -314,7 +314,7 @@ int multi_train(option& opt)
 bool multi_usage(option& opt)
 {
     if (opt.algorithm == "logress.lbfgs") {
-        classias::train::logistic_regression_multi_lbfgs<classias::mdata> tr;
+        classias::train::lbfgs_logistic_multi<classias::mdata> tr;
         tr.params().help(opt.os);
         return true;
     }

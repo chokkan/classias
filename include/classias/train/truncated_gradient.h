@@ -601,12 +601,12 @@ protected:
 /** Truncate gradient for binary classification with logistic loss. */
 typedef truncated_gradient_binary<
     classify::linear_binary_logistic<int, double, weight_vector>
-    > truncated_gradient_binary_logistic_loss;
+    > truncated_gradient_logistic_binary;
 
 /** Truncate gradient for multi classification with logistic loss. */
 typedef truncated_gradient_multi<
     classify::linear_multi_logistic<int, double, weight_vector>
-    > truncated_gradient_multi_logistic_loss;
+    > truncated_gradient_logistic_multi;
 
 };
 

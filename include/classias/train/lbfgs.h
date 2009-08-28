@@ -365,7 +365,7 @@ template <
     class data_tmpl,
     class model_tmpl = weight_vector
 >
-class logistic_regression_binary_lbfgs : public lbfgs_base<model_tmpl>
+class lbfgs_logistic_binary : public lbfgs_base<model_tmpl>
 {
 public:
     /// A type representing a data set for training.
@@ -375,7 +375,7 @@ public:
     /// A synonym of the base class.
     typedef lbfgs_base<model_tmpl> base_class;
     /// A synonym of this class.
-    typedef logistic_regression_binary_lbfgs<data_tmpl, model_tmpl> this_class;
+    typedef lbfgs_logistic_binary<data_tmpl, model_tmpl> this_class;
 
     /// The type representing a value.
     typedef typename model_type::value_type value_type;
@@ -398,7 +398,7 @@ public:
     /**
      * Constructs the object.
      */
-    logistic_regression_binary_lbfgs()
+    lbfgs_logistic_binary()
     {
         clear();
     }
@@ -406,7 +406,7 @@ public:
     /**
      * Destructs the object.
      */
-    virtual ~logistic_regression_binary_lbfgs()
+    virtual ~lbfgs_logistic_binary()
     {
     }
 
@@ -534,7 +534,7 @@ template <
     class data_tmpl,
     class model_tmpl = weight_vector
 >
-class logistic_regression_multi_lbfgs : public lbfgs_base<model_tmpl>
+class lbfgs_logistic_multi : public lbfgs_base<model_tmpl>
 {
 protected:
     /// A type representing a data set for training.
@@ -544,7 +544,7 @@ protected:
     /// A synonym of the base class.
     typedef lbfgs_base<model_tmpl> base_class;
     /// A synonym of this class.
-    typedef logistic_regression_multi_lbfgs<data_type, model_tmpl> this_class;
+    typedef lbfgs_logistic_multi<data_type, model_tmpl> this_class;
 
     /// The type representing a value.
     typedef typename model_type::value_type value_type;
@@ -571,7 +571,7 @@ public:
     /**
      * Constructs the object.
      */
-    logistic_regression_multi_lbfgs()
+    lbfgs_logistic_multi()
     {
         m_oexps = NULL;
         m_data = NULL;
@@ -581,7 +581,7 @@ public:
     /**
      * Destructs the object.
      */
-    virtual ~logistic_regression_multi_lbfgs()
+    virtual ~lbfgs_logistic_multi()
     {
         clear();
     }
