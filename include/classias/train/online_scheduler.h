@@ -33,13 +33,24 @@
 #ifndef __CLASSIAS_TRAIN_ONLINE_SCHEDULER_H__
 #define __CLASSIAS_TRAIN_ONLINE_SCHEDULER_H__
 
+#include <cstdlib>
 #include <ctime>
 #include <iostream>
+#include <iterator>
 #include <classias/evaluation.h>
 
 namespace classias {
 
 namespace train {
+
+template <class iterator_type>
+iterator_type random_sample(iterator_type first, iterator_type last)
+{
+    int n = (int)std::distance(first, last);
+    int i = std::rand() % n;
+    std::advance(first, i);
+    return first;
+}
 
 /**
  * A scheduler of online algorithms for binary classification.
@@ -75,6 +86,8 @@ public:
 protected:
     /// Trainer type.
     trainer_type m_trainer;
+    /// The sample method.
+    std::string m_sample;
     /// The maximum number of iterations.
     int m_max_iterations;
     /// The parameter for regularization.
@@ -104,6 +117,8 @@ public:
         m_trainer.clear();
 
         parameter_exchange& par = this->params();
+        par.init("sample", &m_sample, "random",
+            "The method for sampling instances.");
         par.init("max_iterations", &m_max_iterations, 100,
             "The maximum number of iterations (epochs).");
         par.init("c", &m_c, 1,
@@ -166,11 +181,21 @@ public:
             value_type loss = 0;
             clock_t clk = std::clock();
 
-            // Loop for instances.
-            const_iterator it;
-            for (it = data.begin();it != data.end();++it) {
-                if (it->get_group() != holdout) {
-                    loss += m_trainer.update(it);
+            // Send instances to the algorithm.
+            if (m_sample == "sequantial") {
+                // Loop for instances.
+                for (const_iterator it = data.begin();it != data.end();++it) {
+                    if (it->get_group() != holdout) {
+                        loss += m_trainer.update(it);
+                    }
+                }
+            } else {
+                // Choose N instances at random.
+                for (int i = 0;i < (int)data.size();++i) {
+                    const_iterator it = random_sample(data.begin(), data.end());
+                    if (it->get_group() != holdout) {
+                        loss += m_trainer.update(it);
+                    }
                 }
             }
 
@@ -239,6 +264,8 @@ public:
 protected:
     /// Trainer type.
     trainer_type m_trainer;
+    /// The sample method.
+    std::string m_sample;
     /// The maximum number of iterations.
     int m_max_iterations;
     /// The parameter for regularization.
@@ -268,6 +295,8 @@ public:
         m_trainer.clear();
 
         parameter_exchange& par = this->params();
+        par.init("sample", &m_sample, "random",
+            "The method for sampling instances.");
         par.init("max_iterations", &m_max_iterations, 100,
             "The maximum number of iterations (epochs).");
         par.init("c", &m_c, 1,
@@ -330,10 +359,23 @@ public:
             value_type loss = 0;
             clock_t clk = std::clock();
 
-            const_iterator it;
-            for (it = data.begin();it != data.end();++it) {
-                if (it->get_group() != holdout) {
-                    loss += m_trainer.update(it, const_cast<data_type&>(data).feature_generator);
+            // Send instances to the algorithm.
+            if (m_sample == "sequential") {
+                // Loop for instances.
+                for (const_iterator it = data.begin();it != data.end();++it) {
+                    if (it->get_group() != holdout) {
+                        loss += m_trainer.update(
+                            it, const_cast<data_type&>(data).feature_generator);
+                    }
+                }
+            } else {
+                // Choose N instances at random.
+                for (int i = 0;i < (int)data.size();++i) {
+                    const_iterator it = random_sample(data.begin(), data.end());
+                    if (it->get_group() != holdout) {
+                        loss += m_trainer.update(
+                            it, const_cast<data_type&>(data).feature_generator);
+                    }
                 }
             }
 
