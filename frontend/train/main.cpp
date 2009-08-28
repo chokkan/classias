@@ -35,6 +35,8 @@
 #endif/*HAVE_CONFIG_H*/
 
 #include <iostream>
+#include <map>
+#include <string>
 #include <typeinfo>
 #include <classias/version.h>
 #include <optparse.h>
@@ -43,14 +45,15 @@
 #include "option.h"
 
 int binary_train(option& opt);
-bool binary_usage(option& opt);
 int multi_train(option& opt);
-bool multi_usage(option& opt);
 int candidate_train(option& opt);
-bool candidate_usage(option& opt);
 
 class optionparser : public option, public optparse
 {
+protected:
+    typedef std::map<std::string, std::string> synonyms_type;
+    synonyms_type m_algorithms;
+
 public:
     optionparser(
         std::istream& _is = std::cin,
@@ -58,6 +61,19 @@ public:
         std::ostream& _es = std::cerr
         ) : option(_is, _os, _es)
     {
+        // Build synsets for algorithms.
+        m_algorithms["lbfgs.logistic"]              = "lbfgs.logistic";
+        m_algorithms["lbfgs"]                       = "lbfgs.logistic";
+        m_algorithms["averaged_perceptron"]         = "averaged_perceptron";
+        m_algorithms["ap"]                          = "averaged_perceptron";
+        m_algorithms["pegasos.logistic"]            = "pegasos.logistic";
+        m_algorithms["pegasos.hinge"]               = "pegasos.hinge";
+        m_algorithms["pegasos.svm"]                 = "pegasos.hinge";
+        m_algorithms["truncated_gradient.logistic"] = "truncated_gradient.logistic";
+        m_algorithms["td.logistic"]                 = "truncated_gradient.logistic";
+        m_algorithms["truncated_gradient.hinge"]    = "truncated_gradient.hinge";
+        m_algorithms["td.hinge"]                    = "truncated_gradient.hinge";
+        m_algorithms["td.svm"]                      = "truncated_gradient.hinge";
     }
 
     BEGIN_OPTION_MAP_INLINE()
@@ -77,14 +93,9 @@ public:
             }
 
         ON_OPTION_WITH_ARG(SHORTOPT('a') || LONGOPT("algorithm"))
-            if (strcasecmp(arg, "logress") == 0 || strcasecmp(arg, "logress.lbfgs") == 0) {
-                algorithm = "logress.lbfgs";
-            } else if (strcasecmp(arg, "logress.pegasos") == 0) {
-                algorithm = "logress.pegasos";
-            } else if (strcasecmp(arg, "logress.tg") == 0) {
-                algorithm = "logress.truncated_gradient";
-            } else if (strcasecmp(arg, "averaged_perceptron") == 0 || strcasecmp(arg, "ap") == 0) {
-                algorithm = "averaged_perceptron";
+            synonyms_type::const_iterator it = m_algorithms.find(arg);
+            if (it != m_algorithms.end()) {
+                algorithm = it->second;
             } else {
                 std::stringstream ss;
                 ss << "unknown training algorithm specified: " << arg;
@@ -250,9 +261,6 @@ int main(int argc, char *argv[])
     // Show the help message and exit.
     if (opt.mode == option::MODE_HELP) {
         usage(os, argv[0]);
-        return ret;
-    } else if (opt.mode == option::MODE_HELP_ALGORITHM) {
-        binary_usage(opt) || multi_usage(opt) || candidate_usage(opt);
         return ret;
     }
 

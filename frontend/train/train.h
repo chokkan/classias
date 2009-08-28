@@ -191,6 +191,13 @@ train(option& opt)
     int num_groups = 0;
     std::ostream& os = opt.os;
 
+    // Show the help message for the algorithm and exit if necessary.
+    if (opt.mode == option::MODE_HELP_ALGORITHM) {
+        trainer_type tr;
+        tr.params().help(opt.os);
+        return 0;
+    }
+
 	// Report the start time and global configurations.
     os << "Task type: ";
     switch (opt.type) {

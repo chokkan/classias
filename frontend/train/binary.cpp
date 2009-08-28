@@ -215,7 +215,7 @@ output_model(
 int binary_train(option& opt)
 {
     // Branches for training algorithms.
-    if (opt.algorithm == "logress.lbfgs") {
+    if (opt.algorithm == "lbfgs.logistic") {
         return train<
             classias::bdata,
             classias::train::lbfgs_logistic_binary<classias::bdata>
@@ -228,7 +228,7 @@ int binary_train(option& opt)
                 classias::train::averaged_perceptron_binary
                 >
             >(opt);
-    } else if (opt.algorithm == "logress.pegasos") {
+    } else if (opt.algorithm == "pegasos.logistic") {
         return train<
             classias::bdata,
             classias::train::online_scheduler_binary<
@@ -236,7 +236,7 @@ int binary_train(option& opt)
                 classias::train::pegasos_logistic_binary
                 >
             >(opt);
-    } else if (opt.algorithm == "logress.truncated_gradient") {
+    } else if (opt.algorithm == "truncated_gradient.logistic") {
         return train<
             classias::bdata,
             classias::train::online_scheduler_binary<
@@ -247,14 +247,4 @@ int binary_train(option& opt)
     } else {
         throw invalid_algorithm(opt.algorithm);
     }
-}
-
-bool binary_usage(option& opt)
-{
-    if (opt.algorithm == "logress.lbfgs") {
-        classias::train::lbfgs_logistic_binary<classias::bdata> tr;
-        tr.params().help(opt.os);
-        return true;
-    }
-    return true;
 }

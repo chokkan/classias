@@ -241,7 +241,7 @@ output_model(
 int multi_train(option& opt)
 {
     // Branches for training algorithms.
-    if (opt.algorithm == "logress.lbfgs") {
+    if (opt.algorithm == "lbfgs.logistic") {
         if (opt.type == option::TYPE_MULTI_SPARSE) {
             return train<
                 classias::ndata,
@@ -271,7 +271,7 @@ int multi_train(option& opt)
                     >
                 >(opt);
         }
-    } else if (opt.algorithm == "logress.pegasos") {
+    } else if (opt.algorithm == "pegasos.logistic") {
         if (opt.type == option::TYPE_MULTI_SPARSE) {
             return train<
                 classias::ndata,
@@ -289,7 +289,7 @@ int multi_train(option& opt)
                     >
                 >(opt);
         }
-    } else if (opt.algorithm == "logress.truncated_gradient") {
+    } else if (opt.algorithm == "truncated_gradient.logistic") {
         if (opt.type == option::TYPE_MULTI_SPARSE) {
             return train<
                 classias::ndata,
@@ -309,14 +309,4 @@ int multi_train(option& opt)
         }
     }
     throw invalid_algorithm(opt.algorithm);
-}
-
-bool multi_usage(option& opt)
-{
-    if (opt.algorithm == "logress.lbfgs") {
-        classias::train::lbfgs_logistic_multi<classias::mdata> tr;
-        tr.params().help(opt.os);
-        return true;
-    }
-    return false;
 }
