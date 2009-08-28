@@ -51,11 +51,9 @@ namespace train
  *  that are common for training a binary/multi classification.
  *
  *  @param  error_tmpl  The type of the error (loss) function.
- *  @param  model_tmpl  The type of a weight vector for features.
  */
 template <
-    class error_tmpl,
-    class model_tmpl
+    class error_tmpl
 >
 class truncated_gradient_base
 {
@@ -63,11 +61,11 @@ public:
     /// The type implementing an error function.
     typedef error_tmpl error_type;
     /// The type implementing a model (weight vector for features).
-    typedef model_tmpl model_type;
+    typedef typename error_type::model_type model_type;
     /// The type representing a value.
     typedef typename model_type::value_type value_type;
     /// A synonym of this class.
-    typedef truncated_gradient_base<error_tmpl, model_tmpl> this_class;
+    typedef truncated_gradient_base<error_tmpl> this_class;
 
 protected:
     /// The array of feature weights.
@@ -331,26 +329,24 @@ public:
  * Truncated gradient for binary classification.
  *
  *  @param  error_tmpl  The type of the error (loss) function.
- *  @param  model_tmpl  The type of a weight vector for features.
  */
 template <
-    class error_tmpl,
-    class model_tmpl
+    class error_tmpl
 >
 class truncated_gradient_binary :
-    public truncated_gradient_base<error_tmpl, model_tmpl>
+    public truncated_gradient_base<error_tmpl>
 {
 public:
     /// The type implementing an error function.
     typedef error_tmpl error_type;
     /// The type implementing a model (weight vector for features).
-    typedef model_tmpl model_type;
+    typedef typename error_type::model_type model_type;
     /// The type representing a value.
     typedef typename model_type::value_type value_type;
     /// A synonym of the base class.
-    typedef truncated_gradient_base<error_tmpl, model_tmpl> base_class;
+    typedef truncated_gradient_base<error_tmpl> base_class;
     /// A synonym of this class.
-    typedef truncated_gradient_binary<error_tmpl, model_tmpl> this_class;
+    typedef truncated_gradient_binary<error_tmpl> this_class;
 
 public:
     /**
@@ -447,26 +443,24 @@ protected:
  * Truncated gradient for multi-class classification.
  *
  *  @param  error_tmpl  The type of the error (loss) function.
- *  @param  model_tmpl  The type of a weight vector for features.
  */
 template <
-    class error_tmpl,
-    class model_tmpl
+    class error_tmpl
 >
 class truncated_gradient_multi :
-    public truncated_gradient_base<error_tmpl, model_tmpl>
+    public truncated_gradient_base<error_tmpl>
 {
 public:
     /// The type implementing an error function.
     typedef error_tmpl error_type;
     /// The type implementing a model (weight vector for features).
-    typedef model_tmpl model_type;
+    typedef typename error_type::model_type model_type;
     /// The type representing a value.
     typedef typename model_type::value_type value_type;
     /// A synonym of the base class.
-    typedef truncated_gradient_base<error_tmpl, model_tmpl> base_class;
+    typedef truncated_gradient_base<error_tmpl> base_class;
     /// A synonym of this class.
-    typedef truncated_gradient_multi<error_tmpl, model_tmpl> this_class;
+    typedef truncated_gradient_multi<error_tmpl> this_class;
 
 public:
     /**
@@ -606,14 +600,12 @@ protected:
 
 /** Truncate gradient for binary classification with logistic loss. */
 typedef truncated_gradient_binary<
-    classify::linear_binary_logistic<int, double, weight_vector>,
-    weight_vector
+    classify::linear_binary_logistic<int, double, weight_vector>
     > truncated_gradient_binary_logistic_loss;
 
 /** Truncate gradient for multi classification with logistic loss. */
 typedef truncated_gradient_multi<
-    classify::linear_multi_logistic<int, double, weight_vector>,
-    weight_vector
+    classify::linear_multi_logistic<int, double, weight_vector>
     > truncated_gradient_multi_logistic_loss;
 
 };

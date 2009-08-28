@@ -51,11 +51,9 @@ namespace train
  *  that are common for training a binary/multi classification.
  *
  *  @param  error_tmpl  The type of the error (loss) function.
- *  @param  model_tmpl  The type of a weight vector for features.
  */
 template <
-    class error_tmpl,
-    class model_tmpl
+    class error_tmpl
 >
 class averaged_perceptron_base
 {
@@ -63,11 +61,11 @@ public:
     /// The type implementing an error function.
     typedef error_tmpl error_type;
     /// The type implementing a model (weight vector for features).
-    typedef model_tmpl model_type;
+    typedef typename error_type::model_type model_type;
     /// The type representing a value.
     typedef typename model_type::value_type value_type;
     /// A synonym of this class.
-    typedef averaged_perceptron_base<error_tmpl, model_tmpl> this_class;
+    typedef averaged_perceptron_base<error_tmpl> this_class;
 
 protected:
     /// The array of feature weights (unaveraged or averaged).
@@ -232,26 +230,24 @@ public:
  * Averaged Preceptron for binary classification.
  *
  *  @param  error_tmpl  The type of the error (loss) function.
- *  @param  model_tmpl  The type of a weight vector for features.
  */
 template <
-    class error_tmpl,
-    class model_tmpl
+    class error_tmpl
 >
 class averaged_perceptron_binary_base :
-    public averaged_perceptron_base<error_tmpl, model_tmpl>
+    public averaged_perceptron_base<error_tmpl>
 {
 public:
     /// The type implementing an error function.
     typedef error_tmpl error_type;
     /// The type implementing a model (weight vector for features).
-    typedef model_tmpl model_type;
+    typedef typename error_type::model_type model_type;
     /// The type representing a value.
     typedef typename model_type::value_type value_type;
     /// A synonym of the base class.
-    typedef averaged_perceptron_base<error_tmpl, model_tmpl> base_class;
+    typedef averaged_perceptron_base<error_tmpl> base_class;
     /// A synonym of this class.
-    typedef averaged_perceptron_binary_base<error_tmpl, model_tmpl> this_class;
+    typedef averaged_perceptron_binary_base<error_tmpl> this_class;
 
 public:
     /**
@@ -335,23 +331,22 @@ protected:
  *  @param  model_tmpl  The type of a weight vector for features.
  */
 template <
-    class error_tmpl,
-    class model_tmpl
+    class error_tmpl
 >
 class averaged_perceptron_multi_base :
-    public averaged_perceptron_base<error_tmpl, model_tmpl>
+    public averaged_perceptron_base<error_tmpl>
 {
 public:
     /// The type implementing an error function.
     typedef error_tmpl error_type;
     /// The type implementing a model (weight vector for features).
-    typedef model_tmpl model_type;
+    typedef typename error_type::model_type model_type;
     /// The type representing a value.
     typedef typename model_type::value_type value_type;
     /// A synonym of the base class.
-    typedef averaged_perceptron_base<error_tmpl, model_tmpl> base_class;
+    typedef averaged_perceptron_base<error_tmpl> base_class;
     /// A synonym of this class.
-    typedef averaged_perceptron_multi_base<error_tmpl, model_tmpl> this_class;
+    typedef averaged_perceptron_multi_base<error_tmpl> this_class;
 
 public:
     /**
@@ -479,13 +474,11 @@ protected:
 
 
 typedef averaged_perceptron_binary_base<
-    classify::linear_binary<int, double, weight_vector>,
-    weight_vector
+    classify::linear_binary<int, double, weight_vector>
     > averaged_perceptron_binary;
 
 typedef averaged_perceptron_multi_base<
-    classify::linear_multi<int, double, weight_vector>,
-    weight_vector
+    classify::linear_multi<int, double, weight_vector>
     > averaged_perceptron_multi;
 
 };

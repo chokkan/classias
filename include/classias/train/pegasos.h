@@ -54,8 +54,7 @@ namespace train
  *  @param  model_tmpl  The type of a weight vector for features.
  */
 template <
-    class error_tmpl,
-    class model_tmpl
+    class error_tmpl
 >
 class pegasos_base
 {
@@ -63,11 +62,11 @@ public:
     /// The type implementing an error function.
     typedef error_tmpl error_type;
     /// The type implementing a model (weight vector for features).
-    typedef model_tmpl model_type;
+    typedef typename error_type::model_type model_type;
     /// The type representing a value.
     typedef typename model_type::value_type value_type;
     /// A synonym of this class.
-    typedef pegasos_base<error_tmpl, model_tmpl> this_class;
+    typedef pegasos_base<error_tmpl> this_class;
 
 protected:
     /// The array of feature weights.
@@ -260,23 +259,22 @@ public:
  *  @param  model_tmpl  The type of a weight vector for features.
  */
 template <
-    class error_tmpl,
-    class model_tmpl
+    class error_tmpl
 >
 class pegasos_binary_base :
-    public pegasos_base<error_tmpl, model_tmpl>
+    public pegasos_base<error_tmpl>
 {
 public:
     /// The type implementing an error function.
     typedef error_tmpl error_type;
     /// The type implementing a model (weight vector for features).
-    typedef model_tmpl model_type;
+    typedef typename error_type::model_type model_type;
     /// The type representing a value.
     typedef typename model_type::value_type value_type;
     /// A synonym of the base class.
-    typedef pegasos_base<error_tmpl, model_tmpl> base_class;
+    typedef pegasos_base<error_tmpl> base_class;
     /// A synonym of this class.
-    typedef pegasos_binary_base<error_tmpl, model_tmpl> this_class;
+    typedef pegasos_binary_base<error_tmpl> this_class;
 
 public:
     /**
@@ -390,23 +388,22 @@ protected:
  *  @param  model_tmpl  The type of a weight vector for features.
  */
 template <
-    class error_tmpl,
-    class model_tmpl
+    class error_tmpl
 >
 class pegasos_multi_base :
-    public pegasos_base<error_tmpl, model_tmpl>
+    public pegasos_base<error_tmpl>
 {
 public:
     /// The type implementing an error function.
     typedef error_tmpl error_type;
     /// The type implementing a model (weight vector for features).
-    typedef model_tmpl model_type;
+    typedef typename error_type::model_type model_type;
     /// The type representing a value.
     typedef typename model_type::value_type value_type;
     /// A synonym of the base class.
-    typedef pegasos_base<error_tmpl, model_tmpl> base_class;
+    typedef pegasos_base<error_tmpl> base_class;
     /// A synonym of this class.
-    typedef pegasos_binary_base<error_tmpl, model_tmpl> this_class;
+    typedef pegasos_binary_base<error_tmpl> this_class;
 
 public:
     /**
@@ -554,14 +551,12 @@ protected:
 
 /** Pegasos for binary classification with logistic loss. */
 typedef pegasos_binary_base<
-    classify::linear_binary_logistic<int, double, weight_vector>,
-    weight_vector
+    classify::linear_binary_logistic<int, double, weight_vector>
     > pegasos_binary_logistic_loss;
 
 /** Pegasos for multi-class classification with logistic loss. */
 typedef pegasos_multi_base<
-    classify::linear_multi_logistic<int, double, weight_vector>,
-    weight_vector
+    classify::linear_multi_logistic<int, double, weight_vector>
     > pegasos_multi_logistic_loss;
 
 };
