@@ -245,20 +245,18 @@ protected:
 
 template <
     class iterator_type,
-    class model_type,
     class classifier_type
 >
 static void holdout_evaluation_binary(
     std::ostream& os,
     iterator_type first,
     iterator_type last,
-    model_type& model,
+    classifier_type& cls,
     int holdout
     )
 {
     accuracy acc;
     precall pr(2);
-    classifier_type cls(model);
     static const int positive_labels[] = {1};
 
     // For each instance in the data.

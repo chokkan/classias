@@ -201,6 +201,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\include\classias\train\lbfgs.h"
+				>
+			</File>
+			<File
 				RelativePath="..\include\classias\train\online_scheduler.h"
 				>
 			</File>
@@ -212,22 +216,6 @@
 				RelativePath="..\include\classias\train\truncated_gradient.h"
 				>
 			</File>
-			<Filter
-				Name="L-BFGS"
-				>
-				<File
-					RelativePath="..\include\classias\train\lbfgs\base.h"
-					>
-				</File>
-				<File
-					RelativePath="..\include\classias\train\lbfgs\binary.h"
-					>
-				</File>
-				<File
-					RelativePath="..\include\classias\train\lbfgs\multi.h"
-					>
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="Utilities"

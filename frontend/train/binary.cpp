@@ -38,7 +38,7 @@
 #include <string>
 
 #include <classias/classias.h>
-#include <classias/train/lbfgs/binary.h>
+#include <classias/train/lbfgs.h>
 #include <classias/train/averaged_perceptron.h>
 #include <classias/train/pegasos.h>
 #include <classias/train/truncated_gradient.h>
@@ -217,7 +217,7 @@ int binary_train(option& opt)
     if (opt.algorithm == "logress.lbfgs") {
         return train<
             classias::bdata,
-            classias::train::logistic_regression_binary_lbfgs<classias::bdata, classias::real_t>
+            classias::train::logistic_regression_binary_lbfgs<classias::bdata>
         >(opt);
     } else if (opt.algorithm == "averaged_perceptron") {
         return train<
@@ -251,7 +251,7 @@ int binary_train(option& opt)
 bool binary_usage(option& opt)
 {
     if (opt.algorithm == "logress.lbfgs") {
-        classias::train::logistic_regression_binary_lbfgs<classias::bdata, classias::real_t> tr;
+        classias::train::logistic_regression_binary_lbfgs<classias::bdata> tr;
         tr.params().help(opt.os);
         return true;
     }

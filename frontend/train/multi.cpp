@@ -38,7 +38,7 @@
 #include <string>
 
 #include <classias/classias.h>
-#include <classias/train/lbfgs/multi.h>
+#include <classias/train/lbfgs.h>
 #include <classias/train/averaged_perceptron.h>
 #include <classias/train/pegasos.h>
 #include <classias/train/truncated_gradient.h>
@@ -244,12 +244,12 @@ int multi_train(option& opt)
         if (opt.type == option::TYPE_MULTI_SPARSE) {
             return train<
                 classias::ndata,
-                classias::train::logistic_regression_multi_lbfgs<classias::ndata, classias::real_t>
+                classias::train::logistic_regression_multi_lbfgs<classias::ndata>
             >(opt);
         } else if (opt.type == option::TYPE_MULTI_DENSE) {
             return train<
                 classias::mdata,
-                classias::train::logistic_regression_multi_lbfgs<classias::mdata, classias::real_t>
+                classias::train::logistic_regression_multi_lbfgs<classias::mdata>
             >(opt);
         }
     } else if (opt.algorithm == "averaged_perceptron") {
@@ -313,7 +313,7 @@ int multi_train(option& opt)
 bool multi_usage(option& opt)
 {
     if (opt.algorithm == "logress.lbfgs") {
-        classias::train::logistic_regression_multi_lbfgs<classias::mdata, classias::real_t> tr;
+        classias::train::logistic_regression_multi_lbfgs<classias::mdata> tr;
         tr.params().help(opt.os);
         return true;
     }
