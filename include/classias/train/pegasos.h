@@ -539,11 +539,14 @@ protected:
         value_type& norm22 = this->m_norm22;
 
         for (iterator_type it = first;it != last;++it) {
-            int fid = fgen.forward(it->first, l);
-            value_type w = model[fid];
-            value_type d = delta * it->second;
-            model[fid] += d;
-            norm22 += d * (d + w + w);
+            typename feature_generator_type::feature_type f =
+                fgen.forward(it->first, l);
+            if (0 <= f) {
+                value_type w = model[f];
+                value_type d = delta * it->second;
+                model[f] += d;
+                norm22 += d * (d + w + w);
+            }
         }
     }
 };

@@ -41,6 +41,7 @@
 #include <classias/train/lbfgs/multi.h>
 #include <classias/train/averaged_perceptron.h>
 #include <classias/train/pegasos.h>
+#include <classias/train/truncated_gradient.h>
 #include <classias/train/online_scheduler.h>
 
 #include "option.h"
@@ -284,6 +285,24 @@ int multi_train(option& opt)
                 classias::train::online_scheduler_multi<
                     classias::mdata,
                     classias::train::pegasos_multi_logistic_loss
+                    >
+                >(opt);
+        }
+    } else if (opt.algorithm == "logress.truncated_gradient") {
+        if (opt.type == option::TYPE_MULTI_SPARSE) {
+            return train<
+                classias::ndata,
+                classias::train::online_scheduler_multi<
+                    classias::ndata,
+                    classias::train::truncated_gradient_multi_logistic_loss
+                    >
+                >(opt);
+        } else if (opt.type == option::TYPE_MULTI_DENSE) {
+            return train<
+                classias::mdata,
+                classias::train::online_scheduler_multi<
+                    classias::mdata,
+                    classias::train::truncated_gradient_multi_logistic_loss
                     >
                 >(opt);
         }

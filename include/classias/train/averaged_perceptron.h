@@ -467,8 +467,11 @@ protected:
         )
     {
         for (iterator_type it = first;it != last;++it) {
-            int fid = fgen.forward(it->first, l);
-            w[fid] += (delta * it->second);
+            typename feature_generator_type::feature_type f =
+                fgen.forward(it->first, l);
+            if (0 <= f) {
+                w[f] += (delta * it->second);
+            }
         }
     }
 };

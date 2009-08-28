@@ -151,9 +151,9 @@ public:
     template <class feature_generator_type>
     inline void set(int l, feature_generator_type& fgen, const attribute_type& a, const value_type& value)
     {
-        int_t fid = fgen.forward(a, l);
-        if (0 <= fid) {
-            m_scores[l] += m_model[fid] * value;
+        typename feature_generator_type::feature_type f = fgen.forward(a, l);
+        if (0 <= f) {
+            m_scores[l] += m_model[f] * value;
         }
     }
 

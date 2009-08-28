@@ -350,7 +350,7 @@ public:
     /// A synonym of the base class.
     typedef truncated_gradient_base<error_tmpl, model_tmpl> base_class;
     /// A synonym of this class.
-    typedef truncated_gradient_base<error_tmpl, model_tmpl> this_class;
+    typedef truncated_gradient_binary<error_tmpl, model_tmpl> this_class;
 
 public:
     /**
@@ -443,11 +443,178 @@ protected:
 
 
 
+/**
+ * Truncated gradient for multi-class classification.
+ *
+ *  @param  error_tmpl  The type of the error (loss) function.
+ *  @param  model_tmpl  The type of a weight vector for features.
+ */
+template <
+    class error_tmpl,
+    class model_tmpl
+>
+class truncated_gradient_multi :
+    public truncated_gradient_base<error_tmpl, model_tmpl>
+{
+public:
+    /// The type implementing an error function.
+    typedef error_tmpl error_type;
+    /// The type implementing a model (weight vector for features).
+    typedef model_tmpl model_type;
+    /// The type representing a value.
+    typedef typename model_type::value_type value_type;
+    /// A synonym of the base class.
+    typedef truncated_gradient_base<error_tmpl, model_tmpl> base_class;
+    /// A synonym of this class.
+    typedef truncated_gradient_multi<error_tmpl, model_tmpl> this_class;
+
+public:
+    /**
+     * Receives a training instance and updates feature weights.
+     *  @param  it          An interator for the training instance.
+     *  @param  fgen        The feature generator.
+     *  @return value_type  The loss computed for the instance.
+     */
+    template <class iterator_type, class feature_generator_type>
+    value_type update(iterator_type it, feature_generator_type& fgen)
+    {
+        const int L = (int)fgen.num_labels();
+
+        // Synonyms to avoid "this->" for member variables in the base class.
+        model_type& w = this->m_w;
+        value_type& eta = this->m_eta;
+        int& t = this->m_t;
+
+        // Compute the learning rate for the current update.
+        eta = this->learning_rate(++t);
+
+        // Delay application of L1 penalties to the feature weights that
+        // are relevant to the current instance.
+        for (int l = 0;l < it->num_labels(L);++l) {
+            this->apply_penalty(l, fgen, it->begin(), it->end());
+        }
+
+        // Compute the scores for the labels (candidates) in the instance.
+        error_type cls(w);
+        cls.resize(it->num_labels(L));
+        for (int l = 0;l < it->num_labels(L);++l) {
+            cls.inner_product(
+                l,
+                fgen,
+                it->attributes(l).begin(),
+                it->attributes(l).end()
+                );
+        }
+        cls.finalize();
+
+        // Compute the loss for the instance.
+        value_type loss = -it->get_weight() * cls.logprob(it->get_label());
+
+        // Updates the feature weights.
+        value_type gain = eta * it->get_weight();
+        for (int l = 0;l < it->num_labels(L);++l) {
+            // Computes the error for the label (candidate).
+            value_type err = cls.error(l, it->get_label());
+
+            // Update the feature weights.
+            update_weights(
+                l,
+                fgen,
+                it->attributes(l).begin(),
+                it->attributes(l).end(),
+                -err * gain 
+                );
+        }
+
+        // Accumulate the L1 penalty that should be applied in this update.
+        this->accumulate_penalty(t, eta);
+        return loss;
+    }
+
+    /**
+     * Receives multiple training instances and updates feature weights.
+     *  @param  first       The iterator pointing to the first instance.
+     *  @param  last        The iterator pointing just beyond the last
+     *                      instance.
+     *  @return value_type  The loss computed for the instances.
+     */
+    template <class iterator_type>
+    inline value_type update(iterator_type first, iterator_type last)
+    {
+        value_type loss = 0;
+        for (iterator_type it = first;it != last;++it) {
+            loss += this->update(it);
+        }
+        return loss;
+    }
+
+protected:
+    /**
+     * Adds a value to weights associated with a feature vector.
+     *  @param  first       The iterator pointing to the first element of
+     *                      the feature vector.
+     *  @param  last        The iterator pointing just beyond the last
+     *                      element of the feature vector.
+     *  @param  delta       The value to be added to the weights.
+     */
+    template <class feature_generator_type, class iterator_type>
+    inline void update_weights(
+        int l,
+        feature_generator_type& fgen,
+        iterator_type first,
+        iterator_type last,
+        value_type delta
+        )
+    {
+        for (iterator_type it = first;it != last;++it) {
+            typename feature_generator_type::feature_type f =
+                fgen.forward(it->first, l);
+            if (0 <= f) {
+                this->m_w[f] += delta * it->second;
+                this->m_penalty[f] = m_sum_penalty;
+            }
+        }
+    }
+
+    /**
+     * Applies L1 penalties to the feature weights.
+     *  This function applies L1 penalties to the weights in a feature vector.
+     *  @param  first       The iterator pointing to the first element of
+     *                      the feature vector.
+     *  @param  last        The iterator pointing just beyond the last
+     *                      element of the feature vector.
+     */
+    template <class feature_generator_type, class iterator_type>
+    inline void apply_penalty(
+        int l,
+        feature_generator_type& fgen,
+        iterator_type first,
+        iterator_type last
+        )
+    {
+        for (iterator_type it = first;it != last;++it) {
+            typename feature_generator_type::feature_type f =
+                fgen.forward(it->first, l);
+            if (0 <= f) {
+                base_class::apply_penalty(f);
+            }
+        }
+    }
+};
+
+
+
 /** Truncate gradient for binary classification with logistic loss. */
 typedef truncated_gradient_binary<
     classify::linear_binary_logistic<int, double, weight_vector>,
     weight_vector
     > truncated_gradient_binary_logistic_loss;
+
+/** Truncate gradient for multi classification with logistic loss. */
+typedef truncated_gradient_multi<
+    classify::linear_multi_logistic<int, double, weight_vector>,
+    weight_vector
+    > truncated_gradient_multi_logistic_loss;
 
 };
 
