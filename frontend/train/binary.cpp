@@ -183,18 +183,19 @@ finalize_data(
 
 template <
     class data_type,
-    class value_type
+    class model_type
 >
 static void
 output_model(
     data_type& data,
-    const value_type* weights,
+    const model_type& model,
     const option& opt
     )
 {
     typedef typename data_type::attributes_quark_type attributes_quark_type;
     typedef typename attributes_quark_type::value_type aid_type;
     const attributes_quark_type& attributes = data.attributes;
+    typedef typename model_type::value_type value_type;
 
     // Open a model file for writing.
     std::ofstream os(opt.model.c_str());
@@ -204,7 +205,7 @@ output_model(
 
     // Store the feature weights.
     for (aid_type i = 0;i < attributes.size();++i) {
-        value_type w     = weights[i];
+        value_type w = model[i];
         if (w != 0.) {
             os << w << '\t' << attributes.to_item(i) << std::endl;
         }

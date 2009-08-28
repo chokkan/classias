@@ -96,9 +96,9 @@ public:
         return m_trainer.params();
     }
 
-    const value_type* get_weights() const
+    const model_type& model() const
     {
-        return &m_trainer.model()[0];
+        return m_trainer.model();
     }
 
     int train(
@@ -217,9 +217,9 @@ public:
         return m_trainer.params();
     }
 
-    const value_type* get_weights() const
+    const model_type& model() const
     {
-        return &m_trainer.model()[0];
+        return m_trainer.model();
     }
 
     int train(

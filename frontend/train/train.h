@@ -258,7 +258,7 @@ train(option& opt)
 
         // Store the model.
         if (!opt.model.empty()) {
-            output_model(data, trainer.get_weights(), opt);
+            output_model(data, trainer.model(), opt);
         }
     }
 

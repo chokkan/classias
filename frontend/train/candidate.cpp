@@ -213,16 +213,17 @@ finalize_data(
 
 template <
     class data_type,
-    class value_type
+    class model_type
 >
 static void
 output_model(
     data_type& data,
-    const value_type* weights,
+    const model_type& model,
     const option& opt
     )
 {
     typedef classias::int_t int_t;
+    typedef typename model_type::value_type value_type;
 
     // Open a model file for writing.
     std::ofstream os(opt.model.c_str());
@@ -232,7 +233,7 @@ output_model(
 
     // Store the feature weights.
     for (int_t i = 0;i < (int_t)data.attributes.size();++i) {
-        value_type w = weights[i];
+        value_type w = model[i];
         if (w != 0.) {
             os <<
                 w << '\t' <<

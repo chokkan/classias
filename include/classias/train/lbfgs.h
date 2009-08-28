@@ -57,6 +57,13 @@ namespace train
 {
 
 
+/**
+ * The base class for gradient descent using L-BFGS.
+ *  This class implements internal variables, operations, and interface
+ *  that are common for training a binary/multi classification.
+ *
+ *  @param  model_tmpl  The type of a weight vector for features.
+ */
 template <
     class model_tmpl
 >
@@ -107,15 +114,24 @@ protected:
     int m_regularization_start;
 
 public:
+    /**
+     * Constructs the object.
+     */
     lbfgs_base()
     {
         clear();
     }
 
+    /**
+     * Destructs the object.
+     */
     virtual ~lbfgs_base()
     {
     }
 
+    /**
+     * Resets the internal states and parameters to default.
+     */
     void clear()
     {
         m_w.clear();
@@ -148,17 +164,17 @@ public:
             "The maximum number of trials for the line search algorithm.");
     }
 
+    /**
+     * Initializes the weight vector of the size K.
+     *  This function prepares a vector of the size K, and sets W = 0.
+     *  @param  K           The size of the weight vector.
+     */
     void initialize_weights(const size_t K)
     {
         m_w.resize(K);
         for (size_t k = 0;k < K;++k) {
             m_w[k] = 0;
         }
-    }
-
-    const value_type* get_weights() const
-    {
-        return &m_w[0];
     }
 
     static value_type
@@ -323,6 +339,11 @@ public:
     parameter_exchange& params()
     {
         return m_params;
+    }
+
+    const model_type& model() const
+    {
+        return m_w;
     }
 };
 
