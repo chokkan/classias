@@ -36,6 +36,6 @@
 #define	CLASSIAS_NAME           "Classias"
 #define	CLASSIAS_COPYRIGHT      "Copyright (c) 2008,2009 Naoaki Okazaki"
 #define	CLASSIAS_MAJOR_VERSION  0
-#define CLASSIAS_MINOR_VERSION  6
+#define CLASSIAS_MINOR_VERSION  7
 
 #endif/*__CLASSIAS_VERSION_H__*/
