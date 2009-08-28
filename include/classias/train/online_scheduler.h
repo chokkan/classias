@@ -139,7 +139,7 @@ public:
             os << "Loss: " << loss << std::endl;
             m_trainer.report(os);
 
-            if (holdout != -1) {
+            if (0 <= holdout) {
                 error_type cla(m_trainer.model());
 
                 holdout_evaluation_binary(
@@ -260,7 +260,7 @@ public:
             os << "Loss: " << loss << std::endl;
             m_trainer.report(os);
 
-            if (holdout != -1) {
+            if (0 <= holdout) {
                 error_type cla(m_trainer.model());
 
                 holdout_evaluation_multi(

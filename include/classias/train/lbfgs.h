@@ -56,7 +56,6 @@ namespace classias
 namespace train
 {
 
-
 /**
  * The base class for gradient descent using L-BFGS.
  *  This class implements internal variables, operations, and interface
@@ -263,7 +262,7 @@ public:
         os.flush();
 
         // Holdout evaluation if necessary.
-        if (m_holdout != -1) {
+        if (0 <= m_holdout) {
             holdout_evaluation();
         }
 
@@ -336,16 +335,27 @@ public:
     virtual void holdout_evaluation() = 0;
 
 public:
+    /**
+     * Obtains the parameter interface.
+     *  @return parameter_exchange& The parameter interface associated with
+     *                              this algorithm.
+     */
     parameter_exchange& params()
     {
+
         return m_params;
     }
 
+    /**
+     * Obtains a read-only access to the weight vector (model).
+     *  @return const model_type&   The weight vector (model).
+     */
     const model_type& model() const
     {
         return m_w;
     }
 };
+
 
 
 /**
@@ -362,43 +372,60 @@ public:
     typedef data_tmpl data_type;
     /// The type implementing a model (weight vector for features).
     typedef model_tmpl model_type;
-    /// The type representing a value.
-    typedef typename model_type::value_type value_type;
     /// A synonym of the base class.
     typedef lbfgs_base<model_tmpl> base_class;
     /// A synonym of this class.
     typedef logistic_regression_binary_lbfgs<data_tmpl, model_tmpl> this_class;
+
+    /// The type representing a value.
+    typedef typename model_type::value_type value_type;
     /// A type representing an instance in the training data.
     typedef typename data_type::instance_type instance_type;
     /// A type providing a read-only random-access iterator for instances.
     typedef typename data_type::const_iterator const_iterator;
-
     /// A type representing a vector of features.
     typedef typename instance_type::features_type features_type;
     /// A type representing a feature identifier.
     typedef typename features_type::identifier_type feature_identifier_type;
     /// A classifier type.
-    typedef classify::linear_binary_logistic<feature_identifier_type, value_type, model_type> classifier_type;
+    typedef classify::linear_binary_logistic<feature_identifier_type, value_type, model_type> error_type;
 
 protected:
     /// A data set for training.
     const data_type* m_data;
 
 public:
+    /**
+     * Constructs the object.
+     */
     logistic_regression_binary_lbfgs()
     {
+        clear();
     }
 
+    /**
+     * Destructs the object.
+     */
     virtual ~logistic_regression_binary_lbfgs()
     {
     }
 
+    /**
+     * Resets the internal states and parameters to default.
+     */
     void clear()
     {
         m_data = NULL;
         base_class::clear();
     }
 
+    /**
+     * Computes the loss and gradients of the data set.
+     *  @param  x           The current feature weights.
+     *  @param  g           The gradient vector to which this function stores.
+     *  @param  n           The number of features.
+     *  @return value_type  The loss of the data set on the current weights.
+     */
     virtual value_type loss_and_gradient(
         const value_type *x,
         value_type *g,
@@ -408,7 +435,7 @@ public:
         typename data_type::const_iterator iti;
         typename instance_type::const_iterator it;
         value_type loss = 0;
-        classifier_type cls(this->m_w); // we know that &m_w[0] and x are identical.
+        error_type cls(this->m_w); // we know that &m_w[0] and x are identical.
 
         // Initialize the gradients with zero.
         for (int i = 0;i < n;++i) {
@@ -442,15 +469,25 @@ public:
         return loss;
     }
 
+    /**
+     * Trains a model on a data set.
+     *  @param  data        The data set for training (and holdout evaluation).
+     *  @param  os          The output stream for progress reports.
+     *  @param  holdout     The group number for holdout evaluation. Specify
+     *                      a negative value if a holdout evaluation is
+     *                      unnecessary.
+     */
     int train(
         const data_type& data,
         std::ostream& os,
         int holdout = -1
         )
     {
+        // Initialize the weight vector.
         const size_t K = data.num_features();
         this->initialize_weights(K);
         
+        // Show the information for training.
         os << "Binary logistic regression using L-BFGS" << std::endl;
         this->m_params.show(os);
         os << "lbfgs.regularization_start: " << data.get_user_feature_start() << std::endl;
@@ -470,9 +507,12 @@ public:
         return ret;
     }
 
+    /**
+     * Performs a holdout evaluation.
+     */
     void holdout_evaluation()
     {
-        classifier_type cla(this->m_w);
+        error_type cla(this->m_w);
 
         holdout_evaluation_binary(
             *this->m_os,
@@ -502,16 +542,18 @@ protected:
     typedef data_tmpl data_type;
     /// The type implementing a model (weight vector for features).
     typedef model_tmpl model_type;
-    /// The type representing a value.
-    typedef typename model_type::value_type value_type;
     /// A synonym of the base class.
     typedef lbfgs_base<model_tmpl> base_class;
     /// A synonym of this class.
     typedef logistic_regression_multi_lbfgs<data_type, model_tmpl> this_class;
+
+    /// The type representing a value.
+    typedef typename model_type::value_type value_type;
     /// A type representing an instance in the training data.
     typedef typename data_type::instance_type instance_type;
     /// A type providing a read-only random-access iterator for instances.
     typedef typename data_type::const_iterator const_iterator;
+    /// A type representing an attribute.
     typedef typename instance_type::attributes_type attributes_type;
     /// A type representing a feature generator.
     typedef typename data_type::feature_generator_type feature_generator_type;
@@ -519,8 +561,7 @@ protected:
     typedef typename data_type::attribute_type attribute_type;
     /// The type of a classifier.
     typedef classify::linear_multi_logistic<
-        attribute_type, value_type, model_type> classifier_type;
-
+        attribute_type, value_type, model_type> error_type;
 
     /// An array [K] of observation expectations.
     value_type *m_oexps;
@@ -528,6 +569,9 @@ protected:
     const data_type* m_data;
 
 public:
+    /**
+     * Constructs the object.
+     */
     logistic_regression_multi_lbfgs()
     {
         m_oexps = NULL;
@@ -535,20 +579,32 @@ public:
         clear();
     }
 
+    /**
+     * Destructs the object.
+     */
     virtual ~logistic_regression_multi_lbfgs()
     {
         clear();
     }
 
+    /**
+     * Resets the internal states and parameters to default.
+     */
     void clear()
     {
         delete[] m_oexps;
         m_oexps = NULL;
-
         m_data = NULL;
         base_class::clear();
     }
 
+    /**
+     * Computes the loss and gradients of the data set.
+     *  @param  x           The current feature weights.
+     *  @param  g           The gradient vector to which this function stores.
+     *  @param  n           The number of features.
+     *  @return value_type  The loss of the data set on the current weights.
+     */
     virtual value_type loss_and_gradient(
         const value_type *x,
         value_type *g,
@@ -558,7 +614,7 @@ public:
         value_type loss = 0;
         const data_type& data = *m_data;
         const int L = data.num_labels();
-        classifier_type cls(this->m_w); // We know that &m_w[0] and x are identical.
+        error_type cls(this->m_w); // We know that &m_w[0] and x are identical.
 
         // Initialize the gradients with (the negative of) observation expexcations.
         for (int i = 0;i < n;++i) {
@@ -598,6 +654,14 @@ public:
         return loss;
     }
 
+    /**
+     * Trains a model on a data set.
+     *  @param  data        The data set for training (and holdout evaluation).
+     *  @param  os          The output stream for progress reports.
+     *  @param  holdout     The group number for holdout evaluation. Specify
+     *                      a negative value if a holdout evaluation is
+     *                      unnecessary.
+     */
     int train(
         const data_type& data,
         std::ostream& os,
@@ -648,9 +712,12 @@ public:
         return ret;
     }
 
+    /**
+     * Performs a holdout evaluation.
+     */
     void holdout_evaluation()
     {
-        classifier_type cla(this->m_w);
+        error_type cla(this->m_w);
 
         holdout_evaluation_multi(
             *this->m_os,
