@@ -477,7 +477,7 @@ public:
      *                      a negative value if a holdout evaluation is
      *                      unnecessary.
      */
-    int train(
+    void train(
         const data_type& data,
         std::ostream& os,
         int holdout = -1
@@ -504,7 +504,6 @@ public:
 
         // Report the result from the L-BFGS solver.
         this->lbfgs_output_status(os, ret);
-        return ret;
     }
 
     /**
@@ -662,7 +661,7 @@ public:
      *                      a negative value if a holdout evaluation is
      *                      unnecessary.
      */
-    int train(
+    void train(
         const data_type& data,
         std::ostream& os,
         int holdout = -1
@@ -709,7 +708,6 @@ public:
 
         // Report the result from the L-BFGS solver.
         this->lbfgs_output_status(os, ret);
-        return ret;
     }
 
     /**
