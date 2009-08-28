@@ -103,7 +103,7 @@ public:
         algorithm("logress.lbfgs"),        
         shuffle(false), generate_bias(false),
         split(0), holdout(-1), cross_validation(false),
-        token_separator('\t'), value_separator(':')
+        token_separator(' '), value_separator(':')
     {
     }
 };

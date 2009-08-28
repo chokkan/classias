@@ -217,8 +217,8 @@ static void usage(std::ostream& os, const char *argv0)
     os << "  -n, --negative=LABEL  specify a negative label for computing precision," << std::endl;
     os << "                        recall, and F1 scores" << std::endl;
     os << "  -s, --token-separator=SEP assume SEP character as a token separator:" << std::endl;
-    os << "      '\\t', t, tab              a TAB ('\\t') character (DEFAULT)" << std::endl;
-    os << "      ' ',  s, spc, space       a SPACE (' ') character" << std::endl;
+    os << "      ' ',  s, spc, space       a SPACE (' ') character (DEFAULT)" << std::endl;
+    os << "      '\\t', t, tab              a TAB ('\\t') character" << std::endl;
     os << "      ',',  c, comma            a COMMA (',') character" << std::endl;
     os << "  -c, --value-separator=SEP assume SEP character as a value separator:" << std::endl;
     os << "      ':',  c, colon            a COLON (':') character (DEFAULT)" << std::endl;
