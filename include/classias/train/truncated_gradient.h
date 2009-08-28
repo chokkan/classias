@@ -90,9 +90,10 @@ protected:
     value_type m_lambda;
     /// The initial learning rate.
     value_type m_eta0;
-    /// The period 
+    /// The period for truncations.
     int m_truncate_period;
-    bool m_trucated;
+    /// The boolean value indicating whether m_w is truncated.
+    bool m_truncated;
 
 public:
     /**
@@ -160,6 +161,7 @@ public:
      */
     void finish()
     {
+        this->finalize_penalty(m_t, learning_rate(m_t));
         this->apply_penalty();
     }
 
@@ -179,21 +181,63 @@ public:
      */
     void report(std::ostream& os)
     {
-        // Count the number of active features.
+        // Count the number of active features, and compute the L2 norm.
+        value_type norm22 = 0;
         int num_active_features = 0;
         for (int i = 0;i < (int)m_w.size();++i) {
             value_type alpha = m_sum_penalty - m_penalty[i];
-            if (m_w[i] < -alpha || alpha < m_w[i]) {
+            if (m_w[i] < -alpha) {
+                value_type v = m_w[i] + alpha;
+                norm22 += (v * v);
+                ++num_active_features;
+            } else if (alpha < m_w[i]) {
+                value_type v = m_w[i] - alpha;
+                norm22 += (v * v);
                 ++num_active_features;
             }
         }
 
+        os << "Feature L2-norm: " << std::sqrt(norm22) << std::endl;
         os << "Learning rate (eta): " << m_eta << std::endl;
         os << "Active features: " << num_active_features << std::endl;
         os << "Total number of feature updates: " << m_t-1 << std::endl;
     }
 
 protected:
+    /**
+     * Computes the learning rate for the update count.
+     *  @param  t           The update count.
+     *  @return value_type  The learning rate.
+     */
+    inline value_type learning_rate(int t)
+    {
+        return 1. / (m_lambda * (m_t0 + t));
+    }
+
+    /**
+     * Accumulates the L1 penalty for the current update.
+     *  @param  t           The update count.
+     *  @param  eta         The learning rate for the update count.
+     */
+    inline void accumulate_penalty(int t, value_type eta)
+    {
+        if (t % m_truncate_period == 0) {
+            m_sum_penalty += m_lambda * m_truncate_period * eta;
+            m_truncated = false;
+        }
+    }
+
+    /**
+     * Finalizes the accmulation of L1 penalties.
+     *  @param  t           The update count.
+     *  @param  eta         The learning rate for the update count.
+     */
+    inline void finalize_penalty(int t, value_type eta)
+    {
+        m_sum_penalty += m_lambda * (t % m_truncate_period) * eta;
+        m_truncated = false;
+    }
+
     /**
      * Initializes the weight vector.
      *  This function sets W = 0.
@@ -205,16 +249,26 @@ protected:
             m_penalty[i] = 0.;
         }
         m_sum_penalty = 0.;
-        m_trucated = false;
+        m_truncated = true;
     }
 
+    /**
+     * Applies the L1 penalties to the weight vector.
+     */
     inline void apply_penalty()
     {
-        for (int i = 0;i < (int)m_w.size();++i) {
-            apply_penalty(i);
+        if (!m_truncated) {
+            for (int i = 0;i < (int)m_w.size();++i) {
+                apply_penalty(i);
+            }
+            m_truncated = true;
         }
     }
 
+    /**
+     * Applies the L1 penalty to the weight of a feature.
+     *  @param  i           The feature index.
+     */
     inline void apply_penalty(int i)
     {
         value_type alpha = m_sum_penalty - m_penalty[i];
@@ -223,11 +277,15 @@ protected:
                 m_w[i] -= alpha;
                 if (m_w[i] < 0) {
                     m_w[i] = 0;
+                    m_penalty[i] = 0;
+                    return;
                 }
             } else if (m_w[i] < 0) {
                 m_w[i] += alpha;
                 if (0 < m_w[i]) {
                     m_w[i] = 0;
+                    m_penalty[i] = 0;
+                    return;
                 }
             }
             m_penalty[i] = m_sum_penalty;
@@ -303,38 +361,31 @@ public:
     template <class iterator_type>
     value_type update(iterator_type it)
     {
-        // Define synonyms to avoid using "this->" for member variables.
+        // Synonyms to avoid "this->" for member variables in the base class.
         model_type& w = this->m_w;
-        model_type& penalty = this->m_penalty;
         value_type& eta = this->m_eta;
-        value_type& lambda = this->m_lambda;
-        value_type& sum_penalty = this->m_sum_penalty;
-        int& truncate_period = this->m_truncate_period;
         int& t = this->m_t;
-        value_type& t0 = this->m_t0;
 
-        // Learning rate: eta = 1. / (lambda * (t0 + t)).
-        ++t;
-        eta = 1. / (lambda * (t0 + t));
+        // Compute the learning rate for the current update.
+        eta = this->learning_rate(++t);
 
-        // Apply 
-        apply_penalty(it->begin(), it->end());
+        // Delay application of L1 penalties to the feature weights that
+        // are relevant to the current instance.
+        this->apply_penalty(it->begin(), it->end());
 
-        // Compute the error for the instance.
-        value_type nlogp = 0.;
+        // Compute the error and loss for the instance.
         error_type cls(w);
         cls.inner_product(it->begin(), it->end());
+        value_type nlogp = 0.;
         value_type err = cls.error(it->get_label(), nlogp);
         value_type loss = (it->get_weight() * nlogp);
 
-        // Update the feature weights.
-        update_weights(it->begin(), it->end(), -err * eta * it->get_weight());
+        // Stochastic gradient descent without L1 regularization term.
+        this->update_weights(
+            it->begin(), it->end(), -err * eta * it->get_weight());
 
-        //
-        if (t % truncate_period == 0) {
-            sum_penalty += lambda * truncate_period * eta;
-        }
-
+        // Accumulate the L1 penalty that should be applied in this update.
+        this->accumulate_penalty(t, eta);
         return loss;
     }
 
@@ -369,9 +420,18 @@ protected:
     {
         for (iterator_type it = first;it != last;++it) {
             this->m_w[it->first] += delta * it->second;
+            this->m_penalty[it->first] = m_sum_penalty;
         }
     }
 
+    /**
+     * Applies L1 penalties to the feature weights.
+     *  This function applies L1 penalties to the weights in a feature vector.
+     *  @param  first       The iterator pointing to the first element of
+     *                      the feature vector.
+     *  @param  last        The iterator pointing just beyond the last
+     *                      element of the feature vector.
+     */
     template <class iterator_type>
     inline void apply_penalty(iterator_type first, iterator_type last)
     {
@@ -395,57 +455,75 @@ typedef truncated_gradient_binary<
 
 /*
 
-This is a pseudo-code of the naive implementation of the truncated gradient.
+The detail of this algorithm is described in:
 
-1:  W = 0; t = 1
-2:  for epoch in range(max_epoch):
-3:      for inst in data:
-4:          eta = 1.0 / (lambda * t)
-5:          err = error_function(W, inst)
-6:          for f, v in inst:
-7:              W[f] -= err * eta * v
-8:          if t % K == 0:
-9:              alpha = g * K * eta
-10:             for i in range(len(W)):
-11:                 if 0 < W[i] <= theta:
-12:                     W[i] -= alpha
-13:                     if W[i] < 0:
-14:                         W[i] = 0
-15:                 elif -theta <= W[i] < 0:
-16:                     W[i] += alpha
-17:                     if W[i] > 0:
-18:                         W[i] = 0
-19:         t += 1
-20: return W
+John Langford, Lihong Li, and Tong Zhang.
+Sparse Online Learning via Truncated Gradient.
+JMLR 10(Mar):777-801, 2009.
 
-I think setting theta < \infty is not a good idea.
+This is the pseudo-code of a naive implementation of the truncated gradient.
 
-W = 0
-P = 0
-t = 1
-s = 0
-for epoch in range(max_epoch):
-    for inst in data:
-        eta = 1.0 / (lambda * t)
-        for f, v in inst:
-            alpha = s - P[f]
-            if 0 < W[f]:
-                W[f] -= alpha
-                if W[f] < 0:
-                    W[f] = 0
-            else:
-                W[f] += alpha
-                if W[f] > 0:
-                    W[f] = 0
-            P[f] = s
-        err = error_function(W, inst)
-        for f, v in inst:
-            W[f] -= err * eta * v
-        if t % K == 0:
-            s += g * K * eta
-        t += 1
-return W
+def apply_penalty(W, i, alpha):
+    if 0 < W[i]:
+        W[i] -= alpha
+        if W[i] < 0:
+            W[i] == 0
+    elif W[i] < 0:
+        W[i] += alpha
+        if 0 < W[i]:
+            W[i] = 0
 
+def train(data, lambda, max_epoch, truncate_period):
+    W = 0
+    t = 1
+    eta = 1
+    for epoch in range(max_epoch):
+        for inst in data:
+            eta = 1.0 / (lambda * t)
+            err = error_function(W, inst)
+            for f, v in inst:
+                W[f] -= err * eta * v
+            if t % truncate_period == 0:
+                alpha = lambda * truncate_period * eta
+                for i in range(len(W)):
+                    apply_penalty(W, i, alpha)
+            t += 1
+    alpha = lambda * (t % truncate_period) * eta
+    for i in range(len(W)):
+        apply_penalty(W, i, alpha)
+    return W
+
+This pseudo-code has O(|W|) computation to apply L1 penalties for each update.
+In order to reduce this computational cost, we introduces a variable
+(cumulative L1 penalty) that sums up L1 penalties so far and a vector P whose
+element P[i] stores the value of the cumulative L1 penalty when the feature
+weight W[i] is updated last time. By using these variables, we can perform a
+delay application of L1 penalties ((cumulative L1 penalty) - P[i]) until
+a feature weight is used for computing the error of a given instance.
+
+This is the final form of the efficient implementation.
+
+def train(data, lambda, max_epoch, truncate_period):
+    W = 0
+    P = 0
+    t = 1
+    s = 0
+    eta = 1
+    for epoch in range(max_epoch):
+        for inst in data:
+            eta = 1.0 / (lambda * t)
+            for f, v, in inst:
+                apply_penalty(W, f, s - P[f])
+                P[f] = s
+            err = error_function(W, inst)
+            for f, v in inst:
+                W[f] -= err * eta * v
+            if t % truncate_period == 0:
+                s += lambda * truncate_period * eta
+            t += 1
+    for i in range(len(W)):
+        apply_penalty(W, i, s - P[f])
+    return W
 
 */
 
