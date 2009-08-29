@@ -236,6 +236,14 @@ int binary_train(option& opt)
                 classias::train::pegasos_logistic_binary
                 >
             >(opt);
+    } else if (opt.algorithm == "pegasos.hinge") {
+        return train<
+            classias::bdata,
+            classias::train::online_scheduler_binary<
+                classias::bdata,
+                classias::train::pegasos_hinge_binary
+                >
+            >(opt);
     } else if (opt.algorithm == "truncated_gradient.logistic") {
         return train<
             classias::bdata,

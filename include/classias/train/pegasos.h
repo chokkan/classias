@@ -554,6 +554,11 @@ typedef pegasos_binary_base<
     classify::linear_binary_logistic<int, double, weight_vector>
     > pegasos_logistic_binary;
 
+/** Pegasos for binary classification with hinge loss. */
+typedef pegasos_binary_base<
+    classify::linear_binary_hinge<int, double, weight_vector>
+    > pegasos_hinge_binary;
+
 /** Pegasos for multi-class classification with logistic loss. */
 typedef pegasos_multi_base<
     classify::linear_multi_logistic<int, double, weight_vector>

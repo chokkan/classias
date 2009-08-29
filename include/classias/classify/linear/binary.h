@@ -74,7 +74,7 @@ public:
      * Constructs an object.
      *  @param  model       The model associated with the classifier.
      */
-    linear_binary(model_type& model, const value_type scale = 1)
+    linear_binary(model_type& model)
         : m_model(model)
     {
         clear();
@@ -114,17 +114,26 @@ public:
     }
 
     /**
-     * Sets an attribute for the classification.
+     * Applies a scaling factor to the score.
+     *  @param  scale       The scaling factor.
+     */
+    inline void scale(const value_type& scale)
+    {
+        m_score *= scale;
+    }
+
+    /**
+     * Sets an attribute and value for the classification.
      *  @param  a           The attribute identifier.
      *  @param  value       The attribute value.
      */
-    inline void operator()(const attribute_type& a, const value_type& value)
+    inline void set(const attribute_type& a, const value_type& value)
     {
         m_score += (m_model[a] * value);
     }
 
     /**
-     * Sets an array of attributes for the classification.
+     * Computes the inner product between a feature vector and the model.
      *  @param  first       The iterator for the first element of attributes.
      *  @param  last        The iterator for the element just beyond the
      *                      last element of attributes.
@@ -134,28 +143,37 @@ public:
     {
         this->clear();
         for (iterator_type it = first;it != last;++it) {
-            this->operator()(it->first, it->second);
+            this->set(it->first, it->second);
         }
     }
 
+    /**
+     * Computes the inner product between a feature vector and the model.
+     *  @param  first       The iterator for the first element of attributes.
+     *  @param  last        The iterator for the element just beyond the
+     *                      last element of attributes.
+     *  @param  scale       The scale factor for the inner product.
+     */
     template <class iterator_type>
-    inline void inner_product_scaled(iterator_type first, iterator_type last, const value_type& scale)
+    inline void inner_product_scaled(
+        iterator_type first, iterator_type last, const value_type& scale)
     {
         this->inner_product(first, last);
         this->scale(scale);
     }
 
-    inline void scale(const value_type& scale)
-    {
-        m_score *= scale;
-    }
-
+    /**
+     * Returns the name of this classifier.
+     *  @return const char* The name of the classifier.
+     */
     static const char *name()
     {
         const static char *str = "linear classifier (binary)";
         return str;
     }
 };
+
+
 
 /**
  * Linear binary classifier with logistic-sigmoid error function.
@@ -255,9 +273,98 @@ public:
         return (p - static_cast<double>(b));
     }
 
+    /**
+     * Returns the name of this classifier.
+     *  @return const char* The name of the classifier.
+     */
     static const char *name()
     {
         const static char *str = "linear classifier (binary) with logistic loss";
+        return str;
+    }
+};
+
+
+
+/**
+ * Linear binary classifier with hinge error function.
+ *
+ *  @param  attribute_tmpl  The type of an attribute.
+ *  @param  value_tmpl      The type of a feature weight.
+ *  @param  model_tmpl      The type of a model (array of feature weights).
+ */
+template <
+    class attribute_tmpl,
+    class value_tmpl,
+    class model_tmpl
+>
+class linear_binary_hinge :
+    public linear_binary<attribute_tmpl, value_tmpl, model_tmpl>
+{
+public:
+    /// The type of an attribute.
+    typedef attribute_tmpl attribute_type;
+    /// The type of a feature weight.
+    typedef value_tmpl value_type;
+    /// The type of a model.
+    typedef model_tmpl model_type;
+    /// Tne type of the base class.
+    typedef linear_binary<attribute_tmpl, value_tmpl, model_tmpl> base_type;
+
+public:
+    /**
+     * Constructs an object.
+     *  @param  model       The model associated with the classifier.
+     */
+    linear_binary_hinge(model_type& model)
+        : base_type(model)
+    {
+    }
+
+    /**
+     * Destructs an object.
+     */
+    virtual ~linear_binary_hinge()
+    {
+    }
+
+    /**
+     * Computes the error of the classification result.
+     *  @param  b           The reference label for this instance.
+     *  @return value_type  The error.
+     */
+    inline value_type error(bool b) const
+    {
+        value_type loss;
+        return this->error(b, loss);
+    }
+
+    /**
+     * Computes the error of the classification result.
+     *  @param  b           The reference label for this instance.
+     *  @param  loss        The negative of the log of the probability of the
+     *                      instance being classified to the reference label.
+     *  @return value_type  The error.
+     */
+    inline value_type error(bool b, value_type& loss) const
+    {
+        value_type y = static_cast<value_type>(static_cast<int>(b) * 2 - 1);
+        loss = 1.0 - y * this->score();
+        if (0 < loss) {
+            return -y;
+        } else {
+            loss = 0;
+            return 0;
+        }
+    }
+
+    /**
+     * Returns the name of this classifier.
+     *  @return const char* The name of the classifier.
+     */
+    static const char *name()
+    {
+        const static char *str = "linear classifier (binary) with hinge loss";
         return str;
     }
 };
