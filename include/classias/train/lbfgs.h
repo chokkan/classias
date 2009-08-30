@@ -388,7 +388,7 @@ public:
     /// A type representing a feature identifier.
     typedef typename features_type::identifier_type feature_identifier_type;
     /// A classifier type.
-    typedef classify::linear_binary_logistic<feature_identifier_type, value_type, model_type> error_type;
+    typedef classify::linear_binary_logistic<model_type> error_type;
 
 protected:
     /// A data set for training.
@@ -558,9 +558,10 @@ protected:
     typedef typename data_type::feature_generator_type feature_generator_type;
     /// A type representing a candidate for an instance.
     typedef typename data_type::attribute_type attribute_type;
+    typedef typename data_type::label_type label_type;
     /// The type of a classifier.
     typedef classify::linear_multi_logistic<
-        attribute_type, value_type, model_type> error_type;
+        attribute_type, label_type, value_type, model_type> error_type;
 
     /// An array [K] of observation expectations.
     value_type *m_oexps;

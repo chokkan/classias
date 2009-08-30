@@ -44,24 +44,16 @@ namespace classify
 /**
  * Linear binary classifier.
  *
- *  @param  attribute_tmpl  The type of an attribute.
- *  @param  value_tmpl      The type of a feature weight.
  *  @param  model_tmpl      The type of a model (container of feature weights).
  */
-template <
-    class attribute_tmpl,
-    class value_tmpl,
-    class model_tmpl
->
+template <class model_tmpl>
 class linear_binary
 {
 public:
-    /// The type of an attribute.
-    typedef attribute_tmpl attribute_type;
-    /// The type of a feature weight.
-    typedef value_tmpl value_type;
     /// The type of a model.
     typedef model_tmpl model_type;
+    /// The type of a feature weight.
+    typedef typename model_type::value_type value_type;
 
 protected:
     /// The model.
@@ -127,6 +119,7 @@ public:
      *  @param  a           The attribute identifier.
      *  @param  value       The attribute value.
      */
+    template <class attribute_type>
     inline void set(const attribute_type& a, const value_type& value)
     {
         m_score += (m_model[a] * value);
@@ -152,7 +145,7 @@ public:
      *  @param  first       The iterator for the first element of attributes.
      *  @param  last        The iterator for the element just beyond the
      *                      last element of attributes.
-     *  @param  scale       The scale factor for the inner product.
+     *  @param  scale       The scaling factor to be applied to the score.
      */
     template <class iterator_type>
     inline void inner_product_scaled(
@@ -178,27 +171,18 @@ public:
 /**
  * Linear binary classifier with logistic-sigmoid error function.
  *
- *  @param  attribute_tmpl  The type of an attribute.
- *  @param  value_tmpl      The type of a feature weight.
  *  @param  model_tmpl      The type of a model (array of feature weights).
  */
-template <
-    class attribute_tmpl,
-    class value_tmpl,
-    class model_tmpl
->
-class linear_binary_logistic :
-    public linear_binary<attribute_tmpl, value_tmpl, model_tmpl>
+template <class model_tmpl>
+class linear_binary_logistic : public linear_binary<model_tmpl>
 {
 public:
-    /// The type of an attribute.
-    typedef attribute_tmpl attribute_type;
-    /// The type of a feature weight.
-    typedef value_tmpl value_type;
     /// The type of a model.
     typedef model_tmpl model_type;
+    /// The type of a feature weight.
+    typedef typename model_type::value_type value_type;
     /// Tne type of the base class.
-    typedef linear_binary<attribute_tmpl, value_tmpl, model_tmpl> base_type;
+    typedef linear_binary<model_tmpl> base_type;
 
 public:
     /**
@@ -289,27 +273,18 @@ public:
 /**
  * Linear binary classifier with hinge error function.
  *
- *  @param  attribute_tmpl  The type of an attribute.
- *  @param  value_tmpl      The type of a feature weight.
  *  @param  model_tmpl      The type of a model (array of feature weights).
  */
-template <
-    class attribute_tmpl,
-    class value_tmpl,
-    class model_tmpl
->
-class linear_binary_hinge :
-    public linear_binary<attribute_tmpl, value_tmpl, model_tmpl>
+template <class model_tmpl>
+class linear_binary_hinge : public linear_binary<model_tmpl>
 {
 public:
-    /// The type of an attribute.
-    typedef attribute_tmpl attribute_type;
-    /// The type of a feature weight.
-    typedef value_tmpl value_type;
     /// The type of a model.
     typedef model_tmpl model_type;
+    /// The type of a feature weight.
+    typedef typename model_type::value_type value_type;
     /// Tne type of the base class.
-    typedef linear_binary<attribute_tmpl, value_tmpl, model_tmpl> base_type;
+    typedef linear_binary<model_tmpl> base_type;
 
 public:
     /**

@@ -474,11 +474,11 @@ protected:
 
 
 typedef averaged_perceptron_binary_base<
-    classify::linear_binary<int, double, weight_vector>
+    classify::linear_binary<weight_vector>
     > averaged_perceptron_binary;
 
 typedef averaged_perceptron_multi_base<
-    classify::linear_multi<int, double, weight_vector>
+    classify::linear_multi<int, int, double, weight_vector>
     > averaged_perceptron_multi;
 
 };

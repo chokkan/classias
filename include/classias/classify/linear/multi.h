@@ -51,6 +51,7 @@ namespace classify
  */
 template <
     class attribute_tmpl,
+    class label_tmpl,
     class value_tmpl,
     class model_tmpl
 >
@@ -59,6 +60,8 @@ class linear_multi
 public:
     /// The type of an attribute.
     typedef attribute_tmpl attribute_type;
+    /// The type of a label.
+    typedef label_tmpl label_type;
     /// The type of a feature weight.
     typedef value_tmpl value_type;
     /// The type of a model.
@@ -144,12 +147,18 @@ public:
 
     /**
      * Sets an attribute for a candidate.
-     *  @param  l           The label for the candidate.
+     *  @param  fgen        The feature generator.
      *  @param  a           The attribute identifier.
+     *  @param  l           The label for the candidate.
      *  @param  value       The attribute value.
      */
     template <class feature_generator_type>
-    inline void set(int l, feature_generator_type& fgen, const attribute_type& a, const value_type& value)
+    inline void set(
+        feature_generator_type& fgen,
+        const attribute_type& a,
+        int l,
+        const value_type& value
+        )
     {
         typename feature_generator_type::feature_type f = fgen.forward(a, l);
         if (0 <= f) {
@@ -171,7 +180,7 @@ public:
     {
         m_scores[l] = 0.;
         for (iterator_type it = first;it != last;++it) {
-            this->set(l, fgen, it->first, it->second);
+            this->set(fgen, it->first, l, it->second);
         }
     }
 
@@ -223,21 +232,24 @@ public:
  */
 template <
     class attribute_tmpl,
+    class label_tmpl,
     class value_tmpl,
     class model_tmpl
 >
 class linear_multi_logistic :
-    public linear_multi<attribute_tmpl, value_tmpl, model_tmpl>
+    public linear_multi<attribute_tmpl, label_tmpl, value_tmpl, model_tmpl>
 {
 public:
     /// The type of an attribute.
     typedef attribute_tmpl attribute_type;
+    /// The type of a label.
+    typedef label_tmpl label_type;
     /// The type of a feature weight.
     typedef value_tmpl value_type;
     /// The type of a model.
     typedef model_tmpl model_type;
     /// The type of the base class.
-    typedef linear_multi<attribute_tmpl, value_tmpl, model_tmpl> base_type;
+    typedef linear_multi<attribute_tmpl, label_tmpl, value_tmpl, model_tmpl> base_type;
 
 protected:
     value_type  m_lognorm;
