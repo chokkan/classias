@@ -435,12 +435,13 @@ public:
         value_type nlogp = 0.;
         error_type cls(model);
         cls.resize(it->num_labels(L));
-        for (int l = 0;l < it->num_labels(L);++l) {
+        for (int i = 0;i < it->num_labels(L);++i) {
             cls.inner_product_scaled(
-                l,
+                i,
                 fgen,
-                it->attributes(l).begin(),
-                it->attributes(l).end(),
+                it->attributes(i).begin(),
+                it->attributes(i).end(),
+                i,
                 scale
                 );
         }
@@ -470,16 +471,16 @@ public:
         gain *= it->get_weight();
 
         // Updates the feature weights.
-        for (int l = 0;l < it->num_labels(L);++l) {
+        for (int i = 0;i < it->num_labels(L);++i) {
             // Computes the error for the label (candidate).
-            value_type err = cls.error(l, it->get_label());
+            value_type err = cls.error(i, it->get_label());
 
             // Update the feature weights.
             update_weights(
-                l,
+                i,
                 fgen,
-                it->attributes(l).begin(),
-                it->attributes(l).end(),
+                it->attributes(i).begin(),
+                it->attributes(i).end(),
                 -err * gain
                 );
         }
@@ -561,7 +562,7 @@ typedef pegasos_binary_base<
 
 /** Pegasos for multi-class classification with logistic loss. */
 typedef pegasos_multi_base<
-    classify::linear_multi_logistic<int, int, double, weight_vector>
+    classify::linear_multi_logistic<weight_vector>
     > pegasos_logistic_multi;
 
 };

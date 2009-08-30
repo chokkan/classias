@@ -44,28 +44,16 @@ namespace classify
 /**
  * Linear multi-class classifier.
  *
- *  @param  attribute_tmpl  The type of an attribute.
- *  @param  label_tmpl      The type of a label.
- *  @param  value_tmpl      The type of a feature weight.
  *  @param  model_tmpl      The type of a model (array of feature weights).
  */
-template <
-    class attribute_tmpl,
-    class label_tmpl,
-    class value_tmpl,
-    class model_tmpl
->
+template <class model_tmpl>
 class linear_multi
 {
 public:
-    /// The type of an attribute.
-    typedef attribute_tmpl attribute_type;
-    /// The type of a label.
-    typedef label_tmpl label_type;
-    /// The type of a feature weight.
-    typedef value_tmpl value_type;
     /// The type of a model.
     typedef model_tmpl model_type;
+    /// The type of a feature weight.
+    typedef typename model_type::value_type value_type;
 
 protected:
     /// The type representing an array of scores.
@@ -102,8 +90,8 @@ public:
     inline void clear()
     {
         m_argmax = -1;
-        for (int l = 0;l < this->size();++l) {
-            m_scores[l] = 0.;
+        for (int i = 0;i < this->size();++i) {
+            m_scores[i] = 0.;
         }
     }
 
@@ -127,7 +115,7 @@ public:
 
     /**
      * Returns the argmax index.
-     *  @return int         The label of the candidate that yields the
+     *  @return int         The index of the candidate that yields the
      *                      highest score.
      */
     inline int argmax() const
@@ -137,16 +125,27 @@ public:
 
     /**
      * Returns the score of a candidate.
-     *  @param  l           The label for the candidate.
+     *  @param  i           The index for the candidate.
      *  @return value_type  The score.
      */
-    inline value_type score(int l)
+    inline value_type score(int i)
     {
-        return m_scores[l];
+        return m_scores[i];
+    }
+
+    /**
+     * Applies a scaling factor to the score.
+     *  @param  i           The index for the candidate.
+     *  @param  scale       The scaling factor.
+     */
+    inline void scale(int i, const value_type& scale)
+    {
+        m_scores[i] *= scale;
     }
 
     /**
      * Sets an attribute for a candidate.
+     *  @param  i           The index for the candidate.
      *  @param  fgen        The feature generator.
      *  @param  a           The attribute identifier.
      *  @param  l           The label for the candidate.
@@ -154,46 +153,65 @@ public:
      */
     template <class feature_generator_type>
     inline void set(
+        int i,
         feature_generator_type& fgen,
-        const attribute_type& a,
-        int l,
+        const typename feature_generator_type::attribute_type& a,
+        const typename feature_generator_type::label_type& l,
         const value_type& value
         )
     {
         typename feature_generator_type::feature_type f = fgen.forward(a, l);
         if (0 <= f) {
-            m_scores[l] += m_model[f] * value;
+            m_scores[i] += m_model[f] * value;
         }
     }
 
     /**
-     * Sets an array of attributes for a candidate.
-     *  @param  l           The label for the candidate.
+     * Computes the inner product between an attribute vector and the model.
+     *  @param  i           The index for the candidate.
+     *  @param  fgen        The feature generator.
      *  @param  first       The iterator for the first element of attributes.
      *  @param  last        The iterator for the element just beyond the
      *                      last element of attributes.
-     *  @param  reset       Specify \c true to reset the current result
-     *                      before computing the inner product.
+     *  @param  l           The label for the candidate.
      */
     template <class feature_generator_type, class iterator_type>
-    inline void inner_product(int l, feature_generator_type& fgen, iterator_type first, iterator_type last)
+    inline void inner_product(
+        int i,
+        feature_generator_type& fgen,
+        iterator_type first,
+        iterator_type last,
+        const typename feature_generator_type::label_type& l
+        )
     {
-        m_scores[l] = 0.;
+        m_scores[i] = 0.;
         for (iterator_type it = first;it != last;++it) {
-            this->set(fgen, it->first, l, it->second);
+            this->set(i, fgen, it->first, l, it->second);
         }
     }
 
+    /**
+     * Computes the inner product between an attribute vector and the model.
+     *  @param  i           The index for the candidate.
+     *  @param  fgen        The feature generator.
+     *  @param  first       The iterator for the first element of attributes.
+     *  @param  last        The iterator for the element just beyond the
+     *                      last element of attributes.
+     *  @param  l           The label for the candidate.
+     *  @param  scale       The scaling factor to be applied to the score.
+     */
     template <class feature_generator_type, class iterator_type>
-    inline void inner_product_scaled(int l, feature_generator_type& fgen, iterator_type first, iterator_type last, const value_type& scale)
+    inline void inner_product_scaled(
+        int i,
+        feature_generator_type& fgen,
+        iterator_type first,
+        iterator_type last,
+        const typename feature_generator_type::label_type& l,
+        const value_type& scale
+        )
     {
-        this->inner_product(l, fgen, first, last);
-        this->scale(l, scale);
-    }
-
-    inline void scale(int l, const value_type& scale)
-    {
-        m_scores[l] *= scale;
+        this->inner_product(i, fgen, first, last, l);
+        this->scale(i, scale);
     }
 
     /**
@@ -207,15 +225,19 @@ public:
 
         // Find the argmax index.
         m_argmax = 0;
-        double vmax = m_scores[0];
-        for (int l = 0;l < this->size();++l) {
-            if (vmax < m_scores[l]) {
-                m_argmax = l;
-                vmax = m_scores[l];
+        value_type vmax = m_scores[0];
+        for (int i = 0;i < this->size();++i) {
+            if (vmax < m_scores[i]) {
+                m_argmax = i;
+                vmax = m_scores[i];
             }
         }
     }
 
+    /**
+     * Returns the name of this classifier.
+     *  @return const char* The name of the classifier.
+     */
     static const char *name()
     {
         const static char *str = "linear classifier (multi)";
@@ -223,33 +245,23 @@ public:
     }
 };
 
+
+
 /**
  * Linear multi-class classifier with sigmoid function (maximum entropy).
  *
- *  @param  attribute_tmpl  The type of an attribute.
- *  @param  value_tmpl      The type of a feature weight.
  *  @param  model_tmpl      The type of a model (array of feature weights).
  */
-template <
-    class attribute_tmpl,
-    class label_tmpl,
-    class value_tmpl,
-    class model_tmpl
->
-class linear_multi_logistic :
-    public linear_multi<attribute_tmpl, label_tmpl, value_tmpl, model_tmpl>
+template <class model_tmpl>
+class linear_multi_logistic : public linear_multi<model_tmpl>
 {
 public:
-    /// The type of an attribute.
-    typedef attribute_tmpl attribute_type;
-    /// The type of a label.
-    typedef label_tmpl label_type;
-    /// The type of a feature weight.
-    typedef value_tmpl value_type;
     /// The type of a model.
     typedef model_tmpl model_type;
+    /// The type of a feature weight.
+    typedef typename model_type::value_type value_type;
     /// The type of the base class.
-    typedef linear_multi<attribute_tmpl, label_tmpl, value_tmpl, model_tmpl> base_type;
+    typedef linear_multi<model_tmpl> base_type;
 
 protected:
     value_type  m_lognorm;
@@ -258,7 +270,6 @@ public:
     /**
      * Constructs an instance.
      *  @param  model       The model associated with the classifier.
-     *  @param  feature_generator   The feature generator.
      */
     linear_multi_logistic(model_type& model)
         : base_type(model), m_lognorm(0)
@@ -283,28 +294,34 @@ public:
     }
 
     /**
-     * Returns the probability for a label.
-     *  @param  l           The label for the candidate.
+     * Returns the probability for a candidate.
+     *  @param  i           The index for the candidate.
      *  @return value_type  The probability.
      */
-    inline value_type prob(int l)
+    inline value_type prob(int i)
     {
-        return std::exp(this->m_scores[l] - m_lognorm);
+        return std::exp(this->m_scores[i] - m_lognorm);
     }
 
     /**
-     * Returns the log of the probability for a label.
-     *  @param  l           The label for the candidate.
-     *  @return value_type  The probability.
+     * Returns the log of the probability for a candidate.
+     *  @param  i           The index for the candidate.
+     *  @return value_type  The log of the probability.
      */
-    inline value_type logprob(int l)
+    inline value_type logprob(int i)
     {
-        return (this->m_scores[l] - m_lognorm);
+        return (this->m_scores[i] - m_lognorm);
     }
 
-    inline value_type error(int l, int r)
+    /**
+     * Computes the error of the candidate.
+     *  @param  i           The index for the candidate.
+     *  @param  r           The index for the reference candidate.
+     *  @return value_type  The error.
+     */
+    inline value_type error(int i, int r)
     {
-        return prob(l) - (l == r);
+        return prob(i) - static_cast<double>(i == r);
     }
 
     /**
@@ -321,12 +338,16 @@ public:
         // Compute the partition factor, starting from the maximum value.
         value_type sum = 0.;
         value_type max = this->m_scores[this->m_argmax];
-        for (int l = 0;l < this->size();++l) {
-            sum += std::exp(this->m_scores[l] - max);
+        for (int i = 0;i < this->size();++i) {
+            sum += std::exp(this->m_scores[i] - max);
         }
         m_lognorm = max + std::log(sum);
     }
 
+    /**
+     * Returns the name of this classifier.
+     *  @return const char* The name of the classifier.
+     */
     static const char *name()
     {
         const static char *str = "linear classifier (multi) with logistic loss";

@@ -311,11 +311,13 @@ static void holdout_evaluation_multi(
         // Tell the classifier the number of possible labels.
         cls.resize(it->num_labels(L));
 
-        for (int l = 0;l < it->num_labels(L);++l) {
+        for (int i = 0;i < it->num_labels(L);++i) {
             cls.inner_product(
-                l, fgen,
-                it->attributes(l).begin(),
-                it->attributes(l).end()
+                i,
+                fgen,
+                it->attributes(i).begin(),
+                it->attributes(i).end(),
+                i
                 );
         }
         cls.finalize();

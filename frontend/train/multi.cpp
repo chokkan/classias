@@ -173,7 +173,7 @@ finalize_data(
     const option& opt
     )
 {
-    typedef typename classias::int_t int_t;
+    typedef typename int int_t;
 
     // If necessary, reserve early feature numbers for bias features.
     if (opt.generate_bias) {
@@ -206,7 +206,7 @@ output_model(
     const option& opt
     )
 {
-    typedef classias::int_t int_t;
+    typedef int int_t;
     typedef typename data_type::attributes_quark_type attributes_quark_type;
     typedef typename attributes_quark_type::item_type attribute_type;
     typedef typename data_type::labels_quark_type labels_quark_type;

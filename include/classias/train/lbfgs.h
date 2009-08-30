@@ -560,8 +560,7 @@ protected:
     typedef typename data_type::attribute_type attribute_type;
     typedef typename data_type::label_type label_type;
     /// The type of a classifier.
-    typedef classify::linear_multi_logistic<
-        attribute_type, label_type, value_type, model_type> error_type;
+    typedef classify::linear_multi_logistic<model_type> error_type;
 
     /// An array [K] of observation expectations.
     value_type *m_oexps;
@@ -634,17 +633,17 @@ public:
             cls.resize(inst.num_labels(L));
 
             // Compute the probability prob[l] for each label #l.
-            for (int l = 0;l < inst.num_labels(L);++l) {
-                const attributes_type& v = inst.attributes(l);
-                cls.inner_product(l, data.feature_generator, v.begin(), v.end());
+            for (int i = 0;i < inst.num_labels(L);++i) {
+                const attributes_type& v = inst.attributes(i);
+                cls.inner_product(i, data.feature_generator, v.begin(), v.end(), i);
             }
             cls.finalize();
 
             // Accumulate the model expectations of features.
-            for (int l = 0;l < inst.num_labels(L);++l) {
-                const attributes_type& v = inst.attributes(l);
-                data.feature_generator.add_to(
-                    g, v.begin(), v.end(), l, cls.prob(l));
+            for (int i = 0;i < inst.num_labels(L);++i) {
+                const attributes_type& v = inst.attributes(i);
+                this->add_weights(
+                    g, i, data.feature_generator, v.begin(), v.end(), cls.prob(i));
             }
 
             // Accumulate the loss for predicting the instance.
@@ -694,8 +693,8 @@ public:
             // Compute the observation expectations.
             const int l = iti->get_label();
             const attributes_type& v = iti->attributes(l);
-            data.feature_generator.add_to(
-                m_oexps, v.begin(), v.end(), l, 1.0);
+            this->add_weights(
+                m_oexps, l, data.feature_generator, v.begin(), v.end(), 1.0);
         }
 
         // Call the L-BFGS solver.
@@ -728,6 +727,35 @@ public:
             this->m_data->positive_labels.begin(),
             this->m_data->positive_labels.end()
             );
+    }
+
+protected:
+    /**
+     * Adds a value to weights associated with a feature vector.
+     *  @param  w           The weight vector to which an update occurs.
+     *  @param  first       The iterator pointing to the first element of
+     *                      the feature vector.
+     *  @param  last        The iterator pointing just beyond the last
+     *                      element of the feature vector.
+     *  @param  delta       The value to be added to the weights.
+     */
+    template <class feature_generator_type, class iterator_type>
+    inline void add_weights(
+        value_type* w,
+        int l,
+        feature_generator_type& fgen,
+        iterator_type first,
+        iterator_type last,
+        value_type delta
+        )
+    {
+        for (iterator_type it = first;it != last;++it) {
+            typename feature_generator_type::feature_type f =
+                fgen.forward(it->first, l);
+            if (0 <= f) {
+                w[f] += (delta * it->second);
+            }
+        }
     }
 };
 

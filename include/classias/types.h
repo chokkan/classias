@@ -40,11 +40,6 @@
 namespace classias
 {
 
-/// Integer type.
-typedef int int_t;
-/// Float type.
-typedef double real_t;
-
 /**
  * Instance weight class.
  *
@@ -389,6 +384,9 @@ public:
     }
 };
 
+/**
+ * A fixed-size vector of feature weights.
+ */
 typedef std::vector<double> weight_vector;
 
 };

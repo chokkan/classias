@@ -368,12 +368,13 @@ public:
         value_type loss = 0;
         error_type cls(w);
         cls.resize(it->num_labels(L));
-        for (int l = 0;l < it->num_labels(L);++l) {
+        for (int i = 0;i < it->num_labels(L);++i) {
             cls.inner_product(
-                l,
+                i,
                 fgen,
-                it->attributes(l).begin(),
-                it->attributes(l).end()
+                it->attributes(i).begin(),
+                it->attributes(i).end(),
+                i
                 );
         }
         cls.finalize();
@@ -478,7 +479,7 @@ typedef averaged_perceptron_binary_base<
     > averaged_perceptron_binary;
 
 typedef averaged_perceptron_multi_base<
-    classify::linear_multi<int, int, double, weight_vector>
+    classify::linear_multi<weight_vector>
     > averaged_perceptron_multi;
 
 };

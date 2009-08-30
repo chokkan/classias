@@ -33,6 +33,9 @@
 #ifndef __CLASSIAS_QUARK_H__
 #define __CLASSIAS_QUARK_H__
 
+#include <stdexcept>
+#include <vector>
+
 #if defined _MSC_VER
 #include <unordered_map>
 #define UNORDERED_MAP   std::tr1::unordered_map
@@ -63,9 +66,7 @@ namespace boost {
 
 #endif
 
-#include <map>
-#include <stdexcept>
-#include <vector>
+
 
 namespace classias {
 
@@ -85,13 +86,24 @@ public:
     }
 };
 
+
+
+/**
+ * Quark for associating an item with an identifier.
+ *
+ *  @param  item_base       The type of an item.
+ */
 template <class item_base>
 class quark_base {
 public:
+    /// The type representing an item.
     typedef item_base item_type;
 
+    /// The type implementing a vector of items.
     typedef std::vector<item_type> inverse_map_type;
+    /// The type representing a unique identifier.
     typedef typename inverse_map_type::size_type value_type;
+    /// The type associating an item to its unique identifier.
     typedef UNORDERED_MAP<item_type, value_type> forward_map_type;
 
 protected:
@@ -128,18 +140,32 @@ public:
     /**
      * Tests whether an item has an identifier assigned.
      *  @param  x               The item.
-     *  @retval bool            \c true if the item 
+     *  @retval bool            \c true if the item is known.
      */
     inline bool exists(const item_type& x)
     {
         return m_fwd.find(x) != m_fwd.end();
     }
 
+    /**
+     * Returns the unique identifier for an item.
+     *  If the item is unknown, this function assigns a new unique identifier
+     *  to the item and return it.
+     *  @param  x               The item.
+     *  @return value_type      The unique identifier.
+     */
     inline value_type operator() (const item_type& x)
     {
         return associate(x);
     }
 
+    /**
+     * Returns the unique identifier for an item.
+     *  If the item is unknown, this function assigns a new unique identifier
+     *  to the item and return it.
+     *  @param  x               The item.
+     *  @return value_type      The unique identifier.
+     */
     inline value_type associate(const item_type& x)
     {
         typename forward_map_type::const_iterator it = m_fwd.find(x);
@@ -153,6 +179,13 @@ public:
         }
     }
 
+    /**
+     * Returns the unique identifier for an item.
+     *  If the item is unknown, this function throws quark_error.
+     *  @param  x               The item.
+     *  @return value_type      The unique identifier.
+     *  @throws quark_error.
+     */
     inline value_type to_value(const item_type& x) const
     {
         typename forward_map_type::const_iterator it = m_fwd.find(x);
@@ -163,6 +196,14 @@ public:
         }           
     }
 
+    /**
+     * Returns the item for the unique identifier.
+     *  If the unique identifier is unknown, this function throws quark_error.
+     *  @param  v               The unique identifier.
+     *  @return item_type&      The reference to the item associated with
+     *                          the identifier.
+     *  @throws quark_error.
+     */
     inline const item_type& to_item(const value_type& v) const
     {
         if (v < m_inv.size()) {
@@ -175,15 +216,27 @@ public:
 
 
 
+/**
+ * Quark for associating a pair of items with an identifier.
+ *
+ *  @param  item0_base      The type of an item #0.
+ *  @param  item1_base      The type of an item #1.
+ */
 template <class item0_base, class item1_base>
 class quark2_base {
 public:
+    /// The type representing an item #0.
     typedef item0_base item0_type;
+    /// The type representing an item #1.
     typedef item1_base item1_type;
 
+    /// The type representing a pair of items.
     typedef std::pair<item0_type, item1_type> elem_type;
+    /// The type implementing a vector of pairs of items.
     typedef std::vector<elem_type> inverse_map_type;
+    /// The type representing a unique identifier.
     typedef typename inverse_map_type::size_type value_type;
+    /// The type associating a pair of items to its unique identifier.
     typedef UNORDERED_MAP<elem_type, value_type> forward_map_type;
 
 protected:
@@ -193,29 +246,62 @@ protected:
     inverse_map_type m_inv;
 
 public:
+    /**
+     * Constructs the object.
+     */
     quark2_base()
     {
     }
 
+    /**
+     * Destructs the object.
+     */
     virtual ~quark2_base()
     {
     }
 
+    /**
+     * Returns the number of item-identifier associations.
+     *  @retval value_type      The number of associations between items and
+     *                          identifiers.
+     */
     inline value_type size() const
     {
         return m_fwd.size();
     }
 
-    inline value_type operator() (const item0_type& x, const item1_base& y)
-    {
-        return associate(x, y);
-    }
-
+    /**
+     * Tests whether a pair of items has an identifier assigned.
+     *  @param  x               The item #0.
+     *  @param  y               The item #1.
+     *  @retval bool            \c true if the pair of items is known.
+     */
     inline bool exists(const item0_type& x, const item1_base& y) const
     {
         return m_fwd.find(elem_type(x, y)) != m_fwd.end();
     }
 
+    /**
+     * Returns the unique identifier for a pair of items.
+     *  If the pair is unknown, this function assigns a new unique identifier
+     *  to the pair and return it.
+     *  @param  x               The item #0.
+     *  @param  y               The item #1.
+     *  @return value_type      The unique identifier.
+     */
+    inline value_type operator() (const item0_type& x, const item1_base& y)
+    {
+        return associate(x, y);
+    }
+
+    /**
+     * Returns the unique identifier for a pair of items.
+     *  If the pair is unknown, this function assigns a new unique identifier
+     *  to the pair and return it.
+     *  @param  x               The item #0.
+     *  @param  y               The item #1.
+     *  @return value_type      The unique identifier.
+     */
     inline value_type associate(const item0_type& x, const item1_base& y)
     {
         typename forward_map_type::const_iterator it = m_fwd.find(elem_type(x, y));
@@ -230,6 +316,14 @@ public:
         }
     }
 
+    /**
+     * Returns the unique identifier for a pair of items.
+     *  If the pair is unknown, this function throws quark_error.
+     *  @param  x               The item #0.
+     *  @param  y               The item #1.
+     *  @return value_type      The unique identifier.
+     *  @throws quark_error.
+     */
     inline value_type to_value(const item0_type& x, const item1_type& y) const
     {
         typename forward_map_type::const_iterator it = m_fwd.find(elem_type(x, y));
@@ -240,6 +334,14 @@ public:
         }           
     }
 
+    /**
+     * Returns the unique identifier for a pair of items.
+     *  If the pair is unknown, this function returns the default identifier.
+     *  @param  x               The item #0.
+     *  @param  y               The item #1.
+     *  @param  def             The default identifier if the pair is unknown.
+     *  @return value_type      The unique identifier.
+     */
     inline value_type to_value(const item0_type& x, const item1_type& y, const value_type& def) const
     {
         typename forward_map_type::const_iterator it = m_fwd.find(elem_type(x, y));
@@ -250,6 +352,14 @@ public:
         }           
     }
 
+    /**
+     * Returns the pair for the unique identifier.
+     *  If the unique identifier is unknown, this function throws quark_error.
+     *  @param  v               The unique identifier.
+     *  @param  x               The reference to item #0.
+     *  @param  y               The reference to item #1.
+     *  @throws quark_error.
+     */
     inline void to_item(const value_type& v, item0_type& x, item1_base& y) const
     {
         if (v < m_inv.size()) {
@@ -261,6 +371,7 @@ public:
     }
 };
 
+/// The string quark.
 typedef quark_base<std::string> quark;
 
 };

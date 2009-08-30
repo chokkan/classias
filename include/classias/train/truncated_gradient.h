@@ -491,12 +491,13 @@ public:
         // Compute the scores for the labels (candidates) in the instance.
         error_type cls(w);
         cls.resize(it->num_labels(L));
-        for (int l = 0;l < it->num_labels(L);++l) {
+        for (int i = 0;i < it->num_labels(L);++i) {
             cls.inner_product(
-                l,
+                i,
                 fgen,
-                it->attributes(l).begin(),
-                it->attributes(l).end()
+                it->attributes(i).begin(),
+                it->attributes(i).end(),
+                i
                 );
         }
         cls.finalize();
@@ -506,16 +507,16 @@ public:
 
         // Updates the feature weights.
         value_type gain = eta * it->get_weight();
-        for (int l = 0;l < it->num_labels(L);++l) {
+        for (int i = 0;i < it->num_labels(L);++i) {
             // Computes the error for the label (candidate).
-            value_type err = cls.error(l, it->get_label());
+            value_type err = cls.error(i, it->get_label());
 
             // Update the feature weights.
             update_weights(
-                l,
+                i,
                 fgen,
-                it->attributes(l).begin(),
-                it->attributes(l).end(),
+                it->attributes(i).begin(),
+                it->attributes(i).end(),
                 -err * gain 
                 );
         }
@@ -605,7 +606,7 @@ typedef truncated_gradient_binary<
 
 /** Truncate gradient for multi classification with logistic loss. */
 typedef truncated_gradient_multi<
-    classify::linear_multi_logistic<int, int, double, weight_vector>
+    classify::linear_multi_logistic<weight_vector>
     > truncated_gradient_logistic_multi;
 
 };

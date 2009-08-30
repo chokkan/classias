@@ -74,7 +74,7 @@ public:
     /// A feature quark.
     attributes_quark_type attributes;
     /// The start index of features.
-    int_t feature_start_index;
+    int feature_start_index;
 
     /**
      * Constructs the object.
@@ -203,7 +203,7 @@ public:
      * Sets the start index of user features.
      *  @param  index       The start index of user features.
      */
-    inline void set_user_feature_start(int_t index)
+    inline void set_user_feature_start(int index)
     {
         feature_start_index = index;
     }
@@ -212,7 +212,7 @@ public:
      * Returns the start index of user features.
      *  @return fid_type    The start index of user features.
      */
-    inline int_t get_user_feature_start() const
+    inline int get_user_feature_start() const
     {
         return feature_start_index;
     }
@@ -221,7 +221,7 @@ public:
      * Returns the total number of attributes.
      *  @return int         The total number of attributes.
      */
-    int_t num_attributes() const
+    int num_attributes() const
     {
         return attributes.size();
     }
@@ -230,7 +230,7 @@ public:
      * Returns the total number of features.
      *  @return int         The total number of features.
      */
-    int_t num_features() const
+    int num_features() const
     {
         return attributes.size();
     }
@@ -239,7 +239,7 @@ public:
      * Returns the total number of labels.
      *  @return int         The total number of labels.
      */
-    int_t num_labels() const
+    int num_labels() const
     {
         return 2;
     }
@@ -326,7 +326,7 @@ public:
      * Returns the total number of labels.
      *  @return int         The total number of labels.
      */
-    int_t num_labels() const
+    int num_labels() const
     {
         return labels.size();
     }
@@ -395,7 +395,7 @@ public:
      * Returns the total number of features.
      *  @return int         The total number of features.
      */
-    int_t num_features() const
+    int num_features() const
     {
         return this->feature_generator.num_features();
     }
@@ -405,9 +405,9 @@ public:
         this->feature_generator.set_num_labels(this->labels.size());
         this->feature_generator.set_num_attributes(this->attributes.size());
 
-        int_t max = -1;
-        for (int_t l = 0;l < this->num_labels();++l) {
-            int_t fid = this->feature_generator.regist(a, l);
+        int max = -1;
+        for (int l = 0;l < this->num_labels();++l) {
+            int fid = this->feature_generator.regist(a, l);
             if (max < fid) {
                 max = fid;
             }

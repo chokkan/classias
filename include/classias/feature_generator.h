@@ -41,7 +41,9 @@ namespace classias
 
 
 /**
- * Feature generator for any combinations of attributes and labels.
+ * Feature generator for candidate classification.
+ *  In this class, a feature is identical to an attribute, and a label is
+ *  ignored.
  *
  *  @param  attribute_tmpl  The type of an attribute.
  *  @param  label_tmpl      The type of a label.
@@ -94,7 +96,7 @@ public:
 
     /**
      * Returns the total number of labels.
-     *  @return int         The total number of labels.
+     *  @return size_t      The total number of labels.
      */
     size_t num_labels() const
     {
@@ -103,7 +105,7 @@ public:
 
     /**
      * Returns the total number of attributes.
-     *  @return int         The total number of attributes.
+     *  @return size_t      The total number of attributes.
      */
     size_t num_attributes() const
     {
@@ -112,7 +114,7 @@ public:
 
     /**
      * Returns the total number of features.
-     *  @return int         The total number of features.
+     *  @return size_t      The total number of features.
      */
     size_t num_features() const
     {
@@ -130,7 +132,7 @@ public:
 
     /**
      * Sets the total number of labels.
-     *  @param  num_labels  The total number of labels.
+     *  @param  num_labels      The total number of labels.
      */
     void set_num_labels(size_t num_labels)
     {
@@ -138,7 +140,7 @@ public:
 
     /**
      * Returns if this class requires registration.
-     *  @return bool    This class always returns \c true
+     *  @return bool            This class always returns \c false.
      */
     inline bool needs_registration() const
     {
@@ -147,8 +149,10 @@ public:
 
     /**
      * Registers an association between an attribute and label.
-     *  @param  a       An attribute.
-     *  @param  l       A label.
+     *  @param  a               The attribute.
+     *  @param  l               The label.
+     *  @return feature_type    The feature for the attribute and label,
+     *                          which is always identical to the attribute.
      */
     inline feature_type regist(const attribute_type& a, const label_type& l)
     {
@@ -156,11 +160,11 @@ public:
     }
 
     /**
-     * Returns the feature identifier associated with a pair of an attribute
-     *  and label.
-     *  @param  a               An attribute.
-     *  @param  l               A label.
-     *  @return feature_type    The feature identifier.
+     * Returns the feature associated with a pair of an attribute and label.
+     *  @param  a               The attribute.
+     *  @param  l               The label.
+     *  @return feature_type    The feature for the attribute and label,
+     *                          which is always identical to the attribute.
      */
     inline feature_type forward(const attribute_type& a, const label_type& l) const
     {
@@ -168,8 +172,8 @@ public:
     }
 
     /**
-     * Returns the attribute and label associated with a feature identifier.
-     *  @param  f               The feature identifier.
+     * Returns the attribute and label associated with a feature.
+     *  @param  f               The feature.
      *  @param  a               The attribute associated with the feature.
      *  @param  l               The label associated with the feature.
      */
@@ -181,21 +185,6 @@ public:
     {
         a = f;
         l = 0;
-    }
-
-    template <class value_type, class iterator_type>
-    inline void add_to(
-        value_type* m,
-        iterator_type first,
-        iterator_type last,
-        const label_type& label,
-        value_type value
-        ) const
-    {
-        for (iterator_type it = first;it != last;++it) {
-            feature_type fid = static_cast<feature_type>(it->first);
-            m[fid] += value * it->second;
-        }
     }
 };
 
@@ -257,7 +246,7 @@ public:
 
     /**
      * Returns the total number of labels.
-     *  @return int         The total number of labels.
+     *  @return size_t      The total number of labels.
      */
     size_t num_labels() const
     {
@@ -266,7 +255,7 @@ public:
 
     /**
      * Returns the total number of attributes.
-     *  @return int         The total number of attributes.
+     *  @return size_t      The total number of attributes.
      */
     size_t num_attributes() const
     {
@@ -275,7 +264,7 @@ public:
 
     /**
      * Returns the total number of features.
-     *  @return int         The total number of features.
+     *  @return size_t      The total number of features.
      */
     size_t num_features() const
     {
@@ -302,7 +291,7 @@ public:
 
     /**
      * Returns if this class requires registration.
-     *  @return bool    This class always returns \c true
+     *  @return bool    This class always returns \c false.
      */
     inline bool needs_registration() const
     {
@@ -311,8 +300,10 @@ public:
 
     /**
      * Registers an association between an attribute and label.
-     *  @param  a       An attribute.
-     *  @param  l       A label.
+     *  @param  a               The attribute.
+     *  @param  l               The label.
+     *  @return feature_type    The feature for the attribute and label,
+     *                          which is always identical to the attribute.
      */
     inline feature_type regist(const attribute_type& a, const label_type& l)
     {
@@ -320,11 +311,11 @@ public:
     }
 
     /**
-     * Returns the feature identifier associated with a pair of an attribute
-     *  and label.
-     *  @param  a               An attribute.
-     *  @param  l               A label.
-     *  @return feature_type    The feature identifier.
+     * Returns the feature associated with a pair of an attribute and label.
+     *  @param  a               The attribute.
+     *  @param  l               The label.
+     *  @return feature_type    The feature for the attribute and label,
+     *                          which is always identical to the attribute.
      */
     inline feature_type forward(const attribute_type& a, const label_type& l) const
     {
@@ -332,8 +323,8 @@ public:
     }
 
     /**
-     * Returns the attribute and label associated with a feature identifier.
-     *  @param  f               The feature identifier.
+     * Returns the attribute and label associated with a feature.
+     *  @param  f               The feature.
      *  @param  a               The attribute associated with the feature.
      *  @param  l               The label associated with the feature.
      */
@@ -345,23 +336,6 @@ public:
     {
         a = f / m_num_labels;
         l = f % m_num_labels;
-    }
-
-    template <class value_type, class iterator_type>
-    inline void add_to(
-        value_type* m,
-        iterator_type first,
-        iterator_type last,
-        const label_type& label,
-        value_type value
-        ) const
-    {
-        for (iterator_type it = first;it != last;++it) {
-            feature_type fid = this->forward(it->first, label);
-            if (0 <= fid) {
-                m[fid] += value * it->second;
-            }
-        }
     }
 };
 
@@ -430,7 +404,7 @@ public:
 
     /**
      * Returns the total number of labels.
-     *  @return int         The total number of labels.
+     *  @return size_t      The total number of labels.
      */
     size_t num_labels() const
     {
@@ -439,7 +413,7 @@ public:
 
     /**
      * Returns the total number of features.
-     *  @return int         The total number of features.
+     *  @return size_t      The total number of features.
      */
     size_t num_features() const
     {
@@ -466,7 +440,7 @@ public:
 
     /**
      * Returns if this class requires registration.
-     *  @return bool    This class always returns \c true
+     *  @return bool    This class always returns \c true.
      */
     inline bool needs_registration() const
     {
@@ -475,8 +449,9 @@ public:
 
     /**
      * Registers an association between an attribute and label.
-     *  @param  a       An attribute.
-     *  @param  l       A label.
+     *  @param  a               The attribute.
+     *  @param  l               The label.
+     *  @return feature_type    The feature for the attribute and label.
      */
     inline feature_type regist(const attribute_type& a, const label_type& l)
     {
@@ -484,11 +459,10 @@ public:
     }
 
     /**
-     * Returns the feature identifier associated with a pair of an attribute
-     *  and label.
-     *  @param  a               An attribute.
-     *  @param  l               A label.
-     *  @return feature_type    The feature identifier.
+     * Returns the feature associated with a pair of an attribute and label.
+     *  @param  a               The attribute.
+     *  @param  l               The label.
+     *  @return feature_type    The feature for the attribute and label.
      */
     inline feature_type forward(const attribute_type& a, const label_type& l) const
     {
@@ -496,8 +470,8 @@ public:
     }
 
     /**
-     * Returns the attribute and label associated with a feature identifier.
-     *  @param  f               The feature identifier.
+     * Returns the attribute and label associated with a feature.
+     *  @param  f               The feature.
      *  @param  a               The attribute associated with the feature.
      *  @param  l               The label associated with the feature.
      */
@@ -508,23 +482,6 @@ public:
         ) const
     {
         m_features.to_item(f, a, l);
-    }
-
-    template <class value_type, class iterator_type>
-    inline void add_to(
-        value_type* m,
-        iterator_type first,
-        iterator_type last,
-        const label_type& label,
-        value_type value
-        ) const
-    {
-        for (iterator_type it = first;it != last;++it) {
-            feature_type fid = this->forward(it->first, label);
-            if (0 <= fid) {
-                m[fid] += value * it->second;
-            }
-        }
     }
 };
 

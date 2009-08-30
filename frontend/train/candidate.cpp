@@ -201,10 +201,10 @@ finalize_data(
     const option& opt
     )
 {
-    typedef classias::int_t int_t;
+    typedef int int_t;
 
     // Set positive labels.
-    for (int_t l = 0;l < data.num_labels();++l) {
+    for (int l = 0;l < data.num_labels();++l) {
         if (opt.negative_labels.find(data.labels.to_item(l)) == opt.negative_labels.end()) {
             data.append_positive_label(l);
         }
@@ -222,7 +222,7 @@ output_model(
     const option& opt
     )
 {
-    typedef classias::int_t int_t;
+    typedef int int_t;
     typedef typename model_type::value_type value_type;
 
     // Open a model file for writing.
@@ -232,7 +232,7 @@ output_model(
     os << "@classias\tlinear\tcandidate" << std::endl;
 
     // Store the feature weights.
-    for (int_t i = 0;i < (int_t)data.attributes.size();++i) {
+    for (int i = 0;i < (int)data.attributes.size();++i) {
         value_type w = model[i];
         if (w != 0.) {
             os <<
