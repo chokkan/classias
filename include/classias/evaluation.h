@@ -97,6 +97,8 @@ public:
     }
 };
 
+
+
 /**
  * Counter for precision, recall, and F1 scores
  */
@@ -243,6 +245,17 @@ protected:
 };
 
 
+
+/**
+ * Hold-out evaluation for binary classification.
+ *  @param  os              The output stream.
+ *  @param  first           The iterator pointing to the first element of the
+ *                          dataset.
+ *  @param  last            The iterator pointing just beyond the last element
+ *                          of the dataset.
+ *  @param  cls             The classifier object.
+ *  @param  holdout         The group number for holdout evaluation.
+ */
 template <
     class iterator_type,
     class classifier_type
@@ -280,6 +293,23 @@ static void holdout_evaluation_binary(
     pr.output_micro(os, positive_labels, positive_labels+1);
 }
 
+
+
+/**
+ * Hold-out evaluation for multi-class classification.
+ *  @param  os              The output stream.
+ *  @param  first           The iterator pointing to the first element of the
+ *                          dataset.
+ *  @param  last            The iterator pointing just beyond the last element
+ *                          of the dataset.
+ *  @param  cls             The classifier object.
+ *  @param  fgen            The feature generator.
+ *  @param  holdout         The group number for holdout evaluation.
+ *  @param  label_first     The iterator pointing to the first element of the
+ *                          set of positive labels.
+ *  @param  label_last      The iterator pointing just beyond the last element
+ *                          of the set of positive labels.
+ */
 template <
     class iterator_type,
     class classifier_type,

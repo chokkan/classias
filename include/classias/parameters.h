@@ -43,9 +43,16 @@
 namespace classias
 {
 
+/**
+ * Exception class for \ref parameter_exchange.
+ */
 class unknown_parameter : public std::invalid_argument
 {
 public:
+    /**
+     * Constructs an exception object.
+     *  @param  message     The error message.
+     */
     explicit unknown_parameter(const std::string& message)
         : std::invalid_argument(message)
     {
@@ -53,6 +60,10 @@ public:
 };
 
 
+
+/**
+ * A class for exchanging parameters.
+ */
 class parameter_exchange
 {
 public:
@@ -105,7 +116,19 @@ public:
     {
     }
 
-    void init(const std::string& name, int* var, const int defval = 0, const std::string& message = "")
+    /**
+     * Defines an integer parameter.
+     *  @param  name            The name of the parameter.
+     *  @param  var             The pointer to the parameter variable.
+     *  @param  defval          The default value of the parameter.
+     *  @param  message         The help message for the parameter.
+     */
+    void init(
+        const std::string& name,
+        int* var,
+        const int defval = 0,
+        const std::string& message = ""
+        )
     {
         *var = defval;
 
@@ -120,7 +143,19 @@ public:
         }
     }
 
-    void init(const std::string& name, double* var, const double defval = 0, const std::string& message = "")
+    /**
+     * Defines a double parameter.
+     *  @param  name            The name of the parameter.
+     *  @param  var             The pointer to the parameter variable.
+     *  @param  defval          The default value of the parameter.
+     *  @param  message         The help message for the parameter.
+     */
+    void init(
+        const std::string& name,
+        double* var,
+        const double defval = 0,
+        const std::string& message = ""
+        )
     {
         *var = defval;
 
@@ -135,7 +170,19 @@ public:
         }
     }
 
-    void init(const std::string& name, std::string* var, const std::string& defval = "", const std::string& message = "")
+    /**
+     * Defines a string parameter.
+     *  @param  name            The name of the parameter.
+     *  @param  var             The pointer to the parameter variable.
+     *  @param  defval          The default value of the parameter.
+     *  @param  message         The help message for the parameter.
+     */
+    void init(
+        const std::string& name,
+        std::string* var,
+        const std::string& defval = "",
+        const std::string& message = ""
+        )
     {
         *var = defval;
 
@@ -150,6 +197,14 @@ public:
         }
     }
 
+    /**
+     * Sets a value of a parameter.
+     *  @param  name            The name of the parameter.
+     *  @param  value           The integer value.
+     *  @param  unk             The indicator specifying whether this function
+     *                          throws an exception \ref unknown_parameter
+     *                          when the parameter is undefined.
+     */
     void set(const std::string& name, const int value, bool unk=true)
     {
         parameter_map::iterator it = pmap.find(name);
@@ -169,6 +224,14 @@ public:
         }
     }
 
+    /**
+     * Sets a value of a parameter.
+     *  @param  name            The name of the parameter.
+     *  @param  value           The double value.
+     *  @param  unk             The indicator specifying whether this function
+     *                          throws an exception \ref unknown_parameter
+     *                          when the parameter is undefined.
+     */
     void set(const std::string& name, const double value, bool unk=true)
     {
         parameter_map::iterator it = pmap.find(name);
@@ -188,6 +251,14 @@ public:
         }
     }
 
+    /**
+     * Sets a value of a parameter.
+     *  @param  name            The name of the parameter.
+     *  @param  value           The string value.
+     *  @param  unk             The indicator specifying whether this function
+     *                          throws an exception \ref unknown_parameter
+     *                          when the parameter is undefined.
+     */
     void set(const std::string& name, const std::string& value, bool unk=true)
     {
         parameter_map::iterator it = pmap.find(name);
@@ -205,12 +276,23 @@ public:
         }
     }
 
+    /**
+     * Gets the time stamp when the parameter value is set.
+     *  @param  name            The name of the parameter.
+     *  @return int             The time stamp when the value of the parameter
+     *                          is set.
+     */
     int get_stamp(const std::string& name)
     {
         parameter_map::iterator it = pmap.find(name);
         return (it != pmap.end() ? it->second.stamp : -1);
     }
 
+    /**
+     * Shows the parameter values.
+     *  @param  os              The output stream.
+     *  @return std::ostream&   The output stream.
+     */
     std::ostream& show(std::ostream& os)
     {
         parameter_list::const_iterator it;
@@ -235,6 +317,11 @@ public:
         return os;
     }
 
+    /**
+     * Shows the help message of parameters.
+     *  @param  os              The output stream.
+     *  @return std::ostream&   The output stream.
+     */
     std::ostream& help(std::ostream& os)
     {
         parameter_list::const_iterator it;
