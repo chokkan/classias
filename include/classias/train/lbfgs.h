@@ -630,17 +630,17 @@ public:
             }
 
             // Tell the classifier the number of possible labels.
-            cls.resize(inst.num_labels(L));
+            cls.resize(inst.num_candidates(L));
 
             // Compute the probability prob[l] for each label #l.
-            for (int i = 0;i < inst.num_labels(L);++i) {
+            for (int i = 0;i < inst.num_candidates(L);++i) {
                 const attributes_type& v = inst.attributes(i);
                 cls.inner_product(i, data.feature_generator, v.begin(), v.end(), i);
             }
             cls.finalize();
 
             // Accumulate the model expectations of features.
-            for (int i = 0;i < inst.num_labels(L);++i) {
+            for (int i = 0;i < inst.num_candidates(L);++i) {
                 const attributes_type& v = inst.attributes(i);
                 this->add_weights(
                     g, i, data.feature_generator, v.begin(), v.end(), cls.prob(i));

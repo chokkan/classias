@@ -367,8 +367,8 @@ public:
 
         value_type loss = 0;
         error_type cls(w);
-        cls.resize(it->num_labels(L));
-        for (int i = 0;i < it->num_labels(L);++i) {
+        cls.resize(it->num_candidates(L));
+        for (int i = 0;i < it->num_candidates(L);++i) {
             cls.inner_product(
                 i,
                 fgen,

@@ -309,9 +309,9 @@ static void holdout_evaluation_multi(
         }
 
         // Tell the classifier the number of possible labels.
-        cls.resize(it->num_labels(L));
+        cls.resize(it->num_candidates(L));
 
-        for (int i = 0;i < it->num_labels(L);++i) {
+        for (int i = 0;i < it->num_candidates(L);++i) {
             cls.inner_product(
                 i,
                 fgen,

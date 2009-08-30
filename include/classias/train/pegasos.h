@@ -434,8 +434,8 @@ public:
         // Compute the scores for the labels (candidates) in the instance.
         value_type nlogp = 0.;
         error_type cls(model);
-        cls.resize(it->num_labels(L));
-        for (int i = 0;i < it->num_labels(L);++i) {
+        cls.resize(it->num_candidates(L));
+        for (int i = 0;i < it->num_candidates(L);++i) {
             cls.inner_product_scaled(
                 i,
                 fgen,
@@ -471,7 +471,7 @@ public:
         gain *= it->get_weight();
 
         // Updates the feature weights.
-        for (int i = 0;i < it->num_labels(L);++i) {
+        for (int i = 0;i < it->num_candidates(L);++i) {
             // Computes the error for the label (candidate).
             value_type err = cls.error(i, it->get_label());
 

@@ -129,14 +129,14 @@ public:
     typedef typename attributes_type::identifier_type attribute_type;
 
 protected:
-    /// The label of this instance.
-    int m_label;
+    /// The candidate index of this instance.
+    int m_index;
 
 public:
     /**
      * Constructs an object.
      */
-    multi_instance_base() : m_label(-1)
+    multi_instance_base() : m_index(-1)
     {
     }
 
@@ -149,54 +149,54 @@ public:
 
     /**
      * Sets the label.
-     *  @param  l           The label.
+     *  @param  i           The label index.
      */
-    inline void set_label(int l)
+    inline void set_label(int i)
     {
-        m_label = l;
+        m_index = i;
     }
 
     /**
      * Gets the label.
-     *  @return bool        The label of this instance.
+     *  @return bool        The label index of this instance.
      */
     inline int get_label() const
     {
-        return m_label;
+        return m_index;
     }
 
     /**
-     * Returns the number of possible labels that can be assigned.
+     * Returns the number of possible candidate labels that can be assigned.
      *  @param  L           The total number of labels in the dataset.
-     *  @return int         The number of possible labels for this instance.
-     *                      The return value is always identical to L for
-     *                      multi-class instances.
+     *  @return int         The number of possible candidate labels for this
+     *                      instance. The return value is always identical to
+     *                      L for multi-class instances.
      */
-    inline int num_labels(const int L) const
+    inline int num_candidates(const int L) const
     {
         return L;
     }
 
     /**
      * Returns a read-only access to the attribute vector.
-     *  @param  l           Reserved only for the compatibility with
+     *  @param  i           Reserved only for the compatibility with
      *                      candidate_instance_base class.
      *  @return const attributes_type&  The reference to the attribute vector
      *                                  associated with this instance.
      */
-    inline const attributes_type& attributes(int l) const
+    inline const attributes_type& attributes(int i) const
     {
         return *this;
     }
 
     /**
      * Returns an access to the attribute vector.
-     *  @param  l           Reserved only for the compatibility with
+     *  @param  i           Reserved only for the compatibility with
      *                      candidate_instance_base class.
      *  @return attributes_type&        The reference to the attribute vector
      *                                  associated with this instance.
      */
-    inline attributes_type& attributes(int l)
+    inline attributes_type& attributes(int i)
     {
         return *this;
     }
@@ -362,17 +362,17 @@ public:
     }
 
     /**
-     * Sets the label.
-     *  @param  l           The label.
+     * Sets the index of the reference candidate.
+     *  @param  i           The index number of the reference candidate.
      */
-    inline void set_label(int l)
+    inline void set_label(int i)
     {
-        m_label = l;
+        m_label = i;
     }
 
     /**
-     * Gets the label.
-     *  @return bool        The label of this instance.
+     * Gets the index of the reference candidate.
+     *  @return bool        The index number of the reference candidate.
      */
     inline int get_label() const
     {
@@ -386,7 +386,7 @@ public:
      *  @return int         The number of candidates associated with this
      *                      instance.
      */
-    inline int num_labels(const int L) const
+    inline int num_candidates(const int L) const
     {
         return this->size();
     }
@@ -415,8 +415,6 @@ public:
     }
 };
 
-
 };
-
 
 #endif/*__CLASSIAS_INSTANCE_H__*/

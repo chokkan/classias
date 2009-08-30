@@ -57,8 +57,6 @@ public:
     typedef instance_tmpl instance_type;
     /// The type of a feature vector.
     typedef attributes_quark_tmpl attributes_quark_type;
-    /// The type of an attribute.
-    typedef typename attributes_quark_type::value_type attribute_type;
 
     /// A type providing a container of instances.
     typedef std::vector<instance_type> instances_type;
@@ -68,6 +66,8 @@ public:
     typedef typename instances_type::iterator iterator;
     /// A type providing a read-only random-access iterator.
     typedef typename instances_type::const_iterator const_iterator;
+    /// The type of an attribute.
+    typedef typename attributes_quark_type::value_type attribute_type;
 
     /// A container of instances.
     instances_type instances;
@@ -252,9 +252,10 @@ public:
  *
  *  This class provides a data set for candidate instances.
  *
- *  @param  instance_tmpl       The type of an instance.
- *  @param  features_quark_tmpl The type of a feature quark.
- *  @param  label_quark_tmpl    The type of a label quark.
+ *  @param  instance_tmpl           The type of an instance.
+ *  @param  attributes_quark_tmpl   The type of an attribute quark.
+ *  @param  label_quark_tmpl        The type of a label quark.
+ *  @param  features_quark_tmpl     The type of a feature quark.
  */
 template <
     class instance_tmpl,
@@ -272,13 +273,11 @@ public:
     typedef attributes_quark_tmpl attributes_quark_type;
     /// The type of label quark.
     typedef labels_quark_tmpl labels_quark_type;
-    /// The type of a label.
-    typedef typename labels_quark_type::value_type label_type;
     /// The type of the feature-generator class.
     typedef feature_generator_tmpl feature_generator_type;
-
     /// The base class.
     typedef binary_data_base<instance_tmpl, attributes_quark_tmpl> base_type;
+
     /// A type providing a container of instances.
     typedef typename base_type::instances_type instances_type;
     /// A type counting the number of pairs in a container.
@@ -288,6 +287,10 @@ public:
     /// A type providing a read-only random-access iterator.
     typedef typename base_type::const_iterator const_iterator;
 
+    /// The type of an attribute.
+    typedef typename attributes_quark_type::value_type attribute_type;
+    /// The type of a label.
+    typedef typename labels_quark_type::value_type label_type;
     /// The type of a container for positive labels.
     typedef std::vector<label_type> positive_labels_type;
 
@@ -295,10 +298,10 @@ public:
     labels_quark_type labels;
     /// A set of positive labels in the data set.
     positive_labels_type positive_labels;
-
     /// The feature generator.
     feature_generator_type feature_generator;
 
+public:
     /**
      * Constructs the object.
      */
@@ -333,6 +336,7 @@ public:
 };
 
 
+
 /**
  * Data set for classification instances.
  *
@@ -351,7 +355,12 @@ template <
     class feature_generator_tmpl
 >
 class multi_data_base :
-    public candidate_data_base<instance_tmpl, attributes_quark_tmpl, labels_quark_tmpl, feature_generator_tmpl>
+    public candidate_data_base<
+        instance_tmpl,
+        attributes_quark_tmpl,
+        labels_quark_tmpl,
+        feature_generator_tmpl
+        >
 {
 public:
     /// The type of an instance.
@@ -366,7 +375,12 @@ public:
     typedef feature_generator_tmpl feature_generator_type;
  
     /// The base class.
-    typedef candidate_data_base<instance_tmpl, attributes_quark_tmpl, labels_quark_tmpl, feature_generator_tmpl> base_type;
+    typedef candidate_data_base<
+        instance_tmpl,
+        attributes_quark_tmpl,
+        labels_quark_tmpl,
+        feature_generator_tmpl
+        > base_type;
     /// A type providing a container of instances.
     typedef typename base_type::instances_type instances_type;
     /// A type counting the number of pairs in a container.

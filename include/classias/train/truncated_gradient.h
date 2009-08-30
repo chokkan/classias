@@ -484,14 +484,14 @@ public:
 
         // Delay application of L1 penalties to the feature weights that
         // are relevant to the current instance.
-        for (int l = 0;l < it->num_labels(L);++l) {
+        for (int l = 0;l < it->num_candidates(L);++l) {
             this->apply_penalty(l, fgen, it->begin(), it->end());
         }
 
         // Compute the scores for the labels (candidates) in the instance.
         error_type cls(w);
-        cls.resize(it->num_labels(L));
-        for (int i = 0;i < it->num_labels(L);++i) {
+        cls.resize(it->num_candidates(L));
+        for (int i = 0;i < it->num_candidates(L);++i) {
             cls.inner_product(
                 i,
                 fgen,
@@ -507,7 +507,7 @@ public:
 
         // Updates the feature weights.
         value_type gain = eta * it->get_weight();
-        for (int i = 0;i < it->num_labels(L);++i) {
+        for (int i = 0;i < it->num_candidates(L);++i) {
             // Computes the error for the label (candidate).
             value_type err = cls.error(i, it->get_label());
 
