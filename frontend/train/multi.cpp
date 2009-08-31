@@ -223,7 +223,7 @@ output_model(
 
     // Output a set of labels.
     for (int_t l = 0;l < data.num_labels();++l) {
-        os << "@label\t" << data.labels.to_item(l);
+        os << "@label\t" << data.labels.to_item(l) << std::endl;
     }
 
     // Store the feature weights.
