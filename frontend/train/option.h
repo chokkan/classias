@@ -100,7 +100,7 @@ public:
         ) :
         is(_is), os(_os), es(_es),
         mode(MODE_NORMAL), type(TYPE_MULTI_DENSE), model(""),
-        algorithm("logress.lbfgs"),        
+        algorithm("lbfgs.logistic"),        
         shuffle(false), generate_bias(false),
         split(0), holdout(-1), cross_validation(false),
         token_separator(' '), value_separator(':')

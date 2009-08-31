@@ -193,11 +193,13 @@ static void usage(std::ostream& os, const char *argv0)
     os << "                            candidates for the instance; a candidate line" << std::endl;
     os << "                            consists of a class label and features; an instance" << std::endl;
     os << "                            ends with a directive line '@eoi'" << std::endl;
-    os << "  -a, --algorithm=NAME  specify a training algorithm (DEFAULT='logress.lbfgs')" << std::endl;
-    os << "      logress.lbfgs         logistic regression by L-BFGS method" << std::endl;
-    os << "      logress.pegasos       logistic regression by PEGASOS" << std::endl;
-    os << "      logress.folos         logistic regression by FOLOS" << std::endl;
-    os << "      averaged-perceptron   averaged perceptron" << std::endl;
+    os << "  -a, --algorithm=NAME  specify a training algorithm (DEFAULT='lbfgs.logistic')" << std::endl;
+    os << "      lbfgs.logistic        logistic regression by L-BFGS" << std::endl;
+    os << "      averaged_perceptron   averaged perceptron" << std::endl;
+    os << "      pegasos.logistic      logistic regression by Pegasos" << std::endl;
+    os << "      pegasos.hinge         linear SVM (hinge loss) by Pegasos" << std::endl;
+    os << "      truncated_gradient.logistic   logistic regression by Truncated Gradient" << std::endl;
+    os << "      truncated_gradient.hinge      linear SVM (hinge loss) by Truncated Gradient" << std::endl;
     os << "  -p, --set=NAME=VALUE  set the algorithm-specific parameter NAME to VALUE;" << std::endl;
     os << "                        use '-H' or '--help-parameters' with the algorithm name" << std::endl;
     os << "                        specified by '-a' or '--algorithm' and the task type" << std::endl;
