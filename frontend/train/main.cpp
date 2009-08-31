@@ -70,10 +70,10 @@ public:
         m_algorithms["pegasos.hinge"]               = "pegasos.hinge";
         m_algorithms["pegasos.svm"]                 = "pegasos.hinge";
         m_algorithms["truncated_gradient.logistic"] = "truncated_gradient.logistic";
-        m_algorithms["td.logistic"]                 = "truncated_gradient.logistic";
+        m_algorithms["tg.logistic"]                 = "truncated_gradient.logistic";
         m_algorithms["truncated_gradient.hinge"]    = "truncated_gradient.hinge";
-        m_algorithms["td.hinge"]                    = "truncated_gradient.hinge";
-        m_algorithms["td.svm"]                      = "truncated_gradient.hinge";
+        m_algorithms["tg.hinge"]                    = "truncated_gradient.hinge";
+        m_algorithms["tg.svm"]                      = "truncated_gradient.hinge";
     }
 
     BEGIN_OPTION_MAP_INLINE()

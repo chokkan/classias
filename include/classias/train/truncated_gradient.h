@@ -565,9 +565,8 @@ protected:
         )
     {
         for (iterator_type it = first;it != last;++it) {
-            typename feature_generator_type::feature_type f =
-                fgen.forward(it->first, l);
-            if (0 <= f) {
+            typename feature_generator_type::feature_type f;
+            if (fgen.forward(it->first, l, f)) {
                 this->m_w[f] += delta * it->second;
                 this->m_penalty[f] = this->m_sum_penalty;
             }
@@ -591,9 +590,8 @@ protected:
         )
     {
         for (iterator_type it = first;it != last;++it) {
-            typename feature_generator_type::feature_type f =
-                fgen.forward(it->first, l);
-            if (0 <= f) {
+            typename feature_generator_type::feature_type f;
+            if (fgen.forward(it->first, l, f)) {
                 base_class::apply_penalty(f);
             }
         }

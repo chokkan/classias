@@ -1,5 +1,5 @@
 /*
- *		Data I/O for binary-class classification.
+ *		Binary classification.
  *
  * Copyright (c) 2008,2009 Naoaki Okazaki
  * All rights reserved.
@@ -40,6 +40,7 @@
 #include <map>
 #include "defaultmap.h"
 
+#include <classias/classias.h>
 #include <classias/classify/linear/binary.h>
 #include <classias/evaluation.h>
 
@@ -61,6 +62,7 @@
 
 typedef defaultmap<std::string, double> model_type;
 typedef classias::classify::linear_binary_logistic<model_type> classifier_type;
+
 
 static void
 parse_line(

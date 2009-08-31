@@ -163,12 +163,20 @@ public:
      * Returns the feature associated with a pair of an attribute and label.
      *  @param  a               The attribute.
      *  @param  l               The label.
-     *  @return feature_type    The feature for the attribute and label,
+     *  @param  f               The feature for the attribute and label,
      *                          which is always identical to the attribute.
+     *  @return bool            \c true if the pair of the attribute and label
+     *                          is successfully mapped to a feature, which is
+     *                          always \c true.
      */
-    inline feature_type forward(const attribute_type& a, const label_type& l) const
+    inline bool forward(
+        const attribute_type& a,
+        const label_type& l,
+        feature_type& f
+        ) const
     {
-        return a;
+        f = a;
+        return true;
     }
 
     /**
@@ -176,8 +184,10 @@ public:
      *  @param  f               The feature.
      *  @param  a               The attribute associated with the feature.
      *  @param  l               The label associated with the feature.
+     *  @return bool            \c if the feature is successfully associated
+     *                          with the attribute and label.
      */
-    inline void backward(
+    inline bool backward(
         const feature_type& f,
         attribute_type& a,
         label_type& l
@@ -185,6 +195,7 @@ public:
     {
         a = f;
         l = 0;
+        return true;
     }
 };
 
@@ -307,19 +318,29 @@ public:
      */
     inline feature_type regist(const attribute_type& a, const label_type& l)
     {
-        return forward(a, l);
+        feature_type f;
+        forward(a, l, f);
+        return f;
     }
 
     /**
      * Returns the feature associated with a pair of an attribute and label.
      *  @param  a               The attribute.
      *  @param  l               The label.
-     *  @return feature_type    The feature for the attribute and label,
+     *  @param  f               The feature for the attribute and label,
      *                          which is always identical to the attribute.
+     *  @return bool            \c true if the pair of the attribute and label
+     *                          is successfully mapped to a feature, which is
+     *                          always \c true.
      */
-    inline feature_type forward(const attribute_type& a, const label_type& l) const
+    inline bool forward(
+        const attribute_type& a,
+        const label_type& l,
+        feature_type& f
+        ) const
     {
-        return a * m_num_labels + l;
+        f = a * m_num_labels + l;
+        return true;
     }
 
     /**
@@ -327,8 +348,10 @@ public:
      *  @param  f               The feature.
      *  @param  a               The attribute associated with the feature.
      *  @param  l               The label associated with the feature.
+     *  @return bool            \c if the feature is successfully associated
+     *                          with the attribute and label.
      */
-    inline void backward(
+    inline bool backward(
         const feature_type& f,
         attribute_type& a,
         label_type& l
@@ -336,6 +359,7 @@ public:
     {
         a = f / m_num_labels;
         l = f % m_num_labels;
+        return true;
     }
 };
 
@@ -462,11 +486,19 @@ public:
      * Returns the feature associated with a pair of an attribute and label.
      *  @param  a               The attribute.
      *  @param  l               The label.
-     *  @return feature_type    The feature for the attribute and label.
+     *  @param  f               The feature for the attribute and label.
+     *  @return bool            \c true if the pair of the attribute and label
+     *                          is successfully mapped to a feature, which is
+     *                          always \c true.
      */
-    inline feature_type forward(const attribute_type& a, const label_type& l) const
+    inline bool forward(
+        const attribute_type& a,
+        const label_type& l,
+        feature_type& f
+        ) const
     {
-        return m_features.to_value(a, l, -1);
+        f = m_features.to_value(a, l, -1);
+        return (f != -1);
     }
 
     /**
@@ -474,14 +506,17 @@ public:
      *  @param  f               The feature.
      *  @param  a               The attribute associated with the feature.
      *  @param  l               The label associated with the feature.
+     *  @return bool            \c if the feature is successfully associated
+     *                          with the attribute and label.
      */
-    inline void backward(
+    inline bool backward(
         const feature_type& f,
         attribute_type& a,
         label_type& l
         ) const
     {
         m_features.to_item(f, a, l);
+        return true;
     }
 };
 

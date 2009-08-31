@@ -290,7 +290,7 @@ thread_buffer_t::thread_buffer_t()
     m_error_code=ERROR_SUCCESS;
     m_error_message="";
 
-    m_wait_timeout=2000;
+    m_wait_timeout=10000;
     m_buffer_limit=0;
     m_read_buffer_size=4096;
 

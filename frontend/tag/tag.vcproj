@@ -187,6 +187,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\multi.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\option.h"
 				>
 			</File>

@@ -160,8 +160,8 @@ public:
         const value_type& value
         )
     {
-        typename feature_generator_type::feature_type f = fgen.forward(a, l);
-        if (0 <= f) {
+        typename feature_generator_type::feature_type f;
+        if (fgen.forward(a, l, f)) {
             m_scores[i] += m_model[f] * value;
         }
     }

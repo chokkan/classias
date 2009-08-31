@@ -461,9 +461,8 @@ protected:
         )
     {
         for (iterator_type it = first;it != last;++it) {
-            typename feature_generator_type::feature_type f =
-                fgen.forward(it->first, l);
-            if (0 <= f) {
+            typename feature_generator_type::feature_type f;
+            if (fgen.forward(it->first, l, f)) {
                 w[f] += (delta * it->second);
             }
         }

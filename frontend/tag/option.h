@@ -87,7 +87,7 @@ public:
         is(_is), os(_os), es(_es),
         mode(MODE_NORMAL),
         test(false), false_analysis(false), output(OUTPUT_MLABEL),
-        token_separator('\t'), value_separator(':')
+        token_separator(' '), value_separator(':')
     {
     }
 };

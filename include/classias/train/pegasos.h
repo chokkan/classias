@@ -535,9 +535,8 @@ protected:
         value_type& norm22 = this->m_norm22;
 
         for (iterator_type it = first;it != last;++it) {
-            typename feature_generator_type::feature_type f =
-                fgen.forward(it->first, l);
-            if (0 <= f) {
+            typename feature_generator_type::feature_type f;
+            if (fgen.forward(it->first, l, f)) {
                 value_type w = model[f];
                 value_type d = delta * it->second;
                 model[f] += d;
