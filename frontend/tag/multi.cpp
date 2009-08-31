@@ -154,6 +154,12 @@ read_model(
             break;
         }
 
+        // Candidate label.
+        if (line.compare(0, 7, "@label\t") == 0) {
+            labels(line.substr(7));
+            continue;
+        }
+
         tokenizer values(line, '\t');
         tokenizer::iterator itv = values.begin();
         if (itv == values.end()) {
