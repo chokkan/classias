@@ -43,9 +43,17 @@
 #define REGEX_SEARCH std::tr1::regex_search
 
 #elif defined __GNUC__
+
+#if defined(HAVE_BOOST_REGEX_HPP)
 #include <boost/regex.hpp>
 #define REGEX boost::regex
 #define REGEX_SEARCH boost::regex_search
+
+#else
+#define REGEX std::string
+#define REGEX_SEARCH(x, y)  (1)
+
+#endif
 
 #endif
 

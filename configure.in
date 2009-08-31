@@ -39,7 +39,8 @@ dnl ------------------------------------------------------------------
 AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_LN_S
-
+AC_EXEEXT
+AC_LANG_CPLUSPLUS
 
 dnl ------------------------------------------------------------------
 dnl Initialization for variables
@@ -111,42 +112,48 @@ dnl Checks for library functions.
 dnl ------------------------------------------------------------------
 
 dnl Check for math library
-AC_CHECK_LIB(m, rand)
-AC_CHECK_LIB(pthread, pthread_create)
-
 AC_ARG_WITH(
 	liblbfgs,
 	[AS_HELP_STRING([--with-liblbfgs=DIR],[liblbfgs directory])],
 	[INCLUDES="-I${withval}/include ${INCLUDES}"; LDFLAGS="-L${withval}/lib ${LDFLAGS}"]
 )
-AC_CHECK_LIB(lbfgs, lbfgs)
-
 AC_ARG_WITH(
 	boost,
 	[AS_HELP_STRING([--with-boost=DIR],[boost directory])],
-	[BOOST_INCLUDES="-I${withval}/include"; BOOST_LDFLAGS="-L${withval}/lib"]
+	[INCLUDES="-I${withval}/include ${INCLUDES}"; LDFLAGS="-L${withval}/lib ${LDFLAGS}"]
 )
 AC_ARG_WITH(
 	boost-include,
 	[AS_HELP_STRING([--with-boost-include=DIR],[boost include directory])],
-	[BOOST_INCLUDES="-I${withval}"]
+	[INCLUDES="-I${withval} ${INCLUDES}"]
 )
 AC_ARG_WITH(
 	boost-lib,
 	[AS_HELP_STRING([--with-boost-lib=DIR],[boost library directory])],
-	[BOOST_LDFLAGS="-L${withval}"]
+	[LDFLAGS="-L${withval} ${LDFLAGS}"]
 )
 AC_ARG_WITH(
 	boost-postfix,
 	[AS_HELP_STRING([--with-boost-postfix=STR],[boost postfix])],
 	[BOOST_POSTFIX="${withval}"]
 )
-INCLUDES="${BOOST_INCLUDES} ${INCLUDES}"
-LDFLAGS="${BOOST_LDFLAGS} ${LDFLAGS}"
+
+CPPFLAGS_saved="${CPPFLAGS}"
+CPPFLAGS="${INCLUDES} ${CPPFLAGS}"
+
+AC_CHECK_LIB(m, rand)
+AC_CHECK_LIB(pthread, pthread_create)
+
+AC_CHECK_HEADERS(lbfgs.h)
+AC_CHECK_LIB(lbfgs, lbfgs)
+
+AC_CHECK_HEADERS(tr1/unordered_map)
+AC_CHECK_HEADERS(boost/unordered_map.hpp)
 
 AC_CHECK_HEADERS(boost/regex.hpp)
 AC_CHECK_LIB(boost_regex${BOOST_POSTFIX}, main)
 
+CPPFLAGS="${CPPFLAGS_saved}"
 INCLUDES="-I\$(top_srcdir) -I\$(top_srcdir)/include -I\$(srcdir) ${INCLUDES}"
 
 dnl ------------------------------------------------------------------

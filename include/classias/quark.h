@@ -52,6 +52,8 @@ namespace std {
 };
 
 #elif defined __GNUC__
+
+#if defined(HAVE_BOOST_UNORDERED_MAP_HPP)
 #include <boost/unordered_map.hpp>
 #define UNORDERED_MAP   boost::unordered_map
 namespace boost {
@@ -63,6 +65,28 @@ namespace boost {
         }
     };
 };
+
+#elif defined(HAVE_TR1_UNORDERED_MAP)
+#include <tr1/unordered_map>
+#define UNORDERED_MAP   std::tr1::unordered_map
+namespace std {
+    namespace tr1 {
+        template<>
+        struct hash<std::pair<int, int> > {
+            size_t operator()(const std::pair<int, int>& item) const
+            {
+                return (size_t)((item.first << 8) + (item.second & 0xFF));
+            }
+        };
+    };
+};
+
+#else
+#include <map>
+#define UNORDERED_MAP   std::map
+
+#endif
+
 
 #endif
 
