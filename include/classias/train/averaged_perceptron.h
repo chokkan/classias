@@ -267,8 +267,8 @@ public:
         if (static_cast<bool>(cls) != it->get_label()) {
             int y = static_cast<int>(it->get_label()) * 2 - 1;
             value_type delta = y * it->get_weight();
-            update_weights(m_w, it->begin(), it->end(), delta);
-            update_weights(m_ws, it->begin(), it->end(), c * delta);
+            update_weights(w, it->begin(), it->end(), delta);
+            update_weights(ws, it->begin(), it->end(), c * delta);
             loss = 1;
         } else {
             loss = 0;
@@ -382,7 +382,7 @@ public:
             int la = cls.argmax();
 
             update_weights(
-                m_w,
+                w,
                 lr,
                 fgen,
                 it->attributes(lr).begin(),
@@ -390,7 +390,7 @@ public:
                 it->get_weight()
                 );
             update_weights(
-                m_w,
+                ws,
                 lr,
                 fgen,
                 it->attributes(lr).begin(),
@@ -399,7 +399,7 @@ public:
                 );
 
             update_weights(
-                m_w,
+                w,
                 la,
                 fgen,
                 it->attributes(la).begin(),
@@ -407,7 +407,7 @@ public:
                 -it->get_weight()
                 );
             update_weights(
-                m_w,
+                ws,
                 la,
                 fgen,
                 it->attributes(la).begin(),

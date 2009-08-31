@@ -174,7 +174,7 @@ finalize_data(
     const option& opt
     )
 {
-    typedef typename int int_t;
+    typedef int int_t;
 
     // If necessary, reserve early feature numbers for bias features.
     if (opt.generate_bias) {

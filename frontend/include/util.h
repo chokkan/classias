@@ -34,9 +34,10 @@
 #define __UTIL_H__
 
 #include <ctime>
-#include <sstream>
-#include <string>
 #include <exception>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 
 class invalid_data : public std::exception
 {

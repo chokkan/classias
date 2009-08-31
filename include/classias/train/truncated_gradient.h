@@ -414,7 +414,7 @@ protected:
     {
         for (iterator_type it = first;it != last;++it) {
             this->m_w[it->first] += delta * it->second;
-            this->m_penalty[it->first] = m_sum_penalty;
+            this->m_penalty[it->first] = this->m_sum_penalty;
         }
     }
 
@@ -569,7 +569,7 @@ protected:
                 fgen.forward(it->first, l);
             if (0 <= f) {
                 this->m_w[f] += delta * it->second;
-                this->m_penalty[f] = m_sum_penalty;
+                this->m_penalty[f] = this->m_sum_penalty;
             }
         }
     }

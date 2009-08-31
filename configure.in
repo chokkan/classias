@@ -68,6 +68,18 @@ AC_STRUCT_TM
 AC_CHECK_TYPES([uint8_t, uint16_t, uint32_t])
 
 dnl ------------------------------------------------------------------
+dnl Checks for building binaries with static libraries linked.
+dnl ------------------------------------------------------------------
+AC_ARG_ENABLE(all-static,
+  AC_HELP_STRING([--enable-all-static],
+                 [Build completely static (standalone) binaries.]),
+  [
+    if test "$enableval" = "yes" ; then
+      LDFLAGS="-static $LDFLAGS"
+    fi
+])
+
+dnl ------------------------------------------------------------------
 dnl Checks for debugging mode
 dnl ------------------------------------------------------------------
 AC_ARG_ENABLE(
@@ -147,5 +159,5 @@ AC_SUBST(INCLUDES)
 dnl ------------------------------------------------------------------
 dnl Output the configure results.
 dnl ------------------------------------------------------------------
-AC_CONFIG_FILES(Makefile include/Makefile frontend/Makefile frontend/train/Makefile win32/Makefile)
+AC_CONFIG_FILES(Makefile include/Makefile frontend/Makefile frontend/train/Makefile frontend/tag/Makefile win32/Makefile)
 AC_OUTPUT
