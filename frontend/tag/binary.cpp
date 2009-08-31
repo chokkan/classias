@@ -48,8 +48,6 @@
 #include "defaultmap.h"
 #include <util.h>
 
-//#include "tag.h"
-
 /*
 <line>          ::= <comment> | <instance> | <br>
 <comment>       ::= "#" <string> <br>
@@ -62,7 +60,7 @@
 */
 
 typedef defaultmap<std::string, double> model_type;
-typedef classias::classify::linear_binary_logistic<std::string, double, model_type> classifier_type;
+typedef classias::classify::linear_binary_logistic<model_type> classifier_type;
 
 static void
 parse_line(
@@ -89,18 +87,18 @@ parse_line(
         rl = true;
     } else if (name == "-1") {
         rl = false;
-    } else if (opt.test || (opt.output & option::OUTPUT_RLABEL)) {
+    } else if (opt.test) {
         throw invalid_data("a class label must be either '+1', '1', or '-1'", line, lines);
     }
 
     // Apply the bias feature if any.
-    inst("__BIAS__", 1.0);
+    inst.set("__BIAS__", 1.0);
 
     // Set featuress for the instance.
     for (++itv;itv != values.end();++itv) {
         if (!itv->empty()) {
             get_name_value(*itv, name, value, opt.value_separator);
-            inst(name, value);
+            inst.set(name, value);
         }
     }
 }
@@ -173,11 +171,6 @@ int binary_tag(option& opt, std::ifstream& ifs)
         // Output the label.
         if (opt.output & option::OUTPUT_MLABEL) {
             os << (static_cast<bool>(inst) ? "+1" : "-1");
-
-            // Output the reference label.
-            if (opt.output & option::OUTPUT_RLABEL) {
-                os << opt.value_separator << (rlabel ? "+1" : "-1");
-            }
 
             // Output the probability or score.
             if (opt.output & option::OUTPUT_PROBABILITY) {

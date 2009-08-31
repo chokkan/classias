@@ -29,7 +29,9 @@ public:
     typedef typename base_type::reference reference;
     typedef typename base_type::reverse_iterator reverse_iterator;
     typedef typename base_type::size_type size_type;
-    typedef typename base_type::value_type value_type;
+
+    typedef typename base_type::value_type pair_type;
+    typedef type_type value_type;
 
 public:
     type_type& operator[](const key_type& key)
@@ -38,7 +40,7 @@ public:
         if (it != this->end()) {
             return it->second;
         } else {
-            std::pair<iterator, bool> ret = this->insert(value_type(key, 0));
+            std::pair<iterator, bool> ret = this->insert(pair_type(key, 0));
             return (ret.first)->second;
         }
     }

@@ -98,17 +98,11 @@ public:
         ON_OPTION(SHORTOPT('q') || LONGOPT("quiet"))
             output = OUTPUT_NONE;
 
-        ON_OPTION(SHORTOPT('r') || LONGOPT("reference"))
-            output |= OUTPUT_RLABEL;
-
         ON_OPTION(SHORTOPT('w') || LONGOPT("score"))
             output |= OUTPUT_SCORE;
 
         ON_OPTION(SHORTOPT('p') || LONGOPT("probability"))
             output |= OUTPUT_PROBABILITY;
-
-        ON_OPTION(SHORTOPT('a') || LONGOPT("all"))
-            output |= OUTPUT_ALL;
 
         ON_OPTION(SHORTOPT('v') || LONGOPT("version"))
             mode = MODE_VERSION;
@@ -128,17 +122,15 @@ static void usage(std::ostream& os, const char *argv0)
     os << "  -m, --model=FILE      load the model from FILE" << std::endl;
     os << "  -t, --test            evaluate the tagging performance on the labeled data" << std::endl;
     os << "  -s, --token-separator=SEP assume SEP character as a token separator:" << std::endl;
-    os << "      '\\t', t, tab              a TAB ('\\t') character (DEFAULT)" << std::endl;
-    os << "      ' ',  s, spc, space       a SPACE (' ') character" << std::endl;
+    os << "      ' ',  s, spc, space       a SPACE (' ') character (DEFAULT)" << std::endl;
+    os << "      '\\t', t, tab              a TAB ('\\t') character" << std::endl;
     os << "      ',',  c, comma            a COMMA (',') character" << std::endl;
     os << "  -c, --value-separator=SEP assume SEP character as a value separator:" << std::endl;
     os << "      ':',  c, colon            a COLON (':') character (DEFAULT)" << std::endl;
     os << "      '=',  e, equal            a EQUAL ('=') character" << std::endl;
     os << "      '|',  b, bar              a BAR ('|') character" << std::endl;
-    os << "  -r, --reference       output reference label" << std::endl;
     os << "  -w, --score           output scores for the labels" << std::endl;
     os << "  -p, --probability     output probabilities for the labels" << std::endl;
-    os << "  -a, --all             output scores/probabilities for all candidates" << std::endl;
     os << "  -k, --comment         output commentlines for the tagging output" << std::endl;
     os << "  -q, --quiet           suppress tagging results from the output" << std::endl;
     os << "  -v, --version         show the version and copyright information" << std::endl;
