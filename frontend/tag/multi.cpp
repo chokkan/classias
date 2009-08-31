@@ -1,5 +1,5 @@
 /*
- *		Binary classification.
+ *		Multi-class classifier.
  *
  * Copyright (c) 2008,2009 Naoaki Okazaki
  * All rights reserved.
@@ -36,11 +36,12 @@
 
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <string>
-#include <map>
 
 #include <classias/classias.h>
-#include <classias/classify/linear/binary.h>
+#include <classias/quark.h>
+#include <classias/classify/linear/multi.h>
 #include <classias/evaluation.h>
 
 #include "option.h"
@@ -49,12 +50,45 @@
 #include <util.h>
 
 typedef defaultmap<std::string, double> model_type;
-typedef classias::classify::linear_binary_logistic<model_type> classifier_type;
+typedef std::vector<std::string> labels_type;
+typedef std::vector<int> positive_labels_type;
+typedef classias::classify::linear_multi_logistic<model_type> classifier_type;
+
+class feature_generator
+{
+public:
+    typedef std::string attribute_type;
+    typedef std::string label_type;
+    typedef std::string feature_type;
+
+public:
+    feature_generator()
+    {
+    }
+
+    virtual ~feature_generator()
+    {
+    }
+
+    inline bool forward(
+        const std::string& a,
+        const std::string& l,
+        std::string& f
+        ) const
+    {
+        f  = a;
+        f += '\t';
+        f += l;
+        return true;
+    }
+};
 
 static void
 parse_line(
     classifier_type& inst,
-    bool& rl,
+    const feature_generator& fgen,
+    std::string& rl,
+    const classias::quark& labels,
     const option& opt,
     const std::string& line,
     int lines = 0
@@ -70,31 +104,45 @@ parse_line(
         throw invalid_data("no field found in the line", line, lines);
     }
 
-    // The first field always presents a label, which can be empty.
+    // Make sure that the first token (class) is not empty.
+    if (itv->empty()) {
+        throw invalid_data("an empty label found", line, lines);
+    }
+
+    // Parse the instance label.
     get_name_value(*itv, name, value, opt.value_separator);
-    if (name == "+1" || name == "1") {
-        rl = true;
-    } else if (name == "-1") {
-        rl = false;
-    } else if (opt.test) {
-        throw invalid_data("a class label must be either '+1', '1', or '-1'", line, lines);
+    rl = name;
+
+    // Initialize the classifier.
+    inst.resize(labels.size());
+    inst.clear();
+
+    // Set attributes for the instance.
+    for (++itv;itv != values.end();++itv) {
+        if (!itv->empty()) {
+            double value;
+            std::string name;
+            get_name_value(*itv, name, value, opt.value_separator);
+
+            for (int i = 0;i < (int)labels.size();++i) {
+                inst.set(i, fgen, name, labels.to_item(i), value);
+            }
+        }
     }
 
     // Apply the bias feature if any.
-    inst.set("__BIAS__", 1.0);
-
-    // Set featuress for the instance.
-    for (++itv;itv != values.end();++itv) {
-        if (!itv->empty()) {
-            get_name_value(*itv, name, value, opt.value_separator);
-            inst.set(name, value);
-        }
+    for (int i = 0;i < (int)labels.size();++i) {
+        inst.set(i, fgen, "__BIAS__", labels.to_item(i), value);
     }
+
+    // Finalize the instance.
+    inst.finalize();
 }
 
 static void
 read_model(
     model_type& model,
+    classias::quark& labels,
     std::istream& is,
     const option& opt
     )
@@ -122,17 +170,34 @@ read_model(
     }
 }
 
-int binary_tag(option& opt, std::ifstream& ifs)
+int multi_tag(option& opt, std::ifstream& ifs)
 {
     int lines = 0;
+    feature_generator fgen;
     std::istream& is = opt.is;
     std::ostream& os = opt.os;
-    classias::accuracy acc;
-    classias::precall pr(2);
 
     // Load a model.
     model_type model;
-    read_model(model, ifs, opt);
+    classias::quark labels;
+    read_model(model, labels, ifs, opt);
+
+    // Create an instance of a classifier on the model.
+    classifier_type inst(model);
+
+    // Generate a set of positive labels (necessary only for evaluation).
+    positive_labels_type positives;
+    if (opt.test) {
+        for (int i = 0;i < (int)labels.size();++i) {
+            if (opt.negative_labels.find(labels.to_item(i)) == opt.negative_labels.end()) {
+                positives.push_back(i);
+            }
+        }
+    }
+
+    // Objects for performance evaluation.
+    classias::accuracy acc;
+    classias::precall pr(labels.size());
 
     for (;;) {
         // Read a line.
@@ -153,19 +218,18 @@ int binary_tag(option& opt, std::ifstream& ifs)
         }
 
         // Parse the line and classify the instance.
-        bool rlabel;
-        classifier_type inst(model);
-        parse_line(inst, rlabel, opt, line, lines);
+        std::string rlabel;
+        parse_line(inst, fgen, rlabel, labels, opt, line, lines);
 
         // Output the label.
         if (opt.output & option::OUTPUT_MLABEL) {
-            os << (static_cast<bool>(inst) ? "+1" : "-1");
+            os << labels.to_item(inst.argmax());
 
             // Output the probability or score.
             if (opt.output & option::OUTPUT_PROBABILITY) {
-                os << opt.value_separator << inst.prob();
+                os << opt.value_separator << inst.prob(inst.argmax());
             } else if (opt.output & option::OUTPUT_SCORE) {
-                os << opt.value_separator << inst.score();
+                os << opt.value_separator << inst.score(inst.argmax());
             }
 
             os << std::endl;
@@ -173,18 +237,21 @@ int binary_tag(option& opt, std::ifstream& ifs)
 
         // Accumulate the performance.
         if (opt.test) {
-            int rl = static_cast<int>(rlabel);
-            int ml = static_cast<int>(static_cast<bool>(inst));
-            acc.set(ml == rl);
-            pr.set(ml, rl);
+            try {
+                int rl = inst.argmax();
+                int ml = labels.to_value(rlabel);
+                acc.set(ml == rl);
+                pr.set(ml, rl);
+            } catch (classias::quark_error&) {
+            }
         }
     }
 
     // Output the performance if necessary.
     if (opt.test) {
-        int positive_labels[] = {1};
         acc.output(os);
-        pr.output_micro(os, positive_labels, positive_labels+1);
+        pr.output_micro(os, positives.begin(), positives.end());
+        pr.output_macro(os, positives.begin(), positives.end());
     }
 
     return 0;

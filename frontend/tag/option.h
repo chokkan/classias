@@ -40,8 +40,9 @@
 class option
 {
 public:
-    typedef std::vector<std::string>    files_type;
+    typedef std::set<std::string> labelset_type;
 
+public:
     enum {
         MODE_NORMAL = 0,        /// Normal mode.
         MODE_VERSION,           /// Version mode.
@@ -68,8 +69,6 @@ public:
     std::ostream&   os;
     std::ostream&   es;
 
-    files_type  files;
-
     int         mode;
     std::string model;
     bool        test;
@@ -78,6 +77,8 @@ public:
 
     char        token_separator;
     char        value_separator;
+
+    labelset_type   negative_labels;
 
     option(
         std::istream& _is = std::cin,

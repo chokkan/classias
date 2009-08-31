@@ -44,8 +44,7 @@
 #include "option.h"
 
 int binary_tag(option& opt, std::ifstream& ifs);
-int multi_dense_tag(option& opt, std::ifstream& ifs);
-int multi_sparse_tag(option& opt, std::ifstream& ifs);
+int multi_tag(option& opt, std::ifstream& ifs);
 int candidate_tag(option& opt, std::ifstream& ifs);
 
 class optionparser : public option, public optparse
@@ -98,6 +97,9 @@ public:
         ON_OPTION(SHORTOPT('q') || LONGOPT("quiet"))
             output = OUTPUT_NONE;
 
+        ON_OPTION_WITH_ARG(SHORTOPT('n') || LONGOPT("negative"))
+            negative_labels.insert(arg);
+
         ON_OPTION(SHORTOPT('w') || LONGOPT("score"))
             output |= OUTPUT_SCORE;
 
@@ -129,6 +131,7 @@ static void usage(std::ostream& os, const char *argv0)
     os << "      ':',  c, colon            a COLON (':') character (DEFAULT)" << std::endl;
     os << "      '=',  e, equal            a EQUAL ('=') character" << std::endl;
     os << "      '|',  b, bar              a BAR ('|') character" << std::endl;
+    os << "  -n, --negative=LABEL  assume LABEL to be a negative label" << std::endl;
     os << "  -w, --score           output scores for the labels" << std::endl;
     os << "  -p, --probability     output probabilities for the labels" << std::endl;
     os << "  -k, --comment         output commentlines for the tagging output" << std::endl;
@@ -191,11 +194,6 @@ int main(int argc, char *argv[])
         return ret;
     }
 
-    // Set the source files.
-    for (int i = arg_used;i < argc;++i) {
-        opt.files.push_back(argv[i]);
-    }
-
     // Open the model file.
     std::ifstream ifs(opt.model.c_str());
     if (ifs.fail()) {
@@ -214,7 +212,7 @@ int main(int argc, char *argv[])
             break;
         case option::TYPE_MULTI_SPARSE:
         case option::TYPE_MULTI_DENSE:
-            //ret = multi_train(opt);
+            ret = multi_tag(opt, ifs);
             break;
         case option::TYPE_CANDIDATE:
             //ret = candidate_train(opt);
