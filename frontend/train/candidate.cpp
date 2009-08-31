@@ -38,6 +38,7 @@
 #include <string>
 
 #include <classias/classias.h>
+#include <classias/classify/linear/multi.h>
 #include <classias/train/lbfgs.h>
 
 #include "option.h"

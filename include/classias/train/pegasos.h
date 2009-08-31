@@ -36,8 +36,6 @@
 #include <iostream>
 
 #include <classias/types.h>
-#include <classias/classify/linear/binary.h>
-#include <classias/classify/linear/multi.h>
 
 namespace classias
 {
@@ -261,7 +259,7 @@ public:
 template <
     class error_tmpl
 >
-class pegasos_binary_base :
+class pegasos_binary :
     public pegasos_base<error_tmpl>
 {
 public:
@@ -274,7 +272,7 @@ public:
     /// A synonym of the base class.
     typedef pegasos_base<error_tmpl> base_class;
     /// A synonym of this class.
-    typedef pegasos_binary_base<error_tmpl> this_class;
+    typedef pegasos_binary<error_tmpl> this_class;
 
 public:
     /**
@@ -390,7 +388,7 @@ protected:
 template <
     class error_tmpl
 >
-class pegasos_multi_base :
+class pegasos_multi :
     public pegasos_base<error_tmpl>
 {
 public:
@@ -403,7 +401,7 @@ public:
     /// A synonym of the base class.
     typedef pegasos_base<error_tmpl> base_class;
     /// A synonym of this class.
-    typedef pegasos_binary_base<error_tmpl> this_class;
+    typedef pegasos_binary<error_tmpl> this_class;
 
 public:
     /**
@@ -548,22 +546,6 @@ protected:
         }
     }
 };
-
-
-/** Pegasos for binary classification with logistic loss. */
-typedef pegasos_binary_base<
-    classify::linear_binary_logistic<weight_vector>
-    > pegasos_logistic_binary;
-
-/** Pegasos for binary classification with hinge loss. */
-typedef pegasos_binary_base<
-    classify::linear_binary_hinge<weight_vector>
-    > pegasos_hinge_binary;
-
-/** Pegasos for multi-class classification with logistic loss. */
-typedef pegasos_multi_base<
-    classify::linear_multi_logistic<weight_vector>
-    > pegasos_logistic_multi;
 
 };
 

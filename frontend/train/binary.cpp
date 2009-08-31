@@ -38,6 +38,7 @@
 #include <string>
 
 #include <classias/classias.h>
+#include <classias/classify/linear/binary.h>
 #include <classias/train/lbfgs.h>
 #include <classias/train/averaged_perceptron.h>
 #include <classias/train/pegasos.h>
@@ -225,7 +226,9 @@ int binary_train(option& opt)
             classias::bdata,
             classias::train::online_scheduler_binary<
                 classias::bdata,
-                classias::train::averaged_perceptron_binary
+                classias::train::averaged_perceptron_binary<
+                    classias::classify::linear_binary<classias::weight_vector>
+                    >
                 >
             >(opt);
     } else if (opt.algorithm == "pegasos.logistic") {
@@ -233,7 +236,9 @@ int binary_train(option& opt)
             classias::bdata,
             classias::train::online_scheduler_binary<
                 classias::bdata,
-                classias::train::pegasos_logistic_binary
+                classias::train::pegasos_binary<
+                    classias::classify::linear_binary_logistic<classias::weight_vector>
+                    >
                 >
             >(opt);
     } else if (opt.algorithm == "pegasos.hinge") {
@@ -241,7 +246,9 @@ int binary_train(option& opt)
             classias::bdata,
             classias::train::online_scheduler_binary<
                 classias::bdata,
-                classias::train::pegasos_hinge_binary
+                classias::train::pegasos_binary<
+                    classias::classify::linear_binary_hinge<classias::weight_vector>
+                    >
                 >
             >(opt);
     } else if (opt.algorithm == "truncated_gradient.logistic") {
@@ -249,7 +256,19 @@ int binary_train(option& opt)
             classias::bdata,
             classias::train::online_scheduler_binary<
                 classias::bdata,
-                classias::train::truncated_gradient_logistic_binary
+                classias::train::truncated_gradient_binary<
+                    classias::classify::linear_binary_logistic<classias::weight_vector>
+                    >
+                >
+            >(opt);
+    } else if (opt.algorithm == "truncated_gradient.hinge") {
+        return train<
+            classias::bdata,
+            classias::train::online_scheduler_binary<
+                classias::bdata,
+                classias::train::truncated_gradient_binary<
+                    classias::classify::linear_binary_hinge<classias::weight_vector>
+                    >
                 >
             >(opt);
     } else {

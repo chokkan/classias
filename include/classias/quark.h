@@ -80,7 +80,7 @@ public:
      * Constructs an exception object.
      *  @param  msg         The error message.
      */
-    quark_error(const std::string& msg)
+    explicit quark_error(const std::string& msg)
         : std::out_of_range(msg)
     {
     }

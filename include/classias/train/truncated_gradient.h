@@ -36,8 +36,6 @@
 #include <iostream>
 
 #include <classias/types.h>
-#include <classias/classify/linear/binary.h>
-#include <classias/classify/linear/multi.h>
 
 namespace classias
 {
@@ -596,18 +594,6 @@ protected:
         }
     }
 };
-
-
-
-/** Truncate gradient for binary classification with logistic loss. */
-typedef truncated_gradient_binary<
-    classify::linear_binary_logistic<weight_vector>
-    > truncated_gradient_logistic_binary;
-
-/** Truncate gradient for multi classification with logistic loss. */
-typedef truncated_gradient_multi<
-    classify::linear_multi_logistic<weight_vector>
-    > truncated_gradient_logistic_multi;
 
 };
 

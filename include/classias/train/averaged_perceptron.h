@@ -36,8 +36,6 @@
 #include <iostream>
 
 #include <classias/types.h>
-#include <classias/classify/linear/binary.h>
-#include <classias/classify/linear/multi.h>
 
 namespace classias
 {
@@ -234,7 +232,7 @@ public:
 template <
     class error_tmpl
 >
-class averaged_perceptron_binary_base :
+class averaged_perceptron_binary :
     public averaged_perceptron_base<error_tmpl>
 {
 public:
@@ -247,7 +245,7 @@ public:
     /// A synonym of the base class.
     typedef averaged_perceptron_base<error_tmpl> base_class;
     /// A synonym of this class.
-    typedef averaged_perceptron_binary_base<error_tmpl> this_class;
+    typedef averaged_perceptron_binary<error_tmpl> this_class;
 
 public:
     /**
@@ -333,7 +331,7 @@ protected:
 template <
     class error_tmpl
 >
-class averaged_perceptron_multi_base :
+class averaged_perceptron_multi :
     public averaged_perceptron_base<error_tmpl>
 {
 public:
@@ -346,7 +344,7 @@ public:
     /// A synonym of the base class.
     typedef averaged_perceptron_base<error_tmpl> base_class;
     /// A synonym of this class.
-    typedef averaged_perceptron_multi_base<error_tmpl> this_class;
+    typedef averaged_perceptron_multi<error_tmpl> this_class;
 
 public:
     /**
@@ -471,16 +469,6 @@ protected:
         }
     }
 };
-
-
-
-typedef averaged_perceptron_binary_base<
-    classify::linear_binary<weight_vector>
-    > averaged_perceptron_binary;
-
-typedef averaged_perceptron_multi_base<
-    classify::linear_multi<weight_vector>
-    > averaged_perceptron_multi;
 
 };
 

@@ -38,6 +38,7 @@
 #include <string>
 
 #include <classias/classias.h>
+#include <classias/classify/linear/multi.h>
 #include <classias/train/lbfgs.h>
 #include <classias/train/averaged_perceptron.h>
 #include <classias/train/pegasos.h>
@@ -259,7 +260,9 @@ int multi_train(option& opt)
                 classias::ndata,
                 classias::train::online_scheduler_multi<
                     classias::ndata,
-                    classias::train::averaged_perceptron_multi
+                    classias::train::averaged_perceptron_multi<
+                        classias::classify::linear_multi<classias::weight_vector>
+                        >
                     >
                 >(opt);
         } else if (opt.type == option::TYPE_MULTI_DENSE) {
@@ -267,7 +270,9 @@ int multi_train(option& opt)
                 classias::mdata,
                 classias::train::online_scheduler_multi<
                     classias::mdata,
-                    classias::train::averaged_perceptron_multi
+                    classias::train::averaged_perceptron_multi<
+                        classias::classify::linear_multi<classias::weight_vector>
+                        >
                     >
                 >(opt);
         }
@@ -277,7 +282,9 @@ int multi_train(option& opt)
                 classias::ndata,
                 classias::train::online_scheduler_multi<
                     classias::ndata,
-                    classias::train::pegasos_logistic_multi
+                    classias::train::pegasos_multi<
+                        classias::classify::linear_multi_logistic<classias::weight_vector>
+                        >
                     >
                 >(opt);
         } else if (opt.type == option::TYPE_MULTI_DENSE) {
@@ -285,7 +292,9 @@ int multi_train(option& opt)
                 classias::mdata,
                 classias::train::online_scheduler_multi<
                     classias::mdata,
-                    classias::train::pegasos_logistic_multi
+                    classias::train::pegasos_multi<
+                        classias::classify::linear_multi_logistic<classias::weight_vector>
+                        >
                     >
                 >(opt);
         }
@@ -295,7 +304,9 @@ int multi_train(option& opt)
                 classias::ndata,
                 classias::train::online_scheduler_multi<
                     classias::ndata,
-                    classias::train::truncated_gradient_logistic_multi
+                    classias::train::truncated_gradient_multi<
+                        classias::classify::linear_multi_logistic<classias::weight_vector>
+                        >
                     >
                 >(opt);
         } else if (opt.type == option::TYPE_MULTI_DENSE) {
@@ -303,7 +314,9 @@ int multi_train(option& opt)
                 classias::mdata,
                 classias::train::online_scheduler_multi<
                     classias::mdata,
-                    classias::train::truncated_gradient_logistic_multi
+                    classias::train::truncated_gradient_multi<
+                        classias::classify::linear_multi_logistic<classias::weight_vector>
+                        >
                     >
                 >(opt);
         }
