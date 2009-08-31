@@ -127,6 +127,10 @@ public:
     typedef attributes_tmpl attributes_type;
     /// The type of an attribute identifier.
     typedef typename attributes_type::identifier_type attribute_type;
+    /// The type of an attribute identifier.
+    typedef typename attributes_type::identifier_type attribute_type;
+    /// The type of an attribute value.
+    typedef typename attributes_type::value_type value_type;
 
 protected:
     /// The candidate index of this instance.
@@ -231,6 +235,10 @@ public:
     typedef typename candidates_type::iterator iterator;
     /// A type providing a read-only random-access iterator for candidates.
     typedef typename candidates_type::const_iterator const_iterator;
+    /// The type of an attribute identifier.
+    typedef typename attributes_type::identifier_type attribute_type;
+    /// The type of an attribute value.
+    typedef typename attributes_type::value_type value_type;
 
 protected:
     /// A container of all candidates associated with the instance.

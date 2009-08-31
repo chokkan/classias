@@ -482,8 +482,13 @@ public:
 
         // Delay application of L1 penalties to the feature weights that
         // are relevant to the current instance.
-        for (int l = 0;l < it->num_candidates(L);++l) {
-            this->apply_penalty(l, fgen, it->begin(), it->end());
+        for (int i = 0;i < it->num_candidates(L);++i) {
+            this->apply_penalty(
+                i,
+                fgen,
+                it->attributes(i).begin(),
+                it->attributes(i).end()
+                );
         }
 
         // Compute the scores for the labels (candidates) in the instance.

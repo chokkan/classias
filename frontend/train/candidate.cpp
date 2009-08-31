@@ -40,6 +40,10 @@
 #include <classias/classias.h>
 #include <classias/classify/linear/multi.h>
 #include <classias/train/lbfgs.h>
+#include <classias/train/averaged_perceptron.h>
+#include <classias/train/pegasos.h>
+#include <classias/train/truncated_gradient.h>
+#include <classias/train/online_scheduler.h>
 
 #include "option.h"
 #include "tokenize.h"
@@ -256,8 +260,37 @@ int candidate_train(option& opt)
             classias::cdata,
             classias::train::lbfgs_logistic_multi<classias::cdata>
         >(opt);
-    } else {
-        throw invalid_algorithm(opt.algorithm);
+    } else if (opt.algorithm == "averaged_perceptron") {
+        return train<
+            classias::cdata,
+            classias::train::online_scheduler_multi<
+                classias::cdata,
+                classias::train::averaged_perceptron_multi<
+                    classias::classify::linear_multi<classias::weight_vector>
+                    >
+                >
+            >(opt);
+    } else if (opt.algorithm == "pegasos.logistic") {
+        return train<
+            classias::cdata,
+            classias::train::online_scheduler_multi<
+                classias::cdata,
+                classias::train::pegasos_multi<
+                    classias::classify::linear_multi_logistic<classias::weight_vector>
+                    >
+                >
+            >(opt);
+    } else if (opt.algorithm == "truncated_gradient.logistic") {
+        return train<
+            classias::cdata,
+            classias::train::online_scheduler_multi<
+                classias::cdata,
+                classias::train::truncated_gradient_multi<
+                    classias::classify::linear_multi_logistic<classias::weight_vector>
+                    >
+                >
+            >(opt);
     }
-    return 0;
+
+    throw invalid_algorithm(opt.algorithm);
 }
