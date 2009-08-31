@@ -38,9 +38,17 @@
 #include <string>
 
 #if defined _MSC_VER
+
+#if defined(HAVE_REGEX)
 #include <regex>
 #define REGEX std::tr1::regex
 #define REGEX_SEARCH std::tr1::regex_search
+
+#else
+#define REGEX std::string
+#define REGEX_SEARCH(x, y)  (1)
+
+#endif
 
 #elif defined __GNUC__
 

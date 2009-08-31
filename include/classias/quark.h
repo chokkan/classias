@@ -36,7 +36,8 @@
 #include <stdexcept>
 #include <vector>
 
-#if defined _MSC_VER
+#if defined(_MSC_VER)
+#if defined(HAVE_UNORDERED_MAP)
 #include <unordered_map>
 #define UNORDERED_MAP   std::tr1::unordered_map
 namespace std {
@@ -50,6 +51,11 @@ namespace std {
         };
     };
 };
+#else
+#include <map>
+#define UNORDERED_MAP   std::map
+
+#endif
 
 #elif defined __GNUC__
 

@@ -123,9 +123,11 @@ public:
         ON_OPTION(SHORTOPT('x') || LONGOPT("cross-validate"))
             cross_validation = true;
 
+#if defined(HAVE_REGEX) || defined(HAVE_BOOST_REGEX_HPP)
         ON_OPTION_WITH_ARG(SHORTOPT('F') || LONGOPT("filter"))
             filter = arg;
             filter_string = arg;
+#endif/*defined(HAVE_REGEX) || defined(HAVE_BOOST_REGEX_HPP)*/
 
         ON_OPTION_WITH_ARG(SHORTOPT('n') || LONGOPT("negative"))
             negative_labels.insert(arg);
@@ -215,7 +217,9 @@ static void usage(std::ostream& os, const char *argv0)
     os << "                        for training" << std::endl;
     os << "  -x, --cross-validate  repeat holdout evaluations for #i in {1, ..., N}" << std::endl;
     os << "                        (N-fold cross validation)" << std::endl;
+#if     defined(HAVE_REGEX) || defined(HAVE_BOOST_REGEX_HPP)
     os << "  -F, --filter=REGEX    filter attributes whose names are matched by REGEX" << std::endl;
+#endif/*defined(HAVE_REGEX) || defined(HAVE_BOOST_REGEX_HPP)*/
     os << "  -n, --negative=LABEL  specify a negative label for computing precision," << std::endl;
     os << "                        recall, and F1 scores" << std::endl;
     os << "  -s, --token-separator=SEP assume SEP character as a token separator:" << std::endl;
