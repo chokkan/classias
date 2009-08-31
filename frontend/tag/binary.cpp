@@ -106,19 +106,17 @@ read_model(
             break;
         }
 
-        tokenizer values(line, '\t');
-        tokenizer::iterator itv = values.begin();
-        if (itv == values.end()) {
+        int pos = line.find('\t');
+        if (pos == line.npos) {
             throw invalid_model("feature weight is missing", line);
         }
 
-        double w = std::atof(itv->c_str());
-        ++itv;
-        if (itv == values.end()) {
+        double w = std::atof(line.c_str());
+        if (++pos == line.size()) {
             throw invalid_model("feature name is missing", line);
         }
 
-        model[*itv] = w;
+        model[line.substr(pos)] = w;
     }
 }
 

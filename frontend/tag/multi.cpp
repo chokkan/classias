@@ -166,11 +166,11 @@ read_model(
         }
 
         double w = std::atof(line.c_str());
-        if (pos == line.size()) {
+        if (++pos == line.size()) {
             throw invalid_model("feature name is missing", line);
         }
 
-        model[line.substr(pos+1)] = w;
+        model[line.substr(pos)] = w;
     }
 }
 
