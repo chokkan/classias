@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
             ret = multi_tag(opt, ifs);
             break;
         case option::TYPE_CANDIDATE:
-            //ret = candidate_train(opt);
+            ret = candidate_tag(opt, ifs);
             break;
         default:
             es << "ERROR: unknown model type" << std::endl;

@@ -179,6 +179,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\candidate.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\defaultmap.h"
 				>
 			</File>

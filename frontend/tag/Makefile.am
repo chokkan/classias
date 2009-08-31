@@ -13,6 +13,7 @@ classias_tag_SOURCES = \
 	option.h \
 	binary.cpp \
 	multi.cpp \
+	candidate.cpp \
 	main.cpp
 
 AM_CXXFLAGS = @CXXFLAGS@
