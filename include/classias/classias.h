@@ -43,6 +43,7 @@ namespace classias
 {
 
 typedef std::vector<double> weight_vector;
+typedef default_vector<double> expandable_weight_vector;
 
 typedef dense_feature_generator_base<int, int, int> dense_feature_generator;
 typedef sparse_feature_generator_base<int, int, int> sparse_feature_generator;

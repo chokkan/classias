@@ -40,10 +40,12 @@
 
 #include "strsplit.h"   // necessary for strsplit() and get_id_value().
 
-typedef classias::auto_extensible_vector<double> weight_vector;
+typedef classias::expandable_weight_vector model_type;
 
+// Define the type of a training algorithm. Change this type to use a
+// different online training algorithm.
 typedef classias::train::pegasos_binary<
-    classias::classify::linear_binary_hinge<weight_vector>
+    classias::classify::linear_binary_hinge<model_type>
     >
     trainer_type;
 
@@ -95,7 +97,7 @@ int main(int argc, char *argv[])
     es << "Loss: " << loss << std::endl;
 
     // Output the model.
-    const weight_vector& w = tr.model();
+    const model_type& w = tr.model();
     for (size_t i = 0;i < w.size();++i) {
         // Feature ID and its weight.
         os << i << '\t' << w[i] << std::endl;

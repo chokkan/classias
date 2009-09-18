@@ -41,6 +41,9 @@
 
 #include "strsplit.h"   // necessary for strsplit() and get_id_value().
 
+// Define the type of a training algorithm. Change this type to use a
+// different training algorithm. See /frontend/train/binary.cpp for the
+// examples of other algorithms.
 typedef classias::train::online_scheduler_binary<
     classias::bdata,
     classias::train::pegasos_binary<
@@ -48,7 +51,6 @@ typedef classias::train::online_scheduler_binary<
         >
     >
     trainer_type;
-
 
 int main(int argc, char *argv[])
 {
@@ -104,7 +106,7 @@ int main(int argc, char *argv[])
 
     // Set some parameters for the training algorithm.
     tr.params().set("c", 1.0);
-    tr.params().set("max_iterations", 10);
+    tr.params().set("max_iterations", 50);
 
     // Start training; progress report will be shown in es (STDERR).
     tr.train(data, es);

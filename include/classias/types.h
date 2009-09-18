@@ -390,17 +390,17 @@ template <
     class type,
     class allocator_type = std::allocator<type>
     >
-class auto_extensible_vector : public std::vector<type, allocator_type>
+class default_vector : public std::vector<type, allocator_type>
 {
 public:
     typedef std::vector<type, allocator_type> base_type;
 
 public:
-    auto_extensible_vector()
+    default_vector()
     {
     }
 
-    virtual ~auto_extensible_vector()
+    virtual ~default_vector()
     {
     }
 
@@ -414,7 +414,7 @@ public:
 
     inline typename base_type::reference operator[](typename base_type::size_type i) const
     {
-        return const_cast<auto_extensible_vector&>(*this).operator[](i);
+        return const_cast<default_vector&>(*this).operator[](i);
     }
 };
 

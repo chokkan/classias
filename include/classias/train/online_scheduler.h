@@ -37,6 +37,7 @@
 #include <ctime>
 #include <iostream>
 #include <iterator>
+#include <vector>
 #include <classias/parameters.h>
 #include <classias/evaluation.h>
 
@@ -95,6 +96,10 @@ protected:
     int m_max_iterations;
     /// The parameter for regularization.
     value_type m_c;
+    /// The period to measure the improvement ratio of loss.
+    int m_period;
+    /// The epsilon for improvement ratio.
+    value_type m_epsilon;
 
 public:
     /**
@@ -126,6 +131,10 @@ public:
             "The maximum number of iterations (epochs).");
         par.init("c", &m_c, 1,
             "Coefficient (C) for regularization.");
+        par.init("period", &m_period, 10,
+            "The period to measure the improvement ratio");
+        par.init("epsilon", &m_epsilon, 1e-6,
+            "The stopping criterion for the improvement ratio");
     }
 
     /**
@@ -179,9 +188,12 @@ public:
         // Initialize the training algorithm.
         m_trainer.start();
 
+        std::vector<value_type> pf(m_period);
+
         // Loop for iterations.
         for (int k = 1;k <= m_max_iterations;++k) {
             value_type loss = 0;
+            value_type improvement = 0;
             clock_t clk = std::clock();
 
             // Send instances to the algorithm.
@@ -202,9 +214,20 @@ public:
                 }
             }
 
+            // Compute the improvement ratio.
+            if (m_period < k) {
+                improvement = (pf[(k-1) % m_period] - loss) / loss;
+            } else {
+                improvement = m_epsilon;
+            }
+            pf[(k-1) % m_period] = loss;
+
             // Report the progress.
             os << "***** Iteration #" << k << " *****" << std::endl;
             os << "Loss: " << loss << std::endl;
+            if (m_period < k) {
+                os << "Improvement ratio: " << improvement << std::endl;
+            }
             m_trainer.report(os);
             os << "Seconds required for this iteration: " <<
                 (std::clock() - clk) / (double)CLOCKS_PER_SEC << std::endl;
@@ -224,6 +247,14 @@ public:
             // Flush the output stream.
             os << std::endl;
             os.flush();
+
+            // Terminate if the stopping criterion is satisfied.
+            if (improvement < m_epsilon) {
+                os << "Terminated with the stopping criterion" << std::endl;
+                os << std::endl;
+                os.flush();
+                break;
+            }
         }
 
         // Finalize the training procedure.
@@ -275,6 +306,10 @@ protected:
     int m_max_iterations;
     /// The parameter for regularization.
     value_type m_c;
+    /// The period to measure the improvement ratio of loss.
+    int m_period;
+    /// The epsilon for improvement ratio.
+    value_type m_epsilon;
 
 public:
     /**
@@ -306,6 +341,10 @@ public:
             "The maximum number of iterations (epochs).");
         par.init("c", &m_c, 1,
             "Coefficient (C) for regularization.");
+        par.init("period", &m_period, 10,
+            "The period to measure the improvement ratio");
+        par.init("epsilon", &m_epsilon, 1e-6,
+            "The stopping criterion for the improvement ratio");
     }
 
     /**
@@ -359,6 +398,8 @@ public:
         // Initialize the training algorithm.
         m_trainer.start();
 
+        std::vector<value_type> pf(m_period);
+
         // Loop for iterations.
         for (int k = 1;k <= m_max_iterations;++k) {
             value_type loss = 0;
@@ -384,9 +425,20 @@ public:
                 }
             }
 
+            // Compute the improvement ratio.
+            if (m_period < k) {
+                improvement = (pf[(k-1) % m_period] - loss) / loss;
+            } else {
+                improvement = m_epsilon;
+            }
+            pf[(k-1) % m_period] = loss;
+
             // Report the progress.
             os << "***** Iteration #" << k << " *****" << std::endl;
             os << "Loss: " << loss << std::endl;
+            if (m_period < k) {
+                os << "Improvement ratio: " << improvement << std::endl;
+            }
             m_trainer.report(os);
             os << "Seconds required for this iteration: " <<
                 (std::clock() - clk) / (double)CLOCKS_PER_SEC << std::endl;
@@ -409,6 +461,14 @@ public:
             // Flush the output stream.
             os << std::endl;
             os.flush();
+
+            // Terminate if the stopping criterion is satisfied.
+            if (improvement < m_epsilon) {
+                os << "Terminated with the stopping criterion" << std::endl;
+                os << std::endl;
+                os.flush();
+                break;
+            }
         }
 
         // Finalize the training procedure.

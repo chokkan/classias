@@ -40,24 +40,35 @@
 #include <classias/classify/linear/binary.h>
 #include "strsplit.h"   // necessary for strsplit() and get_id_value().
 
-typedef classias::auto_extensible_vector<double> model_type;
+
+// The type of a model (an array of feature weights). This type can be
+// std::vector<double>, but we use expandable_weight_vector
+// (default_vector<double>) because it can expand the array with default
+// values (0) automatically when an element out of the range is accessed by
+// operator[]. This behavior is necessary in case the input data contains
+// unknown feature identifiers.
+typedef classias::expandable_weight_vector model_type;
+
+// The type of a classifier.
 typedef classias::classify::linear_binary<model_type> classifier_type;
 
-template <class model_type>
 bool read_model(model_type& model, const char *fname)
 {
+    // Open the model file.
     std::ifstream ifs(fname);
     if (ifs.fail()) {
         return false;
     }
 
     for (;;) {
+        // Read a line.
         std::string line;
         std::getline(ifs, line);
         if (ifs.eof()) {
             break;
         }
         
+        // Split the line with a TAB character.
         int pos = line.find('\t');
         if (pos != line.npos) {
             int fid = std::atoi(line.c_str());
@@ -75,20 +86,24 @@ int main(int argc, char *argv[])
     std::ostream& os = std::cout;
     std::ostream& es = std::cerr;
 
+    // Check if a model file is specified.
     if (argc < 2) {
         es << "USAGE: " << argv[0] << " MODEL" << std::endl;
         es << std::endl;
         return 0;
     }
 
+    // Read a model.
     model_type model;
     if (!read_model(model, argv[1])) {
         es << "ERROR: failed to read the model" << std::endl;
     }
 
-    classias::accuracy acc;
-    classifier_type cla(model);
+    classias::accuracy acc;     // An accuracy counter.
+    classifier_type cla(model); // The classifier.
+
     for (;;) {
+        // Read a line.
         std::string line;
         std::getline(is, line);
         if (is.eof()) {
@@ -101,29 +116,36 @@ int main(int argc, char *argv[])
 
         // The line must have at least a label and a feature.
         if (fields.size() > 2) {
-            bool label = (fields[0] != "-1");
+            // Reset the classifier.
             cla.clear();
 
-            // Loop over the rest of fields.
+            // Loop over the features.
             for (size_t i = 1;i < fields.size();++i) {
                 // Split the field into a feature identifier and value.
                 int fid;
                 double value;
                 get_id_value(fields[i], fid, value, ':');
 
+                // Set the feature weight to the classifier.
                 cla.set(fid, value);
             }
 
-            bool rl = (fields[0] != "-1");
+            // Casting the classifier into bool yields the predicted label.
             bool ml = static_cast<bool>(cla);
-            acc.set(rl == ml);
             os << (ml ? "+1" : "-1") << std::endl;
-            
+
+            // Accumulate the accuracy.
+            if (fields[0] == "+1" || fields[0] == "-1") {
+                bool rl = (fields[0] != "-1");
+                acc.set(rl == ml);
+            }
+
         } else {
             os << std::endl;
         }
     }
 
+    // Output the accuracy to STDERR.
     acc.output(es);
 
     return 0;
