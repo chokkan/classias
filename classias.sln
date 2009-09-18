@@ -16,6 +16,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sample programs", "Sample p
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "train_binary_online", "sample\train_binary_online.vcproj", "{B65A832E-4C70-4D83-9715-9B8F1FE83069}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tag_binary", "sample\tag_binary.vcproj", "{7375C155-D969-452E-B455-2285A1949641}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -42,6 +44,10 @@ Global
 		{B65A832E-4C70-4D83-9715-9B8F1FE83069}.Debug|Win32.Build.0 = Debug|Win32
 		{B65A832E-4C70-4D83-9715-9B8F1FE83069}.Release|Win32.ActiveCfg = Release|Win32
 		{B65A832E-4C70-4D83-9715-9B8F1FE83069}.Release|Win32.Build.0 = Release|Win32
+		{7375C155-D969-452E-B455-2285A1949641}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7375C155-D969-452E-B455-2285A1949641}.Debug|Win32.Build.0 = Debug|Win32
+		{7375C155-D969-452E-B455-2285A1949641}.Release|Win32.ActiveCfg = Release|Win32
+		{7375C155-D969-452E-B455-2285A1949641}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -49,5 +55,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{58590B6E-64F5-4BC5-9F3D-27B58197E335} = {514693AF-7849-4029-8FD6-40EC0EB6F317}
 		{B65A832E-4C70-4D83-9715-9B8F1FE83069} = {514693AF-7849-4029-8FD6-40EC0EB6F317}
+		{7375C155-D969-452E-B455-2285A1949641} = {514693AF-7849-4029-8FD6-40EC0EB6F317}
 	EndGlobalSection
 EndGlobal

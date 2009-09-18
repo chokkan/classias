@@ -418,7 +418,6 @@ public:
     }
 };
 
-
 };
 
 #endif/*__CLASSIAS_TYPES_H__*/
