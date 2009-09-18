@@ -403,6 +403,7 @@ public:
         // Loop for iterations.
         for (int k = 1;k <= m_max_iterations;++k) {
             value_type loss = 0;
+            value_type improvement = 0;
             clock_t clk = std::clock();
 
             // Send instances to the algorithm.
