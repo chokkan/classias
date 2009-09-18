@@ -37,6 +37,7 @@
 #include <ctime>
 #include <iostream>
 #include <iterator>
+#include <classias/parameters.h>
 #include <classias/evaluation.h>
 
 namespace classias {
@@ -254,7 +255,6 @@ public:
     typedef typename data_type::instance_type instance_type;
     /// The type representing an attribute in an instance.
     typedef typename data_type::attribute_type attribute_type;
-    typedef typename data_type::label_type label_type;
     /// The type representing a value.
     typedef typename instance_type::value_type value_type;
     /// The type implementing an error function.

@@ -36,6 +36,7 @@
 #include <iostream>
 
 #include <classias/types.h>
+#include <classias/parameters.h>
 
 namespace classias
 {

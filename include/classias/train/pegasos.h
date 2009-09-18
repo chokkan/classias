@@ -36,6 +36,7 @@
 #include <iostream>
 
 #include <classias/types.h>
+#include <classias/parameters.h>
 
 namespace classias
 {
@@ -45,6 +46,12 @@ namespace train
 
 /**
  * The base class for Primal Estimated sub-GrAdient SOlver (Pegasos).
+ *  The detail of this algorithm is described in:
+ *
+ *  -   Shai Shalev-Shwartz, Yoram Singer, and Nathan Srebro.
+ *      Pegasos: Primal Estimated sub-GrAdient SOlver for SVM.
+ *      In Proc. of ICML 2007, pp 807-814, 2007.
+ *
  *  This class implements internal variables, operations, and interface
  *  that are common for training a binary/multi classification.
  *
@@ -300,7 +307,8 @@ public:
         // Compute the error for the instance.
         value_type nlogp = 0.;
         error_type cls(model);
-        cls.inner_product_scaled(it->begin(), it->end(), scale);
+        cls.inner_product(it->begin(), it->end());
+        cls.scale(scale);
         value_type err = cls.error(it->get_label(), nlogp);
         value_type loss = (it->get_weight() * nlogp);
 
@@ -434,14 +442,14 @@ public:
         error_type cls(model);
         cls.resize(it->num_candidates(L));
         for (int i = 0;i < it->num_candidates(L);++i) {
-            cls.inner_product_scaled(
+            cls.inner_product(
                 i,
                 fgen,
                 it->attributes(i).begin(),
                 it->attributes(i).end(),
-                i,
-                scale
+                i
                 );
+            cls.scale(i, scale);
         }
         cls.finalize();
 

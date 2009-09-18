@@ -178,7 +178,7 @@ public:
     }
 
     /**
-     * Returns the unique identifier for an item.
+     * Assigns the unique identifier for an item.
      *  If the item is unknown, this function assigns a new unique identifier
      *  to the item and return it.
      *  @param  x               The item.
@@ -190,9 +190,10 @@ public:
     }
 
     /**
-     * Returns the unique identifier for an item.
+     * Assigns a unique identifier for a new item.
      *  If the item is unknown, this function assigns a new unique identifier
-     *  to the item and return it.
+     *  to the item and return it. If the item is known, this function returns
+     *  the existing identifier that was associated with the item.
      *  @param  x               The item.
      *  @return value_type      The unique identifier.
      */
@@ -312,9 +313,10 @@ public:
     }
 
     /**
-     * Returns the unique identifier for a pair of items.
+     * Assigns the unique identifier for a pair of items.
      *  If the pair is unknown, this function assigns a new unique identifier
-     *  to the pair and return it.
+     *  to the pair and return it.  If the item is known, this function returns
+     *  the existing identifier that was associated with the item.
      *  @param  x               The item #0.
      *  @param  y               The item #1.
      *  @return value_type      The unique identifier.
@@ -325,9 +327,10 @@ public:
     }
 
     /**
-     * Returns the unique identifier for a pair of items.
+     * Assigns the unique identifier for a pair of items.
      *  If the pair is unknown, this function assigns a new unique identifier
-     *  to the pair and return it.
+     *  to the pair and return it.  If the item is known, this function returns
+     *  the existing identifier that was associated with the item.
      *  @param  x               The item #0.
      *  @param  y               The item #1.
      *  @return value_type      The unique identifier.

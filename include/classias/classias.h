@@ -33,6 +33,7 @@
 #ifndef __CLASSIAS_CLASSIAS_H__
 #define __CLASSIAS_CLASSIAS_H__
 
+#include <vector>
 #include "types.h"
 #include "feature_generator.h"
 #include "instance.h"
@@ -41,6 +42,8 @@
 namespace classias
 {
 
+typedef std::vector<double> weight_vector;
+
 typedef dense_feature_generator_base<int, int, int> dense_feature_generator;
 typedef sparse_feature_generator_base<int, int, int> sparse_feature_generator;
 typedef thru_feature_generator_base<int, int, int> thru_feature_generator;
@@ -48,17 +51,80 @@ typedef thru_feature_generator_base<int, int, int> thru_feature_generator;
 typedef sparse_vector_base<int, double> sparse_attributes;
 
 typedef binary_instance_base<sparse_attributes> binstance;
-typedef binary_data_base<binstance, quark> bdata;
+typedef binary_data_base<binstance> bdata;
+typedef binary_data_with_quark_base<binstance, quark> bsdata;
 
 typedef candidate_instance_base<sparse_attributes> cinstance;
-typedef candidate_data_base<cinstance, quark, quark, thru_feature_generator> cdata;
+typedef candidate_data_base<cinstance, thru_feature_generator> cdata;
+typedef candidate_data_with_quark_base<cinstance, quark, quark, thru_feature_generator> csdata;
 
 typedef multi_instance_base<sparse_attributes> minstance;
-typedef multi_data_base<minstance, quark, quark, dense_feature_generator> mdata;
+typedef multi_data_base<minstance, dense_feature_generator> mdata;
+typedef multi_data_with_quark_base<minstance, quark, quark, dense_feature_generator> msdata;
 
 typedef multi_instance_base<sparse_attributes> ninstance;
-typedef multi_data_base<ninstance, quark, quark, sparse_feature_generator> ndata;
+typedef multi_data_base<ninstance, sparse_feature_generator> ndata;
+typedef multi_data_with_quark_base<ninstance, quark, quark, sparse_feature_generator> nsdata;
 
 };
+
+/**
+@mainpage Classias: a template class library for classifiers
+
+@section class_ref Class reference
+- Instance types
+    - Binary instance:
+        \ref classias::binary_instance_base
+    - Multi-class instance:
+        \ref classias::multi_instance_base
+    - Candidate instance:
+        \ref classias::candidate_instance_base
+- Data set
+    - Binary data set:
+        \ref classias::binary_data_base
+    - Binary data set with a quark for attributes:
+        \ref classias::binary_data_with_quark_base
+    - Multi-class data set:
+        \ref classias::multi_data_base
+    - Multi-class data set with quarks for attributes and labels:
+        \ref classias::multi_data_with_quark_base
+    - Candidate data set:
+        \ref classias::candidate_data_base
+    - Candidate data set with quarks for attributes and labels:
+        \ref classias::candidate_data_with_quark_base
+- Feature generators
+    - Dummy feature generator for candidate instances:
+        \ref classias::thru_feature_generator_base
+    - Dense feature generator:
+        \ref classias::dense_feature_generator_base
+    - Sparse feature generator:
+        \ref classias::sparse_feature_generator_base
+- Classifiers and error functions
+    - Linear binary classifier:
+        \ref classias::classify::linear_binary
+    - Linear binary classifier with logistic-sigmoid loss function:
+        \ref classias::classify::linear_binary_logistic
+    - Linear binary classifier with hinge loss function:
+        \ref classias::classify::linear_binary_hinge
+    - Linear multi classifier:
+        \ref classias::classify::linear_multi
+    - Linear multi classifier with soft-max function:
+        \ref classias::classify::linear_binary_logistic
+- Batch training algorithms
+- Online training algorithms
+- Basic data types
+    - Instance weight:
+        \ref classias::weight_base
+    - Instance group number:
+        \ref classias::group_base
+    - Sparse vector:
+        \ref classias::sparse_vector_base
+    - Quark with one item:
+        \ref classias::quark_base
+    - Quark with two items:
+        \ref classias::quark2_base
+    - Quark exception:
+        \ref classias::quark_error
+**/
 
 #endif/*__CLASSIAS_CLASSIAS_H__*/

@@ -258,7 +258,7 @@ public:
 
 
 /**
- * Sparse vector.
+ * A template class for sparse vectors.
  *
  *  This class implements a sparse vector as a linear array of elements, pairs
  *  of identifiers and values.
@@ -374,7 +374,7 @@ public:
     }
 
     /**
-     * Adds an element (name, value) to the end of the vector.
+     * Appends an element (name, value) to the end of the vector.
      *  @param  id          The element identifier.
      *  @param  value       The element value.
      */
@@ -384,10 +384,40 @@ public:
     }
 };
 
-/**
- * A fixed-size vector of feature weights.
- */
-typedef std::vector<double> weight_vector;
+
+
+template <
+    class type,
+    class allocator_type = std::allocator<type>
+    >
+class auto_extensible_vector : public std::vector<type, allocator_type>
+{
+public:
+    typedef std::vector<type, allocator_type> base_type;
+
+public:
+    auto_extensible_vector()
+    {
+    }
+
+    virtual ~auto_extensible_vector()
+    {
+    }
+
+    inline typename base_type::reference operator[](typename base_type::size_type i)
+    {
+        if (base_type::size() <= i) {
+            base_type::resize(i+1);
+        }
+        return base_type::operator[](i);
+    }
+
+    inline typename base_type::reference operator[](typename base_type::size_type i) const
+    {
+        return const_cast<auto_extensible_vector&>(*this).operator[](i);
+    }
+};
+
 
 };
 

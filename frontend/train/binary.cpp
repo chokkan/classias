@@ -218,14 +218,14 @@ int binary_train(option& opt)
     // Branches for training algorithms.
     if (opt.algorithm == "lbfgs.logistic") {
         return train<
-            classias::bdata,
-            classias::train::lbfgs_logistic_binary<classias::bdata>
+            classias::bsdata,
+            classias::train::lbfgs_logistic_binary<classias::bsdata>
         >(opt);
     } else if (opt.algorithm == "averaged_perceptron") {
         return train<
-            classias::bdata,
+            classias::bsdata,
             classias::train::online_scheduler_binary<
-                classias::bdata,
+                classias::bsdata,
                 classias::train::averaged_perceptron_binary<
                     classias::classify::linear_binary<classias::weight_vector>
                     >
@@ -233,9 +233,9 @@ int binary_train(option& opt)
             >(opt);
     } else if (opt.algorithm == "pegasos.logistic") {
         return train<
-            classias::bdata,
+            classias::bsdata,
             classias::train::online_scheduler_binary<
-                classias::bdata,
+                classias::bsdata,
                 classias::train::pegasos_binary<
                     classias::classify::linear_binary_logistic<classias::weight_vector>
                     >
@@ -243,9 +243,9 @@ int binary_train(option& opt)
             >(opt);
     } else if (opt.algorithm == "pegasos.hinge") {
         return train<
-            classias::bdata,
+            classias::bsdata,
             classias::train::online_scheduler_binary<
-                classias::bdata,
+                classias::bsdata,
                 classias::train::pegasos_binary<
                     classias::classify::linear_binary_hinge<classias::weight_vector>
                     >
@@ -253,9 +253,9 @@ int binary_train(option& opt)
             >(opt);
     } else if (opt.algorithm == "truncated_gradient.logistic") {
         return train<
-            classias::bdata,
+            classias::bsdata,
             classias::train::online_scheduler_binary<
-                classias::bdata,
+                classias::bsdata,
                 classias::train::truncated_gradient_binary<
                     classias::classify::linear_binary_logistic<classias::weight_vector>
                     >
@@ -263,9 +263,9 @@ int binary_train(option& opt)
             >(opt);
     } else if (opt.algorithm == "truncated_gradient.hinge") {
         return train<
-            classias::bdata,
+            classias::bsdata,
             classias::train::online_scheduler_binary<
-                classias::bdata,
+                classias::bsdata,
                 classias::train::truncated_gradient_binary<
                     classias::classify::linear_binary_hinge<classias::weight_vector>
                     >

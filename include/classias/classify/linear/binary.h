@@ -42,9 +42,25 @@ namespace classify
 {
 
 /**
- * Linear binary classifier.
+ * A template class for linear binary classifier.
+ *
+ *  This template class implements a binary classifier with a linear
+ *  discriminant model. The types of features and models are customizable.
+ *  Any type that yields a feature weight with operator \c [] is acceptable
+ *  for a model. The type of features must be compatible with the argument
+ *  type of the operator \c [] of the model. The typical configurations are:
+ *      - a model is implemented by \c std::vector<double>, and features are
+ *        integers (indices to the model array).
+ *      - a model is implemented by \c std::map<std::string, double>, and
+ *        features are strings.
+ *  
+ *  The former configuration is preferable for faster training. The latter
+ *  may be useful for implementing a classifier with string features.
  *
  *  @param  model_tmpl      The type of a model (container of feature weights).
+ *                          Any type that yields a feature weight with
+ *                          operator \c [] is usable (e.g., arrays,
+ *                          \c std::vector, \c std::map).
  */
 template <class model_tmpl>
 class linear_binary
@@ -81,6 +97,7 @@ public:
 
     /**
      * Resets the classification result.
+     *  Call this function before sending a next classification instance.
      */
     inline void clear()
     {
@@ -89,7 +106,8 @@ public:
 
     /**
      * Returns the binary label of the classification result.
-     *  @return bool        The binary label.
+     *  @return bool        The binary label: \c true for positive, and
+     *                      \c false for negative.
      */
     inline operator bool() const
     {
@@ -98,7 +116,8 @@ public:
 
     /**
      * Returns the score of the classification result.
-     *  @return value_type  The score.
+     *  @return value_type  The score, which is equivalent to the inner
+     *                      product of the feature vector with the model.
      */
     inline value_type score() const
     {
@@ -116,6 +135,9 @@ public:
 
     /**
      * Sets an attribute and value for the classification.
+     *
+     *  This function adds (model[a] * value) to the score.
+     *  
      *  @param  a           The attribute identifier.
      *  @param  value       The attribute value.
      */
@@ -127,6 +149,12 @@ public:
 
     /**
      * Computes the inner product between a feature vector and the model.
+     *
+     *  A feature vector is represented by a range of iterators [first, last),
+     *  whose element \c *it is compatible with \c std::pair. The member
+     *  \c it->first presents a feature identifier, and the member
+     *  \c it->second presents the feature value.
+     *  
      *  @param  first       The iterator for the first element of attributes.
      *  @param  last        The iterator for the element just beyond the
      *                      last element of attributes.
@@ -138,21 +166,6 @@ public:
         for (iterator_type it = first;it != last;++it) {
             this->set(it->first, it->second);
         }
-    }
-
-    /**
-     * Computes the inner product between a feature vector and the model.
-     *  @param  first       The iterator for the first element of attributes.
-     *  @param  last        The iterator for the element just beyond the
-     *                      last element of attributes.
-     *  @param  scale       The scaling factor to be applied to the score.
-     */
-    template <class iterator_type>
-    inline void inner_product_scaled(
-        iterator_type first, iterator_type last, const value_type& scale)
-    {
-        this->inner_product(first, last);
-        this->scale(scale);
     }
 
     /**
@@ -169,9 +182,15 @@ public:
 
 
 /**
- * Linear binary classifier with logistic-sigmoid error function.
+ * A template class for linear binary classifiers with logistic-sigmoid
+ * error function.
  *
- *  @param  model_tmpl      The type of a model (array of feature weights).
+ *  This template class implements a loss function for training algorithms.
+ *
+ *  @param  model_tmpl      The type of a model (container of feature weights).
+ *                          Any type that yields a feature weight with
+ *                          operator \c [] is usable (e.g., arrays,
+ *                          \c std::vector, \c std::map).
  */
 template <class model_tmpl>
 class linear_binary_logistic : public linear_binary<model_tmpl>
@@ -202,7 +221,7 @@ public:
     }
 
     /**
-     * Computes the probability for the instance being positive.
+     * Computes the probability of the instance being positive.
      *  @return value_type  The probability.
      */
     inline value_type prob() const
@@ -234,7 +253,7 @@ public:
     }
 
     /**
-     * Computes the error of the classification result.
+     * Computes the error and loss of the classification result.
      *  @param  b           The reference label for this instance.
      *  @param  loss        The negative of the log of the probability of the
      *                      instance being classified to the reference label.
@@ -271,9 +290,14 @@ public:
 
 
 /**
- * Linear binary classifier with hinge error function.
+ * A template class for linear binary classifiers with hinge error function.
  *
- *  @param  model_tmpl      The type of a model (array of feature weights).
+ *  This template class implements a loss function for training algorithms.
+ *
+ *  @param  model_tmpl      The type of a model (container of feature weights).
+ *                          Any type that yields a feature weight with
+ *                          operator \c [] is usable (e.g., arrays,
+ *                          \c std::vector, \c std::map).
  */
 template <class model_tmpl>
 class linear_binary_hinge : public linear_binary<model_tmpl>
@@ -315,10 +339,9 @@ public:
     }
 
     /**
-     * Computes the error of the classification result.
+     * Computes the error and loss of the classification result.
      *  @param  b           The reference label for this instance.
-     *  @param  loss        The negative of the log of the probability of the
-     *                      instance being classified to the reference label.
+     *  @param  loss        The loss.
      *  @return value_type  The error.
      */
     inline value_type error(bool b, value_type& loss) const

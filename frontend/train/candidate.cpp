@@ -257,14 +257,14 @@ int candidate_train(option& opt)
     // Branches for training algorithms.
     if (opt.algorithm == "lbfgs.logistic") {
         return train<
-            classias::cdata,
-            classias::train::lbfgs_logistic_multi<classias::cdata>
+            classias::csdata,
+            classias::train::lbfgs_logistic_multi<classias::csdata>
         >(opt);
     } else if (opt.algorithm == "averaged_perceptron") {
         return train<
-            classias::cdata,
+            classias::csdata,
             classias::train::online_scheduler_multi<
-                classias::cdata,
+                classias::csdata,
                 classias::train::averaged_perceptron_multi<
                     classias::classify::linear_multi<classias::weight_vector>
                     >
@@ -272,9 +272,9 @@ int candidate_train(option& opt)
             >(opt);
     } else if (opt.algorithm == "pegasos.logistic") {
         return train<
-            classias::cdata,
+            classias::csdata,
             classias::train::online_scheduler_multi<
-                classias::cdata,
+                classias::csdata,
                 classias::train::pegasos_multi<
                     classias::classify::linear_multi_logistic<classias::weight_vector>
                     >
@@ -282,9 +282,9 @@ int candidate_train(option& opt)
             >(opt);
     } else if (opt.algorithm == "truncated_gradient.logistic") {
         return train<
-            classias::cdata,
+            classias::csdata,
             classias::train::online_scheduler_multi<
-                classias::cdata,
+                classias::csdata,
                 classias::train::truncated_gradient_multi<
                     classias::classify::linear_multi_logistic<classias::weight_vector>
                     >

@@ -245,21 +245,21 @@ int multi_train(option& opt)
     if (opt.algorithm == "lbfgs.logistic") {
         if (opt.type == option::TYPE_MULTI_SPARSE) {
             return train<
-                classias::ndata,
-                classias::train::lbfgs_logistic_multi<classias::ndata>
+                classias::nsdata,
+                classias::train::lbfgs_logistic_multi<classias::nsdata>
             >(opt);
         } else if (opt.type == option::TYPE_MULTI_DENSE) {
             return train<
-                classias::mdata,
-                classias::train::lbfgs_logistic_multi<classias::mdata>
+                classias::msdata,
+                classias::train::lbfgs_logistic_multi<classias::msdata>
             >(opt);
         }
     } else if (opt.algorithm == "averaged_perceptron") {
         if (opt.type == option::TYPE_MULTI_SPARSE) {
             return train<
-                classias::ndata,
+                classias::nsdata,
                 classias::train::online_scheduler_multi<
-                    classias::ndata,
+                    classias::nsdata,
                     classias::train::averaged_perceptron_multi<
                         classias::classify::linear_multi<classias::weight_vector>
                         >
@@ -267,9 +267,9 @@ int multi_train(option& opt)
                 >(opt);
         } else if (opt.type == option::TYPE_MULTI_DENSE) {
             return train<
-                classias::mdata,
+                classias::msdata,
                 classias::train::online_scheduler_multi<
-                    classias::mdata,
+                    classias::msdata,
                     classias::train::averaged_perceptron_multi<
                         classias::classify::linear_multi<classias::weight_vector>
                         >
@@ -279,9 +279,9 @@ int multi_train(option& opt)
     } else if (opt.algorithm == "pegasos.logistic") {
         if (opt.type == option::TYPE_MULTI_SPARSE) {
             return train<
-                classias::ndata,
+                classias::nsdata,
                 classias::train::online_scheduler_multi<
-                    classias::ndata,
+                    classias::nsdata,
                     classias::train::pegasos_multi<
                         classias::classify::linear_multi_logistic<classias::weight_vector>
                         >
@@ -289,9 +289,9 @@ int multi_train(option& opt)
                 >(opt);
         } else if (opt.type == option::TYPE_MULTI_DENSE) {
             return train<
-                classias::mdata,
+                classias::msdata,
                 classias::train::online_scheduler_multi<
-                    classias::mdata,
+                    classias::msdata,
                     classias::train::pegasos_multi<
                         classias::classify::linear_multi_logistic<classias::weight_vector>
                         >
@@ -301,9 +301,9 @@ int multi_train(option& opt)
     } else if (opt.algorithm == "truncated_gradient.logistic") {
         if (opt.type == option::TYPE_MULTI_SPARSE) {
             return train<
-                classias::ndata,
+                classias::nsdata,
                 classias::train::online_scheduler_multi<
-                    classias::ndata,
+                    classias::nsdata,
                     classias::train::truncated_gradient_multi<
                         classias::classify::linear_multi_logistic<classias::weight_vector>
                         >
@@ -311,9 +311,9 @@ int multi_train(option& opt)
                 >(opt);
         } else if (opt.type == option::TYPE_MULTI_DENSE) {
             return train<
-                classias::mdata,
+                classias::msdata,
                 classias::train::online_scheduler_multi<
-                    classias::mdata,
+                    classias::msdata,
                     classias::train::truncated_gradient_multi<
                         classias::classify::linear_multi_logistic<classias::weight_vector>
                         >

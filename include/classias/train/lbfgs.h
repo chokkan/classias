@@ -558,7 +558,6 @@ protected:
     typedef typename data_type::feature_generator_type feature_generator_type;
     /// A type representing a candidate for an instance.
     typedef typename data_type::attribute_type attribute_type;
-    typedef typename data_type::label_type label_type;
     /// The type of a classifier.
     typedef classify::linear_multi_logistic<model_type> error_type;
 

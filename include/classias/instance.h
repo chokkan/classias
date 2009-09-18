@@ -34,32 +34,46 @@
 #define __CLASSIAS_INSTANCE_H__
 
 #include <vector>
-
+#include "types.h"
 
 
 namespace classias
 {
 
 /**
- * Binary instance.
+ * A template class for binary instances.
  *
- *  This class implements an instance for binary classification.
+ *  This class implements an instance for binary classification. An instance
+ *  for binary classification consists of a feature vector (implemented by
+ *  features_tmpl) and a binary label (implemented in this class). In addition,
+ *  an instance class exposes the interfaces for instance weighting
+ *  (implemented by weight_tmpl) and instance group numbers (implemented by
+ *  group_tmpl).
  *
- *  @param  features_tmpl   The type of feature (=attribute) vector.
- *  @param  weight_base     The base class implementing instance weighting.
- *  @param  group_base      The base class managing group numbers.
+ *  @param  features_tmpl   The type of a feature (=attribute) vector.
+ *  @param  weight_tmpl     The base class implementing instance weighting.
+ *                          By default, this class uses weight_base.
+ *  @param  group_tmpl      The base class implementing group numbers.
+ *                          By default, this class uses group_base.
+ *  @see    sparse_vector_base, weight_base, group_base.
  */
 template <
-    class features_tmpl
+    class features_tmpl,
+    class weight_tmpl = weight_base,
+    class group_tmpl = group_base
 >
 class binary_instance_base :
     public features_tmpl,
-    public weight_base,
-    public group_base
+    public weight_tmpl,
+    public group_tmpl
 {
 public:
     /// The type of a feature vector.
     typedef features_tmpl features_type;
+    /// The type of a weight interface.
+    typedef weight_tmpl weight_type;
+    /// The type of a group instance.
+    typedef group_tmpl group_type;
     /// The type of an attribute identifier.
     typedef typename features_type::identifier_type attribute_type;
     /// The type of an attribute value.
@@ -85,8 +99,8 @@ public:
     }
 
     /**
-     * Sets the label.
-     *  @param  l           The label.
+     * Sets the boolean label of the instance.
+     *  @param  l           The boolean label.
      */
     inline void set_label(bool l)
     {
@@ -94,8 +108,8 @@ public:
     }
 
     /**
-     * Gets the label.
-     *  @return bool        The label of this instance.
+     * Gets the boolean label of the instance.
+     *  @return bool        The boolean label of this instance.
      */
     inline bool get_label() const
     {
@@ -106,21 +120,31 @@ public:
 
 
 /**
- * Multi-class instance.
+ * A template class for multi-class instances.
  *
- *  This class implements an instance for multi-class classification.
+ *  This class implements an instance for multi-class classification. An
+ *  instance for multi-class classification consists of an attribute vector
+ *  (implemented by attributes_tmpl) and a label index (implemented in this
+ *  class). In addition, an instance class exposes the interfaces for instance
+ *  weighting (implemented by weight_tmpl) and instance group numbers
+ *  (implemented by group_tmpl).
  *
- *  @param  attributes_tmpl The type of attribute vector.
- *  @param  weight_base     The base class implementing instance weighting.
- *  @param  group_base      The base class managing group numbers.
+ *  @param  attributes_tmpl The type of an attribute vector.
+ *  @param  weight_tmpl     The base class implementing instance weighting.
+ *                          By default, this class uses weight_base.
+ *  @param  group_tmpl      The base class implementing group numbers.
+ *                          By default, this class uses group_base.
+ *  @see    sparse_vector_base, weight_base, group_base.
  */
 template <
-    class attributes_tmpl
+    class attributes_tmpl,
+    class weight_tmpl = weight_base,
+    class group_tmpl = group_base
 >
 class multi_instance_base :
     public attributes_tmpl,
-    public group_base,
-    public weight_base
+    public weight_tmpl,
+    public group_tmpl
 {
 public:
     /// The type of an attribute vector.
@@ -171,10 +195,17 @@ public:
 
     /**
      * Returns the number of possible candidate labels that can be assigned.
+     *  In multi-class classification, the number of possible labels does not
+     *  depend on each instance but only on the total number of labels that
+     *  is global to the data set. Thus, this function is meaningless in terms
+     *  of the functionality, but necessary for the compatibility with
+     *  candidate instances (candidate_instance_base), which have variable
+     *  numbers of candidates.
      *  @param  L           The total number of labels in the dataset.
      *  @return int         The number of possible candidate labels for this
      *                      instance. The return value is always identical to
      *                      L for multi-class instances.
+     *  @see    candidate_instance_base
      */
     inline int num_candidates(const int L) const
     {
@@ -209,23 +240,36 @@ public:
 
 
 /**
- * Candidate instance.
+ * A template class for candidate instances.
  *
- *  This class implements an instance for candidate classification.
- *  @param  candidate_tmpl  The type of a candidate.
+ *  This class implements an instance for candidate classification. An
+ *  instance for candidate classification consists of multiple candidates
+ *  each of which consists of a feature vector (implemented by
+ *  attributes_tmpl). The true candidate is specified by a candidate index
+ *  (implemented in this class). In addition, an instance class exposes the
+ *  interfaces for instance weighting (implemented by weight_tmpl) and
+ *  instance group numbers (implemented by group_tmpl).
+ *
+ *  @param  attributes_tmpl The type of an attribute vector.
+ *  @param  weight_tmpl     The base class implementing instance weighting.
+ *                          By default, this class uses weight_base.
+ *  @param  group_tmpl      The base class implementing group numbers.
+ *                          By default, this class uses group_base.
+ *  @see    sparse_vector_base, weight_base, group_base.
  */
 template <
-    class attributes_tmpl
+    class attributes_tmpl,
+    class weight_tmpl = weight_base,
+    class group_tmpl = group_base
 >
 class candidate_instance_base :
     public weight_base,
     public group_base
-
 {
 public:
     /// A type representing an attribute vector.
     typedef attributes_tmpl attributes_type;
-    /// A type representing a candidate (equivalent to attributes_type).
+    /// A type representing a candidate (a synonym of attributes_type).
     typedef attributes_type candidate_type;
     /// A type providing a container of all candidates.
     typedef std::vector<candidate_type> candidates_type;
@@ -289,26 +333,6 @@ public:
     }
 
     /**
-     * Returns a read/write reference to a candidate.
-     *  @param  i               The index number for a candidate.
-     *  @retval candidate_type& Reference to the candidate.
-     */
-    inline candidate_type& operator[](size_type i)
-    {
-        return candidates[i];
-    }
-
-    /**
-     * Returns a read-only reference to a candidate.
-     *  @param  i                       The index number for a candidate.
-     *  @retval const candidate_type&   Reference to the candidate.
-     */
-    inline const candidate_type& operator[](size_type i) const
-    {
-        return candidates[i];
-    }
-
-    /**
      * Returns a random-access iterator to the first candidate.
      *  @retval iterator    A random-access iterator (for read/write)
      *                      addressing the first candidate or to the location
@@ -361,7 +385,7 @@ public:
 
     /**
      * Creates a new candidate.
-     *  @retval candidate_type& The reference to the new candidate.
+     *  @retval attributes_type&    The reference to the new candidate.
      */
     inline candidate_type& new_element()
     {
@@ -405,9 +429,9 @@ public:
      *  @return const attributes_type&  The reference to the attribute vector
      *                                  associated for the candidate #l.
      */
-    inline const attributes_type& attributes(int l) const
+    inline const candidate_type& attributes(int l) const
     {
-        return this->operator[](l);
+        return this->candidates[l];
     }
 
     /**
@@ -417,9 +441,9 @@ public:
      *  @return attributes_type&        The reference to the attribute vector
      *                                  associated for the candidate #l.
      */
-    inline attributes_type& attributes(int l)
+    inline candidate_type& attributes(int l)
     {
-        return this->operator[](l);
+        return this->candidates[l];
     }
 };
 

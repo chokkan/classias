@@ -42,9 +42,28 @@ namespace classify
 {
 
 /**
- * Linear multi-class classifier.
+ * A template class for linear multi-class classifiers.
  *
- *  @param  model_tmpl      The type of a model (array of feature weights).
+ *  This template class implements a multi classifier with a linear
+ *  discriminant model. The types of features, feature generators, and models
+ *  are customizable. Any type that yields a feature weight with operator
+ *  \c [] is acceptable for a model. A feature generator must convert a pair
+ *  of an attribute and a label into a feature identifier that is compatible
+ *  with the argument type of the operator \c [] of the model.
+ *
+ *  An instance is designed to have multiple candidates, and the candidate
+ *  that yields the highest score is chosen as a classification result. The
+ *  number of candidates must be set by resize() before computing candidate
+ *  scores. Call set(), inner_product(), or scale() functions to compute the
+ *  score of a candidate. After computing the score of all candidates, call
+ *  finalize() function to determine the candidate with the highest score.
+ *
+ *  @param  model_tmpl      The type of a model (container of feature weights).
+ *                          Any type that yields a feature weight with
+ *                          operator \c [] is usable (e.g., arrays,
+ *                          \c std::vector, \c std::map).
+ *  @see    thru_feature_generator_base, dense_feature_generator_base,
+ *          sparse_feature_generator_base.
  */
 template <class model_tmpl>
 class linear_multi
@@ -86,6 +105,7 @@ public:
 
     /**
      * Resets the classification result.
+     *  Call this function before sending a next classification instance.
      */
     inline void clear()
     {
@@ -96,7 +116,8 @@ public:
     }
 
     /**
-     * Reserves the working space for n candidates.
+     * Reserves the working space for storing n candidates.
+     *  Call this function to allocate a working space for n candidates.
      *  @param  n           The number of candidates.
      */
     inline void resize(int n)
@@ -116,7 +137,9 @@ public:
     /**
      * Returns the argmax index.
      *  @return int         The index of the candidate that yields the
-     *                      highest score.
+     *                      highest score. Call finalize() before using this
+     *                      function.
+     *  @see    finalize()
      */
     inline int argmax() const
     {
@@ -134,7 +157,7 @@ public:
     }
 
     /**
-     * Applies a scaling factor to the score.
+     * Applies a scaling factor to a score.
      *  @param  i           The index for the candidate.
      *  @param  scale       The scaling factor.
      */
@@ -145,6 +168,11 @@ public:
 
     /**
      * Sets an attribute for a candidate.
+     *
+     *  This function calls fgen.forward(a, l, f) to translate the pairs of
+     *  the attribute (a) and label (l) to the feature (f), and adds
+     *  (m_model[f] * value) to the score for the candidate #i.
+     *
      *  @param  i           The index for the candidate.
      *  @param  fgen        The feature generator.
      *  @param  a           The attribute identifier.
@@ -168,6 +196,14 @@ public:
 
     /**
      * Computes the inner product between an attribute vector and the model.
+     *
+     *  An attribute vector is represented by a range of iterators
+     *  [first, last), whose element \c *it is compatible with \c std::pair.
+     *  The member \c it->first presents an attribute identifier, and the
+     *  member \c it->second presents the attribute value. The feature
+     *  generator (fgen) is used to convert a pair of attribute (a) and
+     *  label (l) into a feature identifier.
+     *
      *  @param  i           The index for the candidate.
      *  @param  fgen        The feature generator.
      *  @param  first       The iterator for the first element of attributes.
@@ -191,31 +227,8 @@ public:
     }
 
     /**
-     * Computes the inner product between an attribute vector and the model.
-     *  @param  i           The index for the candidate.
-     *  @param  fgen        The feature generator.
-     *  @param  first       The iterator for the first element of attributes.
-     *  @param  last        The iterator for the element just beyond the
-     *                      last element of attributes.
-     *  @param  l           The label for the candidate.
-     *  @param  scale       The scaling factor to be applied to the score.
-     */
-    template <class feature_generator_type, class iterator_type>
-    inline void inner_product_scaled(
-        int i,
-        feature_generator_type& fgen,
-        iterator_type first,
-        iterator_type last,
-        const typename feature_generator_type::label_type& l,
-        const value_type& scale
-        )
-    {
-        this->inner_product(i, fgen, first, last, l);
-        this->scale(i, scale);
-    }
-
-    /**
      * Finalize the classification.
+     *  Call this function before using argmax() function.
      */
     inline void finalize()
     {
@@ -248,9 +261,29 @@ public:
 
 
 /**
- * Linear multi-class classifier with sigmoid function (maximum entropy).
+ * A template class for linear multi-class classifiers with soft-max function
+ * (Maximum Entropy models).
  *
- *  @param  model_tmpl      The type of a model (array of feature weights).
+ *  This template class implements a multi classifier with a linear
+ *  discriminant model. The types of features, feature generators, and models
+ *  are customizable. Any type that yields a feature weight with operator
+ *  \c [] is acceptable for a model. A feature generator must convert a pair
+ *  of an attribute and a label into a feature identifier that is compatible
+ *  with the argument type of the operator \c [] of the model.
+ *
+ *  An instance is designed to have multiple candidates, and the candidate
+ *  that yields the highest score is chosen as a classification result. The
+ *  number of candidates must be set by resize() before computing candidate
+ *  scores. Call set(), inner_product(), or scale() functions to compute the
+ *  score of a candidate. After computing the score of all candidates, call
+ *  finalize() function to determine the candidate with the highest score.
+ *
+ *  @param  model_tmpl      The type of a model (container of feature weights).
+ *                          Any type that yields a feature weight with
+ *                          operator \c [] is usable (e.g., arrays,
+ *                          \c std::vector, \c std::map).
+ *  @see    thru_feature_generator_base, dense_feature_generator_base,
+ *          sparse_feature_generator_base.
  */
 template <class model_tmpl>
 class linear_multi_logistic : public linear_multi<model_tmpl>
@@ -286,6 +319,7 @@ public:
 
     /**
      * Resets the classification result.
+     *  Call this function before sending a next classification instance.
      */
     inline void clear()
     {
@@ -314,7 +348,7 @@ public:
     }
 
     /**
-     * Computes the error of the candidate.
+     * Computes the error of a candidate.
      *  @param  i           The index for the candidate.
      *  @param  r           The index for the reference candidate.
      *  @return value_type  The error.
@@ -326,6 +360,8 @@ public:
 
     /**
      * Finalize the classification.
+     *  Call this function before using argmax(), prob(), logprob(),
+     *  and error() function.
      */
     inline void finalize()
     {

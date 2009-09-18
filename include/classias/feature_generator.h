@@ -41,8 +41,8 @@ namespace classias
 
 
 /**
- * Feature generator for candidate classification.
- *  In this class, a feature is identical to an attribute, and a label is
+ * A template class for feature generators for candidate classification.
+ *  In this class, features are identical to attributes, and labels are
  *  ignored.
  *
  *  @param  attribute_tmpl  The type of an attribute.
@@ -96,7 +96,7 @@ public:
 
     /**
      * Returns the total number of labels.
-     *  @return size_t      The total number of labels.
+     *  @return size_t      The total number of labels, which is always zero.
      */
     size_t num_labels() const
     {
@@ -202,7 +202,15 @@ public:
 
 
 /**
- * Feature generator for any combinations of attributes and labels.
+ * A template class for feature generators for any combinations of
+ *  attributes and labels.
+ *  
+ *  This feature generator assigns a feature for every combination of
+ *  attributes and labels. The number of features is the number of
+ *  attributes multiplied by the number of labels. A conversion between
+ *  attribute-label space and feature space is faster than
+ *  sparse_feature_generator_base, but feature space will be large.
+ *  Call regist() function to register a pair of an attribute and feature.
  *
  *  @param  attribute_tmpl  The type of an attribute.
  *  @param  label_tmpl      The type of a label.
@@ -368,6 +376,13 @@ public:
 /**
  * Feature generator for combinations of attributes and labels that exist
  *  in the training data.
+ *
+ *  This feature generator assigns a feature for every combination of
+ *  attributes and labels that exist in the training data. The number of
+ *  features is the unique number of combinations between attributes and
+ *  labels. A conversion between attribute-label space and feature space is
+ *  slower than dense_feature_generator_base, but feature space will be
+ *  compact.
  *
  *  @param  attribute_tmpl  The type of an attribute.
  *  @param  label_tmpl      The type of a label.
