@@ -151,8 +151,6 @@ public:
     typedef attributes_tmpl attributes_type;
     /// The type of an attribute identifier.
     typedef typename attributes_type::identifier_type attribute_type;
-    /// The type of an attribute identifier.
-    typedef typename attributes_type::identifier_type attribute_type;
     /// The type of an attribute value.
     typedef typename attributes_type::value_type value_type;
 
