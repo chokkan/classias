@@ -261,7 +261,6 @@ public:
  * Pegasos for binary classification.
  *
  *  @param  error_tmpl  The type of the error (loss) function.
- *  @param  model_tmpl  The type of a weight vector for features.
  */
 template <
     class error_tmpl

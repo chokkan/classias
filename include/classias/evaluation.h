@@ -41,6 +41,10 @@ namespace classias
 
 /**
  * Accuracy counter.
+ *
+ *  This class counts the number of true instances and the total number of
+ *  instances. Call set() with a boolean argument indicating whether the
+ *  classification for an instance is successful (\c true) or not (\c false).
  */
 class accuracy
 {
@@ -65,7 +69,7 @@ public:
 
     /**
      * Increments the number of correct/incorrect instances.
-     *  @param  b           A correctness of an instance.
+     *  @param  b           A truth of an instance.
      */
     inline void set(bool b)
     {
@@ -100,7 +104,7 @@ public:
 
 
 /**
- * Counter for precision, recall, and F1 scores
+ * Counter for precision, recall, and F1 scores.
  */
 class precall
 {
@@ -108,9 +112,9 @@ protected:
     /// A counter for each label.
     struct label_stat
     {
-        int num_match;
-        int num_reference;
-        int num_prediction;
+        int num_match;          ///< The number of true positives.
+        int num_reference;      ///< The number of reference positives.
+        int num_prediction;     ///< The number of predicted positives.
 
         label_stat() :
             num_match(0), num_reference(0), num_prediction(0)
@@ -236,7 +240,7 @@ public:
         os.unsetf(std::ios::fixed);
     }
 
-protected:
+private:
     template <typename value_type>
     static inline double divide(value_type a, value_type b)
     {

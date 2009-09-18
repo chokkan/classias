@@ -327,7 +327,6 @@ protected:
  * Averaged Preceptron for multi-class classification.
  *
  *  @param  error_tmpl  The type of the error (loss) function.
- *  @param  model_tmpl  The type of a weight vector for features.
  */
 template <
     class error_tmpl
@@ -445,6 +444,8 @@ protected:
     /**
      * Adds a value to weights associated with a feature vector.
      *  @param  w           The weight vector to which an update occurs.
+     *  @param  l           The candidate index.
+     *  @param  fgen        The feature generator.
      *  @param  first       The iterator pointing to the first element of
      *                      the feature vector.
      *  @param  last        The iterator pointing just beyond the last

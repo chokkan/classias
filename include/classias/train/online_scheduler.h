@@ -54,7 +54,9 @@ iterator_type random_sample(iterator_type first, iterator_type last)
 }
 
 /**
- * A scheduler of online algorithms for binary classification.
+ * A scheduler of online algorithms for training binary classifiers.
+ *  This is a utility class to use online training algorithms from a data set
+ *  transparently as a batch training algorithm.
  *
  *  @param  data_tmpl       The type of a data set.
  *  @param  trainer_tmpl    The type of an online training algorithm.
@@ -232,7 +234,9 @@ public:
 
 
 /**
- * A scheduler of online algorithms for multi-class classification.
+ * A scheduler of online algorithms for training multi/candidate classifiers.
+ *  This is a utility class to use online training algorithms from a data set
+ *  transparently as a batch training algorithm.
  *
  *  @param  data_tmpl       The type of a data set.
  *  @param  trainer_tmpl    The type of an online training algorithm.

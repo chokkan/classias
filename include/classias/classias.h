@@ -111,7 +111,27 @@ typedef multi_data_with_quark_base<ninstance, quark, quark, sparse_feature_gener
     - Linear multi classifier with soft-max function:
         \ref classias::classify::linear_binary_logistic
 - Batch training algorithms
+    - Gradient descent with L-BFGS for logistic regression:
+        \ref classias::train::lbfgs_logistic_binary
+    - Gradient descent with L-BFGS for multi-class logistic regression:
+        \ref classias::train::lbfgs_logistic_multi
+    - Scheduler for online-training algorithms for binary classification:
+        \ref classias::train::online_scheduler_binary
+    - Scheduler for online-training algorithms for multi classification:
+        \ref classias::train::online_scheduler_multi
 - Online training algorithms
+    - Averaged perceptron for binary classification:
+        \ref classias::train::averaged_perceptron_binary
+    - Averaged perceptron for multi/candidate classification:
+        \ref classias::train::averaged_perceptron_multi
+    - Pegasos for binary classification:
+        \ref classias::train::pegasos_binary
+    - Pegasos for multi/candidate classification:
+        \ref classias::train::pegasos_multi
+    - Truncated gradient for binary classification:
+        \ref classias::train::truncated_gradient_binary
+    - Truncated gradient for multi/candidate classification:
+        \ref classias::train::truncated_gradient_multi
 - Basic data types
     - Instance weight:
         \ref classias::weight_base
@@ -125,6 +145,15 @@ typedef multi_data_with_quark_base<ninstance, quark, quark, sparse_feature_gener
         \ref classias::quark2_base
     - Quark exception:
         \ref classias::quark_error
+- Miscellaneous utilities
+    - Accuracy counter:
+        \ref classias::accuracy
+    - Performance evaluation with precision, recall, and F1 scores
+        \ref classias::precall
+    - Parameter exchange
+        \ref classias::parameter_exchange
+    - Exception class for parameter exchange
+        \ref classias::unknown_parameter
 **/
 
 #endif/*__CLASSIAS_CLASSIAS_H__*/

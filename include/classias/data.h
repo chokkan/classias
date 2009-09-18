@@ -452,8 +452,9 @@ public:
  *  This class represents a data set for training a candidate classifier. The
  *  class stores instances into a vector. This class implements the necessary
  *  functions num_attributes(), num_features(), and num_labels() for training
- *  algorithms. Do not forget to call set_num_features() to specify the total
- *  number of features.
+ *  algorithms. In addition, this class owns a quark to assign attribute and
+ *  label identifiers, and overwrites num_attributes(), num_labels(), and
+ *  num_features().
  *
  *  @param  instance_tmpl           The type of an instance.
  *  @param  attributes_quark_tmpl   The type of an attribute quark.
@@ -545,10 +546,14 @@ public:
 
 
 /**
- * Data set for classification instances.
+ * A template class for a collection of multi-class classification instances.
  *
- *  This class provides a data set for classification (attribute-label)
- *  instances.
+ *  This class represents a data set for training a multi-class classifier.
+ *  The class stores instances into a vector. This class implements the
+ *  necessary functions num_attributes(), num_features(), and num_labels() for
+ *  training algorithms. Do not forget to call set_num_features() and
+ *  set_num_labels() to specify the total number of features and total number
+ *  of labels, respectively.
  *
  *  @param  instance_tmpl           The type of an instance.
  *  @param  feature_generator_tmpl  The type of a feature generator.
@@ -601,6 +606,15 @@ public:
     }
 
     /**
+     * Sets the total number of labels.
+     *  @param  num         The number of labels.
+     */
+    inline void set_num_labels(int num)
+    {
+        m_num_labels = num;
+    }
+
+    /**
      * Returns the total number of attributes.
      *  @return int         The total number of attributes.
      */
@@ -628,6 +642,10 @@ public:
         return this->feature_generator.num_features();
     }
 
+    /**
+     * Reserves bias features for all of possible labels.
+     *  @param  a           The attribute identifier for the bias feature.
+     */
     void generate_bias_features(const attribute_type& a)
     {
         this->feature_generator.set_num_labels(this->labels.size());
@@ -646,6 +664,7 @@ public:
 
     /**
      * Finalize the data set.
+     *  This function generates features for pairs of attributes and labels.
      */
     void generate_features()
     {
@@ -758,6 +777,10 @@ public:
         return this->feature_generator.num_features();
     }
 
+    /**
+     * Reserves bias features for all of possible labels.
+     *  @param  a           The attribute identifier for the bias feature.
+     */
     void generate_bias_features(const attribute_type& a)
     {
         this->feature_generator.set_num_labels(this->labels.size());
@@ -776,6 +799,7 @@ public:
 
     /**
      * Finalize the data set.
+     *  This function generates features for pairs of attributes and labels.
      */
     void generate_features()
     {

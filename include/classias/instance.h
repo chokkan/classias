@@ -425,25 +425,25 @@ public:
 
     /**
      * Returns a read-only access to the attribute vector of a candidate.
-     *  @param  l           The candidate label (index).
+     *  @param  i           The candidate label (index).
      *  @return const attributes_type&  The reference to the attribute vector
      *                                  associated for the candidate #l.
      */
-    inline const candidate_type& attributes(int l) const
+    inline const candidate_type& attributes(int i) const
     {
-        return this->candidates[l];
+        return this->candidates[i];
     }
 
     /**
      * Returns an access to the attribute vector of a candidate.
-     *  @param  l           Reserved only for the compatibility with
+     *  @param  i           Reserved only for the compatibility with
      *                      candidate_instance_base class.
      *  @return attributes_type&        The reference to the attribute vector
      *                                  associated for the candidate #l.
      */
-    inline candidate_type& attributes(int l)
+    inline candidate_type& attributes(int i)
     {
-        return this->candidates[l];
+        return this->candidates[i];
     }
 };
 

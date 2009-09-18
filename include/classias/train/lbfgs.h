@@ -163,6 +163,7 @@ public:
             "The maximum number of trials for the line search algorithm.");
     }
 
+protected:
     /**
      * Initializes the weight vector of the size K.
      *  This function prepares a vector of the size K, and sets W = 0.
@@ -325,7 +326,6 @@ public:
         }
     }
 
-
     virtual value_type loss_and_gradient(
         const value_type *x,
         value_type *g,
@@ -359,7 +359,10 @@ public:
 
 
 /**
- * Training a logistic regression model.
+ * Gradient descent with L-BFGS for binary classification.
+ *
+ *  @param  data_tmpl       The type of the data set for training.
+ *  @param  model_tmpl      The type of the feature weights.
  */
 template <
     class data_tmpl,
@@ -419,6 +422,7 @@ public:
         base_class::clear();
     }
 
+protected:
     /**
      * Computes the loss and gradients of the data set.
      *  @param  x           The current feature weights.
@@ -469,6 +473,7 @@ public:
         return loss;
     }
 
+public:
     /**
      * Trains a model on a data set.
      *  @param  data        The data set for training (and holdout evaluation).
@@ -506,6 +511,7 @@ public:
         this->lbfgs_output_status(os, ret);
     }
 
+protected:
     /**
      * Performs a holdout evaluation.
      */
@@ -526,9 +532,10 @@ public:
 
 
 /**
- * Training a log-linear model using the maximum entropy modeling.
- *  @param  data_tmpl           Training data class.
- *  @param  value_tmpl          The type for computation.
+ * Gradient descent with L-BFGS for multi classification.
+ *
+ *  @param  data_tmpl       The type of the data set for training.
+ *  @param  model_tmpl      The type of the feature weights.
  */
 template <
     class data_tmpl,
@@ -596,6 +603,7 @@ public:
         base_class::clear();
     }
 
+protected:
     /**
      * Computes the loss and gradients of the data set.
      *  @param  x           The current feature weights.
@@ -652,6 +660,7 @@ public:
         return loss;
     }
 
+public:
     /**
      * Trains a model on a data set.
      *  @param  data        The data set for training (and holdout evaluation).
@@ -709,6 +718,7 @@ public:
         this->lbfgs_output_status(os, ret);
     }
 
+protected:
     /**
      * Performs a holdout evaluation.
      */
@@ -732,6 +742,8 @@ protected:
     /**
      * Adds a value to weights associated with a feature vector.
      *  @param  w           The weight vector to which an update occurs.
+     *  @param  l           The candidate index.
+     *  @param  fgen        The feature generator.
      *  @param  first       The iterator pointing to the first element of
      *                      the feature vector.
      *  @param  last        The iterator pointing just beyond the last

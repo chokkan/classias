@@ -46,6 +46,12 @@ namespace train
 
 /**
  * The base class for Trancated Gradient.
+ *
+ *  The detail of the algorithm is described in:
+ *      John Langford, Lihong Li, and Tong Zhang.
+ *      Sparse Online Learning via Truncated Gradient.
+ *      JMLR 10(Mar):777-801, 2009.
+ *
  *  This class implements internal variables, operations, and interface
  *  that are common for training a binary/multi classification.
  *
@@ -550,6 +556,8 @@ public:
 protected:
     /**
      * Adds a value to weights associated with a feature vector.
+     *  @param  l           The candidate index.
+     *  @param  fgen        The feature generator.
      *  @param  first       The iterator pointing to the first element of
      *                      the feature vector.
      *  @param  last        The iterator pointing just beyond the last
@@ -577,6 +585,8 @@ protected:
     /**
      * Applies L1 penalties to the feature weights.
      *  This function applies L1 penalties to the weights in a feature vector.
+     *  @param  l           The candidate index.
+     *  @param  fgen        The feature generator.
      *  @param  first       The iterator pointing to the first element of
      *                      the feature vector.
      *  @param  last        The iterator pointing just beyond the last
