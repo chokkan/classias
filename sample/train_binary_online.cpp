@@ -57,6 +57,9 @@ int main(int argc, char *argv[])
     std::ostream& os = std::cout;
     std::ostream& es = std::cerr;
 
+    // Initialize the trainer.
+    tr.start();
+
     // Read a data set from STDIN.
     for (;;) {
         // Read a line.
@@ -92,6 +95,9 @@ int main(int argc, char *argv[])
             loss += tr.update(&inst);
         }
     }
+
+    // Finalize the trainer.
+    tr.finish();
 
     // Output the total loss.
     es << "Loss: " << loss << std::endl;
