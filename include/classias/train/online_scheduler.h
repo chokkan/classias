@@ -226,11 +226,10 @@ public:
 
             // Report the progress.
             os << "***** Iteration #" << k << " *****" << std::endl;
-            os << "Loss: " << loss << std::endl;
+            m_trainer.report(os);
             if (m_period < k) {
                 os << "Improvement ratio: " << improvement << std::endl;
             }
-            m_trainer.report(os);
             os << "Seconds required for this iteration: " <<
                 (std::clock() - clk) / (double)CLOCKS_PER_SEC << std::endl;
 
@@ -440,11 +439,10 @@ public:
 
             // Report the progress.
             os << "***** Iteration #" << k << " *****" << std::endl;
-            os << "Loss: " << loss << std::endl;
+            m_trainer.report(os);
             if (m_period < k) {
                 os << "Improvement ratio: " << improvement << std::endl;
             }
-            m_trainer.report(os);
             os << "Seconds required for this iteration: " <<
                 (std::clock() - clk) / (double)CLOCKS_PER_SEC << std::endl;
 
