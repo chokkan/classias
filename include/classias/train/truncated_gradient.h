@@ -217,6 +217,7 @@ public:
                 ++m_report.num_actives;
             }
         }
+        m_report.loss += m_c * m_report.norm1;
 
         // Reset the run-time information.
         m_loss = 0;

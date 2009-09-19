@@ -192,7 +192,7 @@ public:
         this->rescale_weights();
 
         // Fill the progress information.
-        m_report.loss = m_loss;
+        m_report.loss = m_loss + m_norm22 * m_c;
         m_report.norm2 = std::sqrt(m_norm22);
 
         // Reset the run-time information.
