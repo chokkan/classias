@@ -62,6 +62,24 @@ public:
 
 
 /**
+ * Exception class for invalid parameter.
+ */
+class invalid_parameter : public std::invalid_argument
+{
+public:
+    /**
+     * Constructs an exception object.
+     *  @param  message     The error message.
+     */
+    explicit invalid_parameter(const std::string& message)
+        : std::invalid_argument(message)
+    {
+    }
+};
+
+
+
+/**
  * A class for exchanging parameters.
  */
 class parameter_exchange

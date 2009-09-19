@@ -33,6 +33,7 @@
 #ifndef __CLASSIAS_TRAIN_ONLINE_SCHEDULER_H__
 #define __CLASSIAS_TRAIN_ONLINE_SCHEDULER_H__
 
+#include <algorithm>
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
@@ -46,12 +47,28 @@ namespace classias {
 namespace train {
 
 template <class iterator_type>
-iterator_type random_sample(iterator_type first, iterator_type last)
+static iterator_type
+random_sample(
+    iterator_type first, iterator_type last
+    )
 {
     int n = (int)std::distance(first, last);
     int i = std::rand() % n;
     std::advance(first, i);
     return first;
+}
+
+template <class container_type, class iterator_type>
+static void
+shuffle_permutation(
+    container_type& cont, iterator_type first, iterator_type last
+    )
+{
+    size_t i = 0;
+    for (iterator_type it = first;it != last;++it) {
+        cont[i++] = it;
+    }
+    std::random_shuffle(cont.begin(), cont.end());
 }
 
 /**
@@ -125,7 +142,7 @@ public:
         m_trainer.clear();
 
         parameter_exchange& par = this->params();
-        par.init("sample", &m_sample, "random",
+        par.init("sample", &m_sample, "shuffle",
             "The method for sampling instances.");
         par.init("max_iterations", &m_max_iterations, 100,
             "The maximum number of iterations (epochs).");
@@ -195,22 +212,35 @@ public:
             clock_t clk = std::clock();
 
             // Send instances to the algorithm.
-            if (m_sample == "sequantial") {
-                // Loop for instances.
-                for (const_iterator it = data.begin();it != data.end();++it) {
-                    if (it->get_group() != holdout) {
-                        m_trainer.update(it);
-                    }
-                }
-            } else {
+            if (m_sample == "random") {
                 // Choose N instances at random.
-                for (int i = 0;i < (int)data.size();++i) {
+                for (size_t i = 0;i < data.size();++i) {
                     const_iterator it = random_sample(data.begin(), data.end());
                     if (it->get_group() != holdout) {
                         m_trainer.update(it);
                     }
                 }
+            } else if (m_sample == "cycle") {
+                // Do not change the ordering of instances.
+                for (const_iterator it = data.begin();it != data.end();++it) {
+                    if (it->get_group() != holdout) {
+                        m_trainer.update(it);
+                    }
+                }
+            } else if (m_sample == "shuffle") {
+                // Shuffle N instances first.
+                std::vector<const_iterator> perm(data.size());
+                shuffle_permutation(perm, data.begin(), data.end());
+                for (size_t i = 0;i < perm.size();++i) {
+                    const_iterator it = perm[i];
+                    if (it->get_group() != holdout) {
+                        m_trainer.update(it);
+                    }
+                }
+            } else {
+                throw invalid_parameter("Unknown sampling method for instances");
             }
+
             m_trainer.discontinue();
             loss = m_trainer.loss();
 
@@ -334,7 +364,7 @@ public:
         m_trainer.clear();
 
         parameter_exchange& par = this->params();
-        par.init("sample", &m_sample, "random",
+        par.init("sample", &m_sample, "shuffle",
             "The method for sampling instances.");
         par.init("max_iterations", &m_max_iterations, 100,
             "The maximum number of iterations (epochs).");
@@ -404,24 +434,38 @@ public:
             clock_t clk = std::clock();
 
             // Send instances to the algorithm.
-            if (m_sample == "sequential") {
-                // Loop for instances.
-                for (const_iterator it = data.begin();it != data.end();++it) {
-                    if (it->get_group() != holdout) {
-                        m_trainer.update(
-                            it, const_cast<data_type&>(data).feature_generator);
-                    }
-                }
-            } else {
+            if (m_sample == "random") {
                 // Choose N instances at random.
-                for (int i = 0;i < (int)data.size();++i) {
+                for (size_t i = 0;i < data.size();++i) {
                     const_iterator it = random_sample(data.begin(), data.end());
                     if (it->get_group() != holdout) {
                         m_trainer.update(
                             it, const_cast<data_type&>(data).feature_generator);
                     }
                 }
+            } else if (m_sample == "cycle") {
+                // Do not change the ordering of instances.
+                for (const_iterator it = data.begin();it != data.end();++it) {
+                    if (it->get_group() != holdout) {
+                        m_trainer.update(
+                            it, const_cast<data_type&>(data).feature_generator);
+                    }
+                }
+            } else if (m_sample == "shuffle") {
+                // Shuffle N instances first.
+                std::vector<const_iterator> perm(data.size());
+                shuffle_permutation(perm, data.begin(), data.end());
+                for (size_t i = 0;i < perm.size();++i) {
+                    const_iterator it = perm[i];
+                    if (it->get_group() != holdout) {
+                        m_trainer.update(
+                            it, const_cast<data_type&>(data).feature_generator);
+                    }
+                }
+            } else {
+                throw invalid_parameter("Unknown sampling method for instances");
             }
+
             m_trainer.discontinue();
             loss = m_trainer.loss();
 
