@@ -322,13 +322,54 @@ public:
     typedef pegasos_binary<error_tmpl> this_class;
 
 public:
+    template <class iterator_type>
+    void update(iterator_type it)
+    {
+        // Define synonyms to avoid using "this->" for member variables.
+        model_type& model = this->m_model;
+        value_type& eta = this->m_eta;
+        value_type& lambda = this->m_lambda;
+        int& t = this->m_t;
+        value_type& t0 = this->m_t0;
+        value_type& loss = this->m_loss;
+
+        // Learning rate: eta = 1. / (lambda * (t0 + t)).
+        eta = 1. / (lambda * (t0 + t));
+
+        // Compute the error for the instance.
+        value_type nlogp = 0.;
+        error_type cls(model);
+        cls.inner_product(it->begin(), it->end());
+        value_type err = cls.error(it->get_label(), nlogp);
+        loss += (it->get_weight() * nlogp);
+
+        for (size_t i = 0;i < model.size();++i) {
+            model[i] *= (1. - eta * lambda);
+        }
+        update_model(it->begin(), it->end(), -err * eta * it->get_weight());
+
+        // Increment the update count.
+        ++t;
+    }
+
+    template <class iterator_type>
+    inline void update_model(iterator_type first, iterator_type last, value_type delta)
+    {
+        model_type& model = this->m_model;
+        for (iterator_type it = first;it != last;++it) {
+            value_type w = model[it->first];
+            value_type d = delta * it->second;
+            model[it->first] += d;
+        }
+    }
+
     /**
      * Receives a training instance and updates feature weights.
      *  @param  it          An interator for the training instance.
      *  @return value_type  The loss computed for the instance.
      */
     template <class iterator_type>
-    void update(iterator_type it)
+    void update_old(iterator_type it)
     {
         // Define synonyms to avoid using "this->" for member variables.
         model_type& model = this->m_model;
