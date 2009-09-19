@@ -173,9 +173,7 @@ public:
     {
         // Translate the C parameter to an algorithm-specific parameter.
         parameter_exchange& par = this->params();
-        if (par.get_stamp("lambda") <= par.get_stamp("c")) {
-            par.set("lambda", 2. * m_c / data.size(), false);
-        }
+        par.set("n", (double)data.size(), false);
 
         // Reserve the weight vector.
         m_trainer.set_num_features(data.num_features());
@@ -384,9 +382,7 @@ public:
     {
         // Translate the C parameter to an algorithm-specific parameter.
         parameter_exchange& par = this->params();
-        if (par.get_stamp("lambda") <= par.get_stamp("c")) {
-            par.set("lambda", 2. * m_c / data.size(), false);
-        }
+        par.set("n", (double)data.size(), false);
 
         // Reserve the weight vector.
         m_trainer.set_num_features(data.num_features());

@@ -87,6 +87,8 @@ protected:
     /// The array of feature weights.
     model_type m_model;
 
+    /// The lambda (coefficient for L2 regularization).
+    value_type m_lambda;
     /// The square of the L2-norm of feature weights.
     value_type m_norm22;
     /// The decay factor for feature weights.
@@ -106,8 +108,10 @@ protected:
 
     /// Parameter interface.
     parameter_exchange m_params;
-    /// The lambda (coefficient for L2 regularization).
-    value_type m_lambda;
+    /// The coefficient for L2 regularization.
+    value_type m_c;
+    /// The number of instances in the data set.
+    value_type m_n;
     /// The initial learning rate.
     value_type m_eta0;
 
@@ -137,8 +141,10 @@ public:
         this->initialize_weights();
 
         // Initialize the parameters.
-        m_params.init("lambda", &m_lambda, 0.001,
-            "Coefficient (lambda) for L2-regularization.");
+        m_params.init("c", &m_c, 1.,
+            "Coefficient for L2 regularization.");
+        m_params.init("n", &m_n, 1.,
+            "The number of instances in the data set.");
         m_params.init("eta", &m_eta0, 0.1,
             "Initial learning rate");
     }
@@ -163,6 +169,7 @@ public:
     void start()
     {
         this->initialize_weights();
+        m_lambda = m_c / m_n;
         m_t = 0;
         m_t0 = 1.0 / (m_lambda * m_eta0);
         m_loss = 0;
