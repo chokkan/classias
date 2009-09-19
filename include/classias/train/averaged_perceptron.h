@@ -66,6 +66,16 @@ public:
     /// A synonym of this class.
     typedef averaged_perceptron_base<error_tmpl> this_class;
 
+    /// The type of progress information.
+    struct report_type
+    {
+        /// The loss (the number of violations).
+        value_type loss;
+        /// The L2-norm of feature weights.
+        value_type norm2;
+    };
+    report_type m_report;
+
 protected:
     /// The array of feature weights (unaveraged or averaged).
     model_type m_w;
@@ -74,6 +84,8 @@ protected:
     /// The indicator whether m_w is averaged or not.
     bool m_averaged;
 
+    /// The loss.
+    value_type m_loss;
     /// The update count.
     int m_c;
 
@@ -128,7 +140,11 @@ public:
     void start()
     {
         this->initialize_weights();
+        m_loss = 0;
         m_c = 1;
+
+        m_report.loss = 0;
+        m_report.norm2 = 0;
     }
 
     /**
@@ -138,6 +154,22 @@ public:
     void finish()
     {
         this->average_weights();
+    }
+
+    void discontinue()
+    {
+        this->average_weights();
+
+        // Fill the progress information.
+        m_report.loss = m_loss;
+        m_report.norm2 = 0;
+        for (size_t i = 0;i < m_w.size();++i) {
+            m_report.norm2 += m_w[i] * m_w[i];
+        }
+        m_report.norm2 = std::sqrt(m_report.norm2);
+
+        // Reset the run-time information.
+        m_loss = 0;
     }
 
 public:
@@ -156,6 +188,8 @@ public:
      */
     void report(std::ostream& os)
     {
+        os << "Loss: " << m_report.loss << std::endl;
+        os << "Feature L2-norm: " << m_report.norm2 << std::endl;
     }
 
 protected:
@@ -221,6 +255,11 @@ public:
         // Force to remove the const modifier for rescaling.
         return const_cast<this_class*>(this)->model();
     }
+
+    value_type loss() const
+    {
+        return m_report.loss;
+    }
 };
 
 
@@ -255,14 +294,14 @@ public:
      *  @return value_type  The loss computed for the instance.
      */
     template <class iterator_type>
-    value_type update(iterator_type it)
+    void update(iterator_type it)
     {
         // Define synonyms to avoid using "this->" for member variables.
         int& c = this->m_c;
+        value_type& loss = this->m_loss;
         model_type& w = this->m_w;
         model_type& ws = this->m_ws;
 
-        value_type loss = 0;
         error_type cls(w);
         cls.inner_product(it->begin(), it->end());
         if (static_cast<bool>(cls) != it->get_label()) {
@@ -270,14 +309,10 @@ public:
             value_type delta = y * it->get_weight();
             update_weights(w, it->begin(), it->end(), delta);
             update_weights(ws, it->begin(), it->end(), c * delta);
-            loss = 1;
-        } else {
-            loss = 0;
+            loss += 1;
         }
 
         ++c;
-
-        return loss;
     }
 
     /**
@@ -288,13 +323,11 @@ public:
      *  @return value_type  The loss computed for the instances.
      */
     template <class iterator_type>
-    inline value_type update(iterator_type first, iterator_type last)
+    inline void update(iterator_type first, iterator_type last)
     {
-        value_type loss = 0;
         for (iterator_type it = first;it != last;++it) {
-            loss += this->update(it);
+            this->update(it);
         }
-        return loss;
     }
 
 protected:
@@ -354,16 +387,16 @@ public:
      *  @return value_type  The loss computed for the instance.
      */
     template <class iterator_type, class feature_generator_type>
-    value_type update(iterator_type it, feature_generator_type& fgen)
+    void update(iterator_type it, feature_generator_type& fgen)
     {
         const int L = (int)fgen.num_labels();
 
         // Define synonyms to avoid using "this->" for member variables.
         int& c = this->m_c;
+        value_type& loss = this->m_loss;
         model_type& w = this->m_w;
         model_type& ws = this->m_ws;
 
-        value_type loss = 0;
         error_type cls(w);
         cls.resize(it->num_candidates(L));
         for (int i = 0;i < it->num_candidates(L);++i) {
@@ -414,13 +447,10 @@ public:
                 it->attributes(la).end(),
                 -c * it->get_weight()
                 );
-            loss = 1;
-        } else {
-            loss = 0;
+            loss += 1;
         }
 
         ++c;
-        return loss;
     }
 
     /**
@@ -431,13 +461,11 @@ public:
      *  @return value_type  The loss computed for the instances.
      */
     template <class iterator_type>
-    inline value_type update(iterator_type first, iterator_type last)
+    inline void update(iterator_type first, iterator_type last)
     {
-        value_type loss = 0;
         for (iterator_type it = first;it != last;++it) {
-            loss += this->update(it);
+            this->update(it);
         }
-        return loss;
     }
 
 protected:

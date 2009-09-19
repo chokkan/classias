@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
             }
 
             // Update the model by using the current instance.
-            loss += tr.update(&inst);
+            tr.update(&inst);
         }
     }
 

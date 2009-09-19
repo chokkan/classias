@@ -73,6 +73,16 @@ public:
     /// A synonym of this class.
     typedef pegasos_base<error_tmpl> this_class;
 
+    /// The type of progress information.
+    struct report_type
+    {
+        /// The loss (the number of violations).
+        value_type loss;
+        /// The L2-norm of feature weights.
+        value_type norm2;
+    };
+    report_type m_report;
+
 protected:
     /// The array of feature weights.
     model_type m_model;
@@ -89,6 +99,8 @@ protected:
     value_type m_eta;
     /// The offset of the update count.
     value_type m_t0;
+    /// The loss.
+    value_type m_loss;
     /// The update count.
     int m_t;
 
@@ -153,6 +165,10 @@ public:
         this->initialize_weights();
         m_t = 0;
         m_t0 = 1.0 / (m_lambda * m_eta0);
+        m_loss = 0;
+
+        m_report.loss = 0;
+        m_report.norm2 = 0;
     }
 
     /**
@@ -162,6 +178,18 @@ public:
     void finish()
     {
         this->rescale_weights();
+    }
+
+    void discontinue()
+    {
+        this->rescale_weights();
+
+        // Fill the progress information.
+        m_report.loss = m_loss;
+        m_report.norm2 = std::sqrt(m_norm22);
+
+        // Reset the run-time information.
+        m_loss = 0;
     }
 
 public:
@@ -180,7 +208,8 @@ public:
      */
     void report(std::ostream& os)
     {
-        os << "Feature L2-norm: " << std::sqrt(m_norm22) * m_scale << std::endl;
+        os << "Loss: " << m_report.loss << std::endl;
+        os << "Feature L2-norm: " << m_report.norm2 << std::endl;
         os << "Learning rate (eta): " << m_eta << std::endl;
         os << "Total number of feature updates: " << m_t << std::endl;
     }
@@ -253,6 +282,11 @@ public:
         // Force to remove the const modifier for rescaling.
         return const_cast<this_class*>(this)->model();
     }
+
+    value_type loss() const
+    {
+        return m_report.loss;
+    }
 };
 
 
@@ -287,7 +321,7 @@ public:
      *  @return value_type  The loss computed for the instance.
      */
     template <class iterator_type>
-    value_type update(iterator_type it)
+    void update(iterator_type it)
     {
         // Define synonyms to avoid using "this->" for member variables.
         model_type& model = this->m_model;
@@ -299,6 +333,7 @@ public:
         value_type& norm22 = this->m_norm22;
         int& t = this->m_t;
         value_type& t0 = this->m_t0;
+        value_type& loss = this->m_loss;
 
         // Learning rate: eta = 1. / (lambda * (t0 + t)).
         eta = 1. / (lambda * (t0 + t));
@@ -309,7 +344,7 @@ public:
         cls.inner_product(it->begin(), it->end());
         cls.scale(scale);
         value_type err = cls.error(it->get_label(), nlogp);
-        value_type loss = (it->get_weight() * nlogp);
+        loss += (it->get_weight() * nlogp);
 
         // W *= (1 - eta * lambda), equivalent to L2 regularization.
         // Insted of applying the decay factor to the weight vector,
@@ -340,7 +375,6 @@ public:
 
         // Increment the update count.
         ++t;
-        return loss;
     }
 
     /**
@@ -351,13 +385,11 @@ public:
      *  @return value_type  The loss computed for the instances.
      */
     template <class iterator_type>
-    inline value_type update(iterator_type first, iterator_type last)
+    inline void update(iterator_type first, iterator_type last)
     {
-        value_type loss = 0;
         for (iterator_type it = first;it != last;++it) {
-            loss += this->update(it);
+            this->update(it);
         }
-        return loss;
     }
 
 protected:
@@ -418,7 +450,7 @@ public:
      *  @return value_type  The loss computed for the instance.
      */
     template <class iterator_type, class feature_generator_type>
-    value_type update(iterator_type it, feature_generator_type& fgen)
+    void update(iterator_type it, feature_generator_type& fgen)
     {
         const int L = (int)fgen.num_labels();
 
@@ -432,6 +464,7 @@ public:
         value_type& norm22 = this->m_norm22;
         int& t = this->m_t;
         value_type& t0 = this->m_t0;
+        value_type& loss = this->m_loss;
 
         // Learning rate: eta = 1. / (lambda * (t0 + t)).
         eta = 1. / (lambda * (t0 + t));
@@ -453,7 +486,7 @@ public:
         cls.finalize();
 
         // Compute the loss for the instance.
-        value_type loss = -it->get_weight() * cls.logprob(it->get_label());
+        loss += -it->get_weight() * cls.logprob(it->get_label());
 
         // W *= (1 - eta * lambda), equivalent to L2 regularization.
         // Insted of applying the decay factor to the weight vector,
@@ -498,7 +531,6 @@ public:
 
         // Increment the update count.
         ++t;
-        return loss;
     }
 
     /**
@@ -509,13 +541,11 @@ public:
      *  @return value_type  The loss computed for the instances.
      */
     template <class iterator_type>
-    inline value_type update(iterator_type first, iterator_type last)
+    inline void update(iterator_type first, iterator_type last)
     {
-        value_type loss = 0;
         for (iterator_type it = first;it != last;++it) {
-            loss += this->update(it);
+            this->update(it);
         }
-        return loss;
     }
 
 protected:

@@ -72,6 +72,28 @@ public:
     /// A synonym of this class.
     typedef truncated_gradient_base<error_tmpl> this_class;
 
+    /// The type of progress information.
+    struct report_type
+    {
+        /// The loss (the number of violations).
+        value_type loss;
+        /// The L1-norm of feature weights.
+        value_type norm1;
+        /// The L2-norm of feature weights.
+        value_type norm2;
+        /// The number of active features.
+        int num_actives;
+
+        void init()
+        {
+            loss = 0;
+            norm1 = 0;
+            norm2 = 0;
+            num_actives = 0;
+        }
+    };
+    report_type m_report;
+
 protected:
     /// The array of feature weights.
     model_type m_w;
@@ -84,6 +106,8 @@ protected:
     value_type m_t0;
     /// The update count.
     int m_t;
+    /// The loss.
+    value_type m_loss;
     /// The total amount of L1 penalty.
     value_type m_sum_penalty;
 
@@ -156,6 +180,9 @@ public:
         this->initialize_weights();
         m_t = 0;
         m_t0 = 1.0 / (m_lambda * m_eta0);
+        m_loss = 0;
+
+        m_report.init();
     }
 
     /**
@@ -166,6 +193,26 @@ public:
     {
         this->finalize_penalty(m_t, learning_rate(m_t));
         this->apply_penalty();
+    }
+
+    void discontinue()
+    {
+        this->apply_penalty();
+
+        // Fill the progress information.
+        m_report.init();
+        m_report.loss = m_loss;
+        for (size_t i = 0;i < m_w.size();++i) {
+            value_type v = m_w[i];
+            m_report.norm1 += std::fabs(v);
+            m_report.norm2 += v * v;
+            if (v != 0.) {
+                ++m_report.num_actives;
+            }
+        }
+
+        // Reset the run-time information.
+        m_loss = 0;
     }
 
 public:
@@ -184,25 +231,11 @@ public:
      */
     void report(std::ostream& os)
     {
-        // Count the number of active features, and compute the L2 norm.
-        value_type norm22 = 0;
-        int num_active_features = 0;
-        for (int i = 0;i < (int)m_w.size();++i) {
-            value_type alpha = m_sum_penalty - m_penalty[i];
-            if (m_w[i] < -alpha) {
-                value_type v = m_w[i] + alpha;
-                norm22 += (v * v);
-                ++num_active_features;
-            } else if (alpha < m_w[i]) {
-                value_type v = m_w[i] - alpha;
-                norm22 += (v * v);
-                ++num_active_features;
-            }
-        }
-
-        os << "Feature L2-norm: " << std::sqrt(norm22) << std::endl;
+        os << "Loss: " << m_report.loss << std::endl;
+        os << "Feature L1-norm: " << m_report.norm1 << std::endl;
+        os << "Feature L2-norm: " << m_report.norm2 << std::endl;
         os << "Learning rate (eta): " << m_eta << std::endl;
-        os << "Active features: " << num_active_features << std::endl;
+        os << "Active features: " << m_report.num_actives << std::endl;
         os << "Total number of feature updates: " << m_t-1 << std::endl;
     }
 
@@ -326,6 +359,11 @@ public:
         // Force to remove the const modifier for rescaling.
         return const_cast<this_class*>(this)->model();
     }
+
+    value_type loss() const
+    {
+        return m_report.loss;
+    }
 };
 
 
@@ -360,12 +398,13 @@ public:
      *  @return value_type  The loss computed for the instance.
      */
     template <class iterator_type>
-    value_type update(iterator_type it)
+    void update(iterator_type it)
     {
         // Synonyms to avoid "this->" for member variables in the base class.
         model_type& w = this->m_w;
         value_type& eta = this->m_eta;
         int& t = this->m_t;
+        value_type& loss = this->m_loss;
 
         // Compute the learning rate for the current update.
         eta = this->learning_rate(++t);
@@ -379,7 +418,7 @@ public:
         cls.inner_product(it->begin(), it->end());
         value_type nlogp = 0.;
         value_type err = cls.error(it->get_label(), nlogp);
-        value_type loss = (it->get_weight() * nlogp);
+        loss += (it->get_weight() * nlogp);
 
         // Stochastic gradient descent without L1 regularization term.
         this->update_weights(
@@ -387,7 +426,6 @@ public:
 
         // Accumulate the L1 penalty that should be applied in this update.
         this->accumulate_penalty(t, eta);
-        return loss;
     }
 
     /**
@@ -398,13 +436,11 @@ public:
      *  @return value_type  The loss computed for the instances.
      */
     template <class iterator_type>
-    inline value_type update(iterator_type first, iterator_type last)
+    inline void update(iterator_type first, iterator_type last)
     {
-        value_type loss = 0;
         for (iterator_type it = first;it != last;++it) {
-            loss += this->update(it);
+            this->update(it);
         }
-        return loss;
     }
 
 protected:
@@ -475,7 +511,7 @@ public:
      *  @return value_type  The loss computed for the instance.
      */
     template <class iterator_type, class feature_generator_type>
-    value_type update(iterator_type it, feature_generator_type& fgen)
+    void update(iterator_type it, feature_generator_type& fgen)
     {
         const int L = (int)fgen.num_labels();
 
@@ -483,6 +519,7 @@ public:
         model_type& w = this->m_w;
         value_type& eta = this->m_eta;
         int& t = this->m_t;
+        value_type& loss = this->m_loss;
 
         // Compute the learning rate for the current update.
         eta = this->learning_rate(++t);
@@ -513,7 +550,7 @@ public:
         cls.finalize();
 
         // Compute the loss for the instance.
-        value_type loss = -it->get_weight() * cls.logprob(it->get_label());
+        loss += -it->get_weight() * cls.logprob(it->get_label());
 
         // Updates the feature weights.
         value_type gain = eta * it->get_weight();
@@ -533,7 +570,6 @@ public:
 
         // Accumulate the L1 penalty that should be applied in this update.
         this->accumulate_penalty(t, eta);
-        return loss;
     }
 
     /**
@@ -544,13 +580,11 @@ public:
      *  @return value_type  The loss computed for the instances.
      */
     template <class iterator_type>
-    inline value_type update(iterator_type first, iterator_type last)
+    inline void update(iterator_type first, iterator_type last)
     {
-        value_type loss = 0;
         for (iterator_type it = first;it != last;++it) {
-            loss += this->update(it);
+            this->update(it);
         }
-        return loss;
     }
 
 protected:

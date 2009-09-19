@@ -201,7 +201,7 @@ public:
                 // Loop for instances.
                 for (const_iterator it = data.begin();it != data.end();++it) {
                     if (it->get_group() != holdout) {
-                        loss += m_trainer.update(it);
+                        m_trainer.update(it);
                     }
                 }
             } else {
@@ -209,10 +209,12 @@ public:
                 for (int i = 0;i < (int)data.size();++i) {
                     const_iterator it = random_sample(data.begin(), data.end());
                     if (it->get_group() != holdout) {
-                        loss += m_trainer.update(it);
+                        m_trainer.update(it);
                     }
                 }
             }
+            m_trainer.discontinue();
+            loss = m_trainer.loss();
 
             // Compute the improvement ratio.
             if (m_period < k) {
@@ -411,7 +413,7 @@ public:
                 // Loop for instances.
                 for (const_iterator it = data.begin();it != data.end();++it) {
                     if (it->get_group() != holdout) {
-                        loss += m_trainer.update(
+                        m_trainer.update(
                             it, const_cast<data_type&>(data).feature_generator);
                     }
                 }
@@ -420,11 +422,13 @@ public:
                 for (int i = 0;i < (int)data.size();++i) {
                     const_iterator it = random_sample(data.begin(), data.end());
                     if (it->get_group() != holdout) {
-                        loss += m_trainer.update(
+                        m_trainer.update(
                             it, const_cast<data_type&>(data).feature_generator);
                     }
                 }
             }
+            m_trainer.discontinue();
+            loss = m_trainer.loss();
 
             // Compute the improvement ratio.
             if (m_period < k) {
