@@ -225,7 +225,7 @@ public:
         // Loop for iterations.
         for (int k = 1;k <= m_max_iterations;++k) {
             value_type loss = 0;
-            value_type avg = 0, var = 0, nvar = 0;
+            value_type avg = 0, var = 0, nvar = m_epsilon;
             clock_t clk = std::clock();
 
             // Send instances to the algorithm.
@@ -278,7 +278,7 @@ public:
             // Report the progress.
             os << "***** Iteration #" << k << " *****" << std::endl;
             m_trainer.report(os);
-            if (m_period+1 < k) {
+            if (m_period < k) {
                 os << "Loss variance: " << nvar << std::endl;
             }
             os << "Seconds required for this iteration: " <<
@@ -453,7 +453,7 @@ public:
         // Loop for iterations.
         for (int k = 1;k <= m_max_iterations;++k) {
             value_type loss = 0;
-            value_type improvement = 0;
+            value_type avg = 0, var = 0, nvar = m_epsilon;
             clock_t clk = std::clock();
 
             // Send instances to the algorithm.
@@ -492,19 +492,25 @@ public:
             m_trainer.discontinue();
             loss = m_trainer.loss();
 
-            // Compute the improvement ratio.
-            if (m_period < k) {
-                improvement = (pf[(k-1) % m_period] - loss) / loss;
-            } else {
-                improvement = m_epsilon;
-            }
             pf[(k-1) % m_period] = loss;
+
+            if (m_period < k) {
+                avg = std::accumulate(pf.begin(), pf.end(), 0.);
+                avg /= pf.size();
+                var = compute_variance(pf.begin(), pf.end(), avg);
+                nvar = fabs(loss);
+                if (1. < nvar) {
+                    nvar = var / nvar;
+                } else {
+                    nvar = var;
+                }
+            }
 
             // Report the progress.
             os << "***** Iteration #" << k << " *****" << std::endl;
             m_trainer.report(os);
             if (m_period < k) {
-                os << "Improvement ratio: " << improvement << std::endl;
+                os << "Loss variance: " << nvar << std::endl;
             }
             os << "Seconds required for this iteration: " <<
                 (std::clock() - clk) / (double)CLOCKS_PER_SEC << std::endl;
@@ -529,7 +535,7 @@ public:
             os.flush();
 
             // Terminate if the stopping criterion is satisfied.
-            if (improvement < m_epsilon) {
+            if (nvar < m_epsilon) {
                 os << "Terminated with the stopping criterion" << std::endl;
                 os << std::endl;
                 os.flush();
