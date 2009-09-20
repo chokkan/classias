@@ -83,10 +83,10 @@ protected:
     /// Parameter interface.
     parameter_exchange m_params;
 
-    /// Sigma for L1-regularization;
-    value_type m_regularization_sigma1;
-    /// Sigma for L2-regularization;
-    value_type m_regularization_sigma2;
+    /// Coefficient for L1-regularization;
+    value_type m_c1;
+    /// Coefficient for L2-regularization
+    value_type m_c2;
     /// The number of memories in L-BFGS.
     int m_lbfgs_num_memories;
     /// L-BFGS epsilon for convergence.
@@ -140,10 +140,10 @@ public:
         m_os = NULL;
 
         // Initialize the parameters.
-        m_params.init("regularization.sigma1", &m_regularization_sigma1, 0.0,
-            "Coefficient (sigma) for L1-regularization.");
-        m_params.init("regularization.sigma2", &m_regularization_sigma2, 1.0,
-            "Coefficient (sigma) for L2-regularization.");
+        m_params.init("c1", &m_c1, 0.0,
+            "Coefficient for L1-regularization.");
+        m_params.init("c2", &m_c2, 1.0,
+            "Coefficient for L2-regularization.");
         m_params.init("lbfgs.num_memories", &m_lbfgs_num_memories, 6,
             "The number of corrections to approximate the inverse hessian matrix.");
         m_params.init("lbfgs.epsilon", &m_lbfgs_epsilon, 1e-5,
@@ -196,13 +196,14 @@ protected:
         value_type loss = loss_and_gradient(x, g, n);
 
 	    // L2 regularization.
-	    if (m_regularization_sigma2 != 0.) {
+	    if (m_c2 != 0.) {
             value_type norm = 0.;
+            const value_type lambda = 2 * m_c2;
             for (int i = m_regularization_start;i < n;++i) {
-                g[i] += (m_regularization_sigma2 * x[i]);
+                g[i] += (lambda * x[i]);
                 norm += x[i] * x[i];
             }
-            loss += (m_regularization_sigma2 * norm * 0.5);
+            loss += (m_c2 * norm * 0.5);
 	    }
 
         return loss;
@@ -293,7 +294,7 @@ protected:
             param.linesearch = LBFGS_LINESEARCH_BACKTRACKING;
         }
         param.max_linesearch = m_lbfgs_max_linesearch;
-        param.orthantwise_c = m_regularization_sigma1;
+        param.orthantwise_c = m_c1;
         param.orthantwise_start = regularization_start;
         param.orthantwise_end = K;
 
