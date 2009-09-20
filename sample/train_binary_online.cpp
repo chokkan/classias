@@ -51,11 +51,15 @@ typedef classias::train::pegasos_binary<
 
 int main(int argc, char *argv[])
 {
-    double loss = 0;
     trainer_type tr;
     std::istream& is = std::cin;
     std::ostream& os = std::cout;
     std::ostream& es = std::cerr;
+
+    // Show the algorithm name and parameters.
+    tr.copyright(es);
+    tr.params().show(es);
+    es << std::endl;
 
     // Initialize the trainer.
     tr.start();
@@ -96,11 +100,12 @@ int main(int argc, char *argv[])
         }
     }
 
+    // Pause the training process, and report the progress.
+    tr.discontinue();
+    tr.report(es);
+
     // Finalize the trainer.
     tr.finish();
-
-    // Output the total loss.
-    es << "Loss: " << loss << std::endl;
 
     // Output the model.
     const model_type& w = tr.model();

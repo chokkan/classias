@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
 
     // Set some parameters for the training algorithm.
     tr.params().set("c", 1.0);
-    tr.params().set("max_iterations", 50);
+    tr.params().set("max_iterations", 100);
 
     // Start training; progress report will be shown in es (STDERR).
     tr.train(data, es);

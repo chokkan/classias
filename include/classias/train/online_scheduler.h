@@ -161,7 +161,7 @@ public:
         parameter_exchange& par = this->params();
         par.init("sample", &m_sample, "shuffle",
             "The method for sampling instances.");
-        par.init("max_iterations", &m_max_iterations, 100,
+        par.init("max_iterations", &m_max_iterations, 1000,
             "The maximum number of iterations (epochs).");
         par.init("c", &m_c, 1,
             "Coefficient (C) for regularization.");
@@ -392,11 +392,11 @@ public:
         parameter_exchange& par = this->params();
         par.init("sample", &m_sample, "shuffle",
             "The method for sampling instances.");
-        par.init("max_iterations", &m_max_iterations, 100,
+        par.init("max_iterations", &m_max_iterations, 1000,
             "The maximum number of iterations (epochs).");
         par.init("c", &m_c, 1,
             "Coefficient (C) for regularization.");
-        par.init("period", &m_period, 10,
+        par.init("period", &m_period, 20,
             "The period to measure the improvement ratio");
         par.init("epsilon", &m_epsilon, 1e-6,
             "The stopping criterion for the improvement ratio");
