@@ -169,7 +169,7 @@ public:
     void start()
     {
         this->initialize_weights();
-        m_lambda = m_c / m_n;
+        m_lambda = 2 * m_c / m_n;
         m_t = 0;
         m_t0 = 1.0 / (m_lambda * m_eta0);
         m_loss = 0;
