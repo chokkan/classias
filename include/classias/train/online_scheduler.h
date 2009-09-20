@@ -72,6 +72,22 @@ shuffle_permutation(
     std::random_shuffle(cont.begin(), cont.end());
 }
 
+template <class value_type, class iterator_type>
+static value_type compute_variance(iterator_type first, iterator_type last, value_type avg)
+{
+    int n = 0;
+    value_type var = 0;
+    for (iterator_type it = first;it != last;++it) {
+        value_type v = (*it - avg);
+        var += v * v;
+        ++n;
+    }
+    if (n > 0) {
+        var /= n;
+    }
+    return var;
+}
+
 /**
  * A scheduler of online algorithms for training binary classifiers.
  *  This is a utility class to use online training algorithms from a data set
@@ -209,8 +225,7 @@ public:
         // Loop for iterations.
         for (int k = 1;k <= m_max_iterations;++k) {
             value_type loss = 0;
-            value_type improvement = 0;
-            value_type var = 0;
+            value_type avg = 0, var = 0;
             clock_t clk = std::clock();
 
             // Send instances to the algorithm.
@@ -249,21 +264,18 @@ public:
             pf[(k-1) % m_period] = loss;
 
             if (m_period < k) {
-                for (size_t i = 0;i < pf.size();++i) {
-                    improvement += pf[i];
-                    var += pf[i] * pf[i];
-                }
-                improvement /= pf.size();
-                var /= pf.size();
-                var -= improvement * improvement;
+                avg = std::accumulate(pf.begin(), pf.end(), 0.);
+                avg /= pf.size();
+                var = compute_variance(pf.begin(), pf.end(), avg);
             }
 
             // Report the progress.
             os << "***** Iteration #" << k << " *****" << std::endl;
             m_trainer.report(os);
             if (m_period+1 < k) {
-                os << "Improvement ratio: " << improvement << std::endl;
+                os << "Moving average: " << avg << std::endl;
                 os << "Variance: " << var << std::endl;
+                os << "Variance / loss" << (var / loss) << std::endl;
             }
             os << "Seconds required for this iteration: " <<
                 (std::clock() - clk) / (double)CLOCKS_PER_SEC << std::endl;
@@ -285,7 +297,7 @@ public:
             os.flush();
 
             // Terminate if the stopping criterion is satisfied.
-            if (improvement < m_epsilon) {
+            if (avg < m_epsilon) {
                 os << "Terminated with the stopping criterion" << std::endl;
                 os << std::endl;
                 os.flush();
