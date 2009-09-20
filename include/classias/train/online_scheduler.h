@@ -205,7 +205,10 @@ public:
         int holdout = -1
         )
     {
-        // Translate the C parameter to an algorithm-specific parameter.
+        // Ring buffer for moving averages.
+        std::vector<value_type> pf(m_period);
+
+        // Set the number of instances for the target algorithm.
         parameter_exchange& par = this->params();
         par.set("n", (double)data.size(), false);
 
@@ -219,8 +222,6 @@ public:
 
         // Initialize the training algorithm.
         m_trainer.start();
-
-        std::vector<value_type> pf(m_period);
 
         // Loop for iterations.
         for (int k = 1;k <= m_max_iterations;++k) {
@@ -258,15 +259,17 @@ public:
                 throw invalid_parameter("Unknown sampling method for instances");
             }
 
+            // Pause the training process, and compute the loss.
             m_trainer.discontinue();
             loss = m_trainer.loss();
 
+            // Store the current loss to the ring buffer
             pf[(k-1) % m_period] = loss;
-
             if (m_period < k) {
-                avg = std::accumulate(pf.begin(), pf.end(), 0.);
-                avg /= pf.size();
+                // Compute the average and variance of the recent losses.
+                avg = std::accumulate(pf.begin(), pf.end(), 0.) / pf.size();
                 var = compute_variance(pf.begin(), pf.end(), avg);
+                // nvar = var / min(1, fabs(loss))
                 nvar = fabs(loss);
                 if (1. < nvar) {
                     nvar = var / nvar;
@@ -433,7 +436,10 @@ public:
         int holdout = -1
         )
     {
-        // Translate the C parameter to an algorithm-specific parameter.
+        // Ring buffer for moving averages.
+        std::vector<value_type> pf(m_period);
+
+        // Set the number of instances for the target algorithm.
         parameter_exchange& par = this->params();
         par.set("n", (double)data.size(), false);
 
@@ -447,8 +453,6 @@ public:
 
         // Initialize the training algorithm.
         m_trainer.start();
-
-        std::vector<value_type> pf(m_period);
 
         // Loop for iterations.
         for (int k = 1;k <= m_max_iterations;++k) {
@@ -489,15 +493,17 @@ public:
                 throw invalid_parameter("Unknown sampling method for instances");
             }
 
+            // Pause the training process, and compute the loss.
             m_trainer.discontinue();
             loss = m_trainer.loss();
 
+            // Store the current loss to the ring buffer
             pf[(k-1) % m_period] = loss;
-
             if (m_period < k) {
-                avg = std::accumulate(pf.begin(), pf.end(), 0.);
-                avg /= pf.size();
+                // Compute the average and variance of the recent losses.
+                avg = std::accumulate(pf.begin(), pf.end(), 0.) / pf.size();
                 var = compute_variance(pf.begin(), pf.end(), avg);
+                // nvar = var / min(1, fabs(loss))
                 nvar = fabs(loss);
                 if (1. < nvar) {
                     nvar = var / nvar;
