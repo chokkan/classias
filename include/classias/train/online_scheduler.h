@@ -204,13 +204,13 @@ public:
         // Initialize the training algorithm.
         m_trainer.start();
 
-        std::vector<value_type> diffs(m_period);
+        std::vector<value_type> pf(m_period);
 
         // Loop for iterations.
-        value_type prev_loss = 0;
         for (int k = 1;k <= m_max_iterations;++k) {
             value_type loss = 0;
             value_type improvement = 0;
+            value_type var = 0;
             clock_t clk = std::clock();
 
             // Send instances to the algorithm.
@@ -246,14 +246,16 @@ public:
             m_trainer.discontinue();
             loss = m_trainer.loss();
 
-            if (1 < k) {
-                diffs[(k-2) % m_period] = (loss - prev_loss);
-            }
-            prev_loss = loss;
+            pf[(k-1) % m_period] = loss;
 
-            if (m_period+1 < k) {
-                improvement = std::accumulate(diffs.begin(), diffs.end(), 0);
-                improvement /= diffs.size();
+            if (m_period < k) {
+                for (size_t i = 0;i < pf.size();++i) {
+                    improvement += pf[i];
+                    var += pf[i] * pf[i];
+                }
+                improvement /= pf.size();
+                var /= pf.size();
+                var -= improvement * improvement;
             }
 
             // Report the progress.
@@ -261,6 +263,7 @@ public:
             m_trainer.report(os);
             if (m_period+1 < k) {
                 os << "Improvement ratio: " << improvement << std::endl;
+                os << "Variance: " << var << std::endl;
             }
             os << "Seconds required for this iteration: " <<
                 (std::clock() - clk) / (double)CLOCKS_PER_SEC << std::endl;
