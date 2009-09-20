@@ -36,6 +36,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
+#include <numeric>
 #include <iostream>
 #include <iterator>
 #include <vector>
@@ -203,9 +204,10 @@ public:
         // Initialize the training algorithm.
         m_trainer.start();
 
-        std::vector<value_type> pf(m_period);
+        std::vector<value_type> diffs(m_period);
 
         // Loop for iterations.
+        value_type prev_loss = 0;
         for (int k = 1;k <= m_max_iterations;++k) {
             value_type loss = 0;
             value_type improvement = 0;
@@ -244,18 +246,20 @@ public:
             m_trainer.discontinue();
             loss = m_trainer.loss();
 
-            // Compute the improvement ratio.
-            if (m_period < k) {
-                improvement = (pf[(k-1) % m_period] - loss) / loss;
-            } else {
-                improvement = m_epsilon;
+            if (1 < k) {
+                diffs[(k-2) % m_period] = (loss - prev_loss);
             }
-            pf[(k-1) % m_period] = loss;
+            prev_loss = loss;
+
+            if (m_period+1 < k) {
+                improvement = std::accumulate(diffs.begin(), diffs.end(), 0);
+                improvement /= diffs.size();
+            }
 
             // Report the progress.
             os << "***** Iteration #" << k << " *****" << std::endl;
             m_trainer.report(os);
-            if (m_period < k) {
+            if (m_period+1 < k) {
                 os << "Improvement ratio: " << improvement << std::endl;
             }
             os << "Seconds required for this iteration: " <<
