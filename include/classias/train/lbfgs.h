@@ -290,7 +290,7 @@ protected:
         param.past = m_lbfgs_stop;
         param.delta = m_lbfgs_delta;
         param.max_iterations = m_lbfgs_maxiter;
-        if (m_lbfgs_linesearch == "Backtracking") {
+        if (0 < m_c1 || m_lbfgs_linesearch == "Backtracking") {
             param.linesearch = LBFGS_LINESEARCH_BACKTRACKING;
         }
         param.max_linesearch = m_lbfgs_max_linesearch;
