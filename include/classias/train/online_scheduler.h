@@ -165,7 +165,7 @@ public:
             "The maximum number of iterations (epochs).");
         par.init("c", &m_c, 1,
             "Coefficient (C) for regularization.");
-        par.init("period", &m_period, 10,
+        par.init("period", &m_period, 20,
             "The period to measure the improvement ratio");
         par.init("epsilon", &m_epsilon, 1e-6,
             "The stopping criterion for the improvement ratio");
@@ -225,7 +225,7 @@ public:
         // Loop for iterations.
         for (int k = 1;k <= m_max_iterations;++k) {
             value_type loss = 0;
-            value_type avg = 0, var = 0;
+            value_type avg = 0, var = 0, nvar = 0;
             clock_t clk = std::clock();
 
             // Send instances to the algorithm.
@@ -267,15 +267,19 @@ public:
                 avg = std::accumulate(pf.begin(), pf.end(), 0.);
                 avg /= pf.size();
                 var = compute_variance(pf.begin(), pf.end(), avg);
+                nvar = fabs(loss);
+                if (1. < nvar) {
+                    nvar = var / nvar;
+                } else {
+                    nvar = var;
+                }
             }
 
             // Report the progress.
             os << "***** Iteration #" << k << " *****" << std::endl;
             m_trainer.report(os);
             if (m_period+1 < k) {
-                os << "Moving average: " << avg << std::endl;
-                os << "Variance: " << var << std::endl;
-                os << "Variance / loss" << (var / loss) << std::endl;
+                os << "Loss variance: " << nvar << std::endl;
             }
             os << "Seconds required for this iteration: " <<
                 (std::clock() - clk) / (double)CLOCKS_PER_SEC << std::endl;
@@ -297,7 +301,7 @@ public:
             os.flush();
 
             // Terminate if the stopping criterion is satisfied.
-            if (avg < m_epsilon) {
+            if (nvar < m_epsilon) {
                 os << "Terminated with the stopping criterion" << std::endl;
                 os << std::endl;
                 os.flush();
