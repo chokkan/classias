@@ -167,7 +167,7 @@ public:
             "Coefficient (C) for regularization.");
         par.init("period", &m_period, 20,
             "The period to measure the improvement ratio");
-        par.init("epsilon", &m_epsilon, 1e-6,
+        par.init("epsilon", &m_epsilon, 1e-4,
             "The stopping criterion for the improvement ratio");
     }
 

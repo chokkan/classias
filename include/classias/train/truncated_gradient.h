@@ -243,7 +243,7 @@ public:
         os << "Feature L1-norm: " << m_report.norm1 << std::endl;
         os << "Feature L2-norm: " << m_report.norm2 << std::endl;
         os << "Learning rate (eta): " << m_eta << std::endl;
-        os << "Active features: " << m_report.num_actives << std::endl;
+        os << "Active features: " << m_report.num_actives << " / " << m_w.size() << std::endl;
         os << "Total number of feature updates: " << m_t-1 << std::endl;
     }
 

@@ -253,8 +253,8 @@ protected:
 
         // Output the current progress.
         os << "***** Iteration #" << k << " *****" << std::endl;
-        os << "Log-likelihood: " << -fx << std::endl;
-        os << "Feature norm: " << xnorm << std::endl;
+        os << "Loss: " << fx << std::endl;
+        os << "Feature L2-norm: " << xnorm << std::endl;
         os << "Error norm: " << gnorm << std::endl;
         os << "Active features: " << num_active << " / " << n << std::endl;
         os << "Line search trials: " << ls << std::endl;
