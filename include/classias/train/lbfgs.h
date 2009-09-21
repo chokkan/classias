@@ -203,7 +203,7 @@ protected:
                 g[i] += (lambda * x[i]);
                 norm += x[i] * x[i];
             }
-            loss += (m_c2 * norm * 0.5);
+            loss += (m_c2 * norm);
 	    }
 
         return loss;
