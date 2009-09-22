@@ -74,6 +74,7 @@ public:
     bool        test;
     bool        false_analysis;
     int         output;
+    double      bias;
 
     char        token_separator;
     char        value_separator;
@@ -88,7 +89,7 @@ public:
         is(_is), os(_os), es(_es),
         mode(MODE_NORMAL),
         test(false), false_analysis(false), output(OUTPUT_MLABEL),
-        token_separator(' '), value_separator(':')
+        bias(1.0), token_separator(' '), value_separator(':')
     {
     }
 };

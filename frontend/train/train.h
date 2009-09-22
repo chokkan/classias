@@ -211,7 +211,7 @@ train(option& opt)
     os << std::endl;
     os << "Training algorithm: " << opt.algorithm << std::endl;
     os << "Instance shuffle: " << std::boolalpha << opt.shuffle << std::endl;
-    os << "Bias feature generation: " << std::boolalpha << opt.generate_bias << std::endl;
+    os << "Bias feature value: " << opt.bias << std::endl;
     os << "Model file: " << opt.model << std::endl;
     os << "Instance splitting: " << opt.split << std::endl;
     os << "Holdout group: " << opt.holdout << std::endl;

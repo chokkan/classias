@@ -249,11 +249,6 @@ output_model(
 
 int candidate_train(option& opt)
 {
-    if (opt.generate_bias) {
-        // Automatic generation of bias features is not supported for candidate type.
-        throw invalid_algorithm("Automatic generation of bias features is not supported for 'candidate' type.");
-    }
-
     // Branches for training algorithms.
     if (opt.algorithm == "lbfgs.logistic") {
         return train<

@@ -123,6 +123,11 @@ static void usage(std::ostream& os, const char *argv0)
     os << "OPTIONS:" << std::endl;
     os << "  -m, --model=FILE      load the model from FILE" << std::endl;
     os << "  -t, --test            evaluate the tagging performance on the labeled data" << std::endl;
+    os << "  -n, --negative=LABEL  assume LABEL to be a negative label" << std::endl;
+    os << "  -w, --score           output scores for the labels" << std::endl;
+    os << "  -p, --probability     output probabilities for the labels" << std::endl;
+    os << "  -k, --comment         output commentlines for the tagging output" << std::endl;
+    os << "  -q, --quiet           suppress tagging results from the output" << std::endl;
     os << "  -s, --token-separator=SEP assume SEP character as a token separator:" << std::endl;
     os << "      ' ',  s, spc, space       a SPACE (' ') character (DEFAULT)" << std::endl;
     os << "      '\\t', t, tab              a TAB ('\\t') character" << std::endl;
@@ -131,11 +136,6 @@ static void usage(std::ostream& os, const char *argv0)
     os << "      ':',  c, colon            a COLON (':') character (DEFAULT)" << std::endl;
     os << "      '=',  e, equal            a EQUAL ('=') character" << std::endl;
     os << "      '|',  b, bar              a BAR ('|') character" << std::endl;
-    os << "  -n, --negative=LABEL  assume LABEL to be a negative label" << std::endl;
-    os << "  -w, --score           output scores for the labels" << std::endl;
-    os << "  -p, --probability     output probabilities for the labels" << std::endl;
-    os << "  -k, --comment         output commentlines for the tagging output" << std::endl;
-    os << "  -q, --quiet           suppress tagging results from the output" << std::endl;
     os << "  -v, --version         show the version and copyright information" << std::endl;
     os << "  -h, --help            show this help message and exit" << std::endl;
     os << std::endl;

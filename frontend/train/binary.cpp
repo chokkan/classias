@@ -114,8 +114,8 @@ read_line(
     }
 
     // Include a bias feature if necessary.
-    if (opt.generate_bias) {
-        instance.append(features("__BIAS__"), 1.);
+    if (opt.bias != 0.) {
+        instance.append(features("__BIAS__"), opt.bias);
     }
 }
 
@@ -134,7 +134,7 @@ read_stream(
     typedef typename data_type::instance_type instance_type;
 
     // If necessary, generate a bias attribute here to reserve feature #0.
-    if (opt.generate_bias) {
+    if (opt.bias != 0.) {
         int fid = (int)data.attributes("__BIAS__");
         if (fid != 0) {
             throw invalid_data("A bias attribute could not obtain #0");
@@ -203,6 +203,7 @@ output_model(
 
     // Output a model type.
     os << "@classias\tlinear\tbinary" << std::endl;
+    os << "@bias\t" << opt.bias << std::endl;
 
     // Store the feature weights.
     for (aid_type i = 0;i < attributes.size();++i) {

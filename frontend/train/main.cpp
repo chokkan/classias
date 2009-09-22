@@ -108,8 +108,8 @@ public:
         ON_OPTION(SHORTOPT('f') || LONGOPT("shuffle"))
             shuffle = true;
 
-        ON_OPTION(SHORTOPT('b') || LONGOPT("generate-bias"))
-            generate_bias = true;
+        ON_OPTION_WITH_ARG(SHORTOPT('b') || LONGOPT("bias"))
+            bias = atof(arg);
 
         ON_OPTION_WITH_ARG(SHORTOPT('m') || LONGOPT("model"))
             model = arg;
@@ -210,7 +210,7 @@ static void usage(std::ostream& os, const char *argv0)
     os << "                        specified by '-t' or '--type' to see the list of the" << std::endl;
     os << "                        algorithm-specific parameters" << std::endl;
     os << "  -f, --shuffle         shuffle (reorder) instances in the data" << std::endl;
-    os << "  -b, --generate-bias   insert bias features automatically" << std::endl;
+    os << "  -b, --bias=VALUE      insert bias features with their values VALUE" << std::endl;
     os << "  -m, --model=FILE      store the model to FILE (DEFAULT=''); if the value is" << std::endl;
     os << "                        empty, this utility does not store the model" << std::endl;
     os << "  -g, --split=N         split the instances into N groups; this option is" << std::endl;

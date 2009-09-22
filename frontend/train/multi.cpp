@@ -110,8 +110,8 @@ read_line(
     }
 
     // Include a bias feature if necessary.
-    if (opt.generate_bias) {
-        instance.append(attributes("__BIAS__"), 1.);
+    if (opt.bias != 0.) {
+        instance.append(attributes("__BIAS__"), opt.bias);
     }
 }
 
@@ -130,7 +130,7 @@ read_stream(
     typedef typename data_type::instance_type instance_type;
 
     // If necessary, generate a bias attribute here to reserve feature #0.
-    if (opt.generate_bias) {
+    if (opt.bias != 0.) {
         int aid = (int)data.attributes("__BIAS__");
         if (aid != 0) {
             throw invalid_data("A bias attribute could not obtain #0");
@@ -177,7 +177,7 @@ finalize_data(
     typedef int int_t;
 
     // If necessary, reserve early feature numbers for bias features.
-    if (opt.generate_bias) {
+    if (opt.bias != 0.) {
         int_t aid = (int_t)data.attributes("__BIAS__");
         if (aid != 0) {
             throw invalid_data("A bias attribute could not obtain #0");
@@ -220,6 +220,7 @@ output_model(
     // Output a model type.
     os << "@classias\tlinear\tmulti\t";
     os << data.feature_generator.name() << std::endl;
+    os << "@bias\t" << opt.bias << std::endl;
 
     // Output a set of labels.
     for (int_t l = 0;l < data.num_labels();++l) {

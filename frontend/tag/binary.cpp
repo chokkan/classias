@@ -96,7 +96,7 @@ static void
 read_model(
     model_type& model,
     std::istream& is,
-    const option& opt
+    option& opt
     )
 {
     for (;;) {
@@ -104,6 +104,11 @@ read_model(
         std::getline(is, line);
         if (is.eof()) {
             break;
+        }
+
+        if (line.compare(0, 6, "@bias\t") == 0) {
+            opt.bias = std::atof(line.c_str() + 6);
+            continue;
         }
 
         int pos = line.find('\t');
