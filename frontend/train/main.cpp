@@ -172,12 +172,12 @@ static void usage(std::ostream& os, const char *argv0)
     os << "USAGE: " << argv0 << " [OPTIONS] [DATA1] [DATA2] ..." << std::endl;
     os << "This utility trains a model from training data set(s)." << std::endl;
     os << std::endl;
-    os << "  DATA    file(s) corresponding to a data set for training; if multiple N files" << std::endl;
-    os << "          are specified, this utility assumes a data set to be split into N" << std::endl;
-    os << "          groups and sets a group number (1...N) to the instances in each file;" << std::endl;
-    os << "          if no file is specified, the tool reads a data set from STDIN;" << std::endl;
-    os << "          if a file name has an extension '.gz', '.bz2', and '.xz', the utility" << std::endl;
-    os << "          uses 'gzip', 'bzip2', and 'xv' to decompress the input file" << std::endl;
+    os << "  DATA    file(s) corresponding to data set(s) for training; if multiple N files" << std::endl;
+    os << "          are specified, this utility assigns a group number (1...N) to the" << std::endl;
+    os << "          instances in each file if no file is specified, the utility reads a" << std::endl;
+    os << "          data set from STDIN; if a file name has an extension '.gz', '.bz2'," << std::endl;
+    os << "          and '.xz', the utility uses 'gzip', 'bzip2', and 'xv' to decompress" << std::endl;
+    os << "          the input file" << std::endl;
     os << std::endl;
     os << "OPTIONS:" << std::endl;
     os << "  -t, --type=TYPE       specify a task type (DEFAULT='multi-dense'):" << std::endl;
@@ -196,18 +196,20 @@ static void usage(std::ostream& os, const char *argv0)
     os << "                            consists of a class label and features; an instance" << std::endl;
     os << "                            ends with a directive line '@eoi'" << std::endl;
     os << "  -a, --algorithm=NAME  specify a training algorithm (DEFAULT='lbfgs.logistic')" << std::endl;
-    os << "      lbfgs.logistic        logistic regression by L-BFGS" << std::endl;
+    os << "      lbfgs.logistic        L1/L2-regularized logistic regression (LR) by L-BFGS" << std::endl;
     os << "      averaged_perceptron   averaged perceptron" << std::endl;
-    os << "      pegasos.logistic      logistic regression by Pegasos" << std::endl;
-    os << "      pegasos.hinge         linear SVM (hinge loss) by Pegasos" << std::endl;
-    os << "      truncated_gradient.logistic   logistic regression by Truncated Gradient" << std::endl;
-    os << "      truncated_gradient.hinge      linear SVM (hinge loss) by Truncated Gradient" << std::endl;
+    os << "      pegasos.logistic      L2-regularized LR by Pegasos" << std::endl;
+    os << "      pegasos.hinge         L2-regularized linear L1-loss SVM by Pegasos" << std::endl;
+    os << "      truncated_gradient.logistic" << std::endl;
+    os << "                            L1-regularized LR by Truncated Gradient" << std::endl;
+    os << "      truncated_gradient.hinge" << std::endl;
+    os << "                            L1-regularized L1-loss SVM by Truncated Gradient" << std::endl;
     os << "  -p, --set=NAME=VALUE  set the algorithm-specific parameter NAME to VALUE;" << std::endl;
     os << "                        use '-H' or '--help-parameters' with the algorithm name" << std::endl;
     os << "                        specified by '-a' or '--algorithm' and the task type" << std::endl;
     os << "                        specified by '-t' or '--type' to see the list of the" << std::endl;
     os << "                        algorithm-specific parameters" << std::endl;
-    os << "  -f, --shuffle         shuffle instances in the data" << std::endl;
+    os << "  -f, --shuffle         shuffle (reorder) instances in the data" << std::endl;
     os << "  -b, --generate-bias   insert bias features automatically" << std::endl;
     os << "  -m, --model=FILE      store the model to FILE (DEFAULT=''); if the value is" << std::endl;
     os << "                        empty, this utility does not store the model" << std::endl;
@@ -232,7 +234,8 @@ static void usage(std::ostream& os, const char *argv0)
     os << "      '|',  b, bar              a BAR ('|') character" << std::endl;
     os << "  -h, --help            show this help message and exit" << std::endl;
     os << "  -H, --help-parameters show the help message of algorithm-specific parameters;" << std::endl;
-    os << "                        specify an algorithm with '-a' or '--algorithm' option" << std::endl;
+    os << "                        specify an algorithm with '-a' or '--algorithm' option," << std::endl;
+    os << "                        and specify a task type with '-t' or '--task' option" << std::endl;
     os << std::endl;
 }
 
