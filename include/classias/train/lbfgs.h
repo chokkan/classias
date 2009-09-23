@@ -144,22 +144,22 @@ public:
             "Coefficient for L1-regularization.");
         m_params.init("c2", &m_c2, 1.0,
             "Coefficient for L2-regularization.");
-        m_params.init("lbfgs.num_memories", &m_lbfgs_num_memories, 6,
+        m_params.init("num_memories", &m_lbfgs_num_memories, 6,
             "The number of corrections to approximate the inverse hessian matrix.");
-        m_params.init("lbfgs.epsilon", &m_lbfgs_epsilon, 1e-5,
+        m_params.init("epsilon", &m_lbfgs_epsilon, 1e-5,
             "Epsilon for testing the convergence of the log likelihood.");
-        m_params.init("lbfgs.stop", &m_lbfgs_stop, 10,
+        m_params.init("stop", &m_lbfgs_stop, 10,
             "The duration of iterations to test the stopping criterion.");
-        m_params.init("lbfgs.delta", &m_lbfgs_delta, 1e-5,
+        m_params.init("delta", &m_lbfgs_delta, 1e-5,
             "The threshold for the stopping criterion; an L-BFGS iteration stops when the\n"
             "improvement of the log likelihood over the last ${lbfgs.stop} iterations is\n"
             "no greater than this threshold.");
-        m_params.init("lbfgs.max_iterations", &m_lbfgs_maxiter, INT_MAX,
+        m_params.init("max_iterations", &m_lbfgs_maxiter, INT_MAX,
             "The maximum number of L-BFGS iterations.");
-        m_params.init("lbfgs.linesearch", &m_lbfgs_linesearch, "MoreThuente",
+        m_params.init("linesearch", &m_lbfgs_linesearch, "MoreThuente",
             "The line search algorithm used in L-BFGS updates:\n"
             "{'MoreThuente': More and Thuente's method, 'Backtracking': backtracking}");
-        m_params.init("lbfgs.max_linesearch", &m_lbfgs_max_linesearch, 20,
+        m_params.init("max_linesearch", &m_lbfgs_max_linesearch, 20,
             "The maximum number of trials for the line search algorithm.");
     }
 
