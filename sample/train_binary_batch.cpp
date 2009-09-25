@@ -41,9 +41,10 @@
 
 #include "strsplit.h"   // necessary for strsplit() and get_id_value().
 
-// Define the type of a training algorithm. Change this type to use a
-// different training algorithm. See /frontend/train/binary.cpp for the
-// examples of other algorithms.
+// Define the type of a training algorithm. This code uses Pegasos algorithm
+// (classias::train::pegasos_binary) with the hinge loss function
+// (classias::classify::linear_binary_hinge). The type of a data set is
+// given by classias::bdata.
 typedef classias::train::online_scheduler_binary<
     classias::bdata,
     classias::train::pegasos_binary<
@@ -51,6 +52,24 @@ typedef classias::train::online_scheduler_binary<
         >
     >
     trainer_type;
+
+// This is an example of training with Averaged Perceptron.
+// #include <classias/train/averaged_perceptron.h>
+// typedef classias::train::online_scheduler_binary<
+//     classias::bdata,
+//     classias::train::averaged_perceptron_binary<
+//         classias::classify::linear_binary<classias::weight_vector>
+//         >
+//     >
+//     trainer_type;
+//
+// This is an example of training with L-BFGS. Do not forget to link this
+// sample program with libLBFGS.
+// #include <classias/train/lbfgs.h>
+// typedef classias::train::lbfgs_logistic_binary<classias::bsdata>
+//     trainer_type;
+//
+// See /frontend/train/binary.cpp for the examples of other algorithms.
 
 int main(int argc, char *argv[])
 {

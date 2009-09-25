@@ -70,7 +70,12 @@ typedef multi_data_with_quark_base<ninstance, quark, quark, sparse_feature_gener
 };
 
 /**
-@mainpage Classias: a template class library for classifiers
+@mainpage Classias: C++ Template Class Library for Classification
+
+@section sample Sample programs
+- @ref sample_train_binary_batch "Training a binary classifier on a data set"
+- @ref sample_train_binary_online "Training a binary classifier with real online setting"
+- @ref sample_tag_binary "Binary classifier"
 
 @section class_ref Class reference
 - Instance types
@@ -83,15 +88,15 @@ typedef multi_data_with_quark_base<ninstance, quark, quark, sparse_feature_gener
 - Data set
     - Binary data set:
         \ref classias::binary_data_base
-    - Binary data set with a quark for attributes:
+    - Binary data set with a string quark for attributes:
         \ref classias::binary_data_with_quark_base
     - Multi-class data set:
         \ref classias::multi_data_base
-    - Multi-class data set with quarks for attributes and labels:
+    - Multi-class data set with string quarks for attributes and labels:
         \ref classias::multi_data_with_quark_base
     - Candidate data set:
         \ref classias::candidate_data_base
-    - Candidate data set with quarks for attributes and labels:
+    - Candidate data set with string quarks for attributes and labels:
         \ref classias::candidate_data_with_quark_base
 - Feature generators
     - Dummy feature generator for candidate instances:
@@ -112,13 +117,13 @@ typedef multi_data_with_quark_base<ninstance, quark, quark, sparse_feature_gener
     - Linear multi classifier with soft-max function:
         \ref classias::classify::linear_binary_logistic
 - Batch training algorithms
-    - Gradient descent with L-BFGS for logistic regression:
+    - Gradient descent with L-BFGS/OW-LQN for logistic regression:
         \ref classias::train::lbfgs_logistic_binary
-    - Gradient descent with L-BFGS for multi-class logistic regression:
+    - Gradient descent with L-BFGS/OW-LQN for multi-class logistic regression:
         \ref classias::train::lbfgs_logistic_multi
-    - Scheduler for online-training algorithms for binary classification:
+    - Scheduler for applying an online-training algorithm to a data set for binary classification:
         \ref classias::train::online_scheduler_binary
-    - Scheduler for online-training algorithms for multi classification:
+    - Scheduler for applying an online-training algorithm to a data set for multi classification:
         \ref classias::train::online_scheduler_multi
 - Online training algorithms
     - Averaged perceptron for binary classification:
@@ -140,9 +145,9 @@ typedef multi_data_with_quark_base<ninstance, quark, quark, sparse_feature_gener
         \ref classias::group_base
     - Sparse vector:
         \ref classias::sparse_vector_base
-    - Quark with one item:
+    - Quark with one item (item-to-integer mapping):
         \ref classias::quark_base
-    - Quark with two items:
+    - Quark with two items (item-pair-to-integer mapping):
         \ref classias::quark2_base
     - Quark exception:
         \ref classias::quark_error
@@ -156,5 +161,50 @@ typedef multi_data_with_quark_base<ninstance, quark, quark, sparse_feature_gener
     - Exception class for parameter exchange
         \ref classias::unknown_parameter
 **/
+
+/**
+@defgroup sample_train_binary_batch Training a binary classifier on a data set
+@{
+
+@section Description
+This code trains a model of binary classifier by using a data set read from
+STDIN, and writes the resultant model to STDOUT. This code assumes that
+features in the data set are represented by integer identifiers.
+
+@include train_binary_batch.cpp
+
+@}
+*/
+
+/**
+@defgroup sample_train_binary_online Training a binary classifier with real online setting
+@{
+
+@section Description
+This code trains a model of binary classifier with a real online setting,
+i.e., the code reads each instance from STDIN, updates the model based on the
+instance without storing it into an instance collection. This code assumes
+that features in the data set are represented by integer identifiers.
+
+@include train_binary_online.cpp
+
+@}
+*/
+
+/**
+@defgroup sample_tag_binary Binary classifier
+@{
+
+@section Description
+This code reads a model of binary classifier from the file specified in the
+first argument, reads a labeled or unlabeled data from STDIN, and writes the
+predictions into STDOUT. If the input data is labeled, this code computes
+the accuracy of the classification model.
+
+@include tag_binary.cpp
+
+@}
+*/
+
 
 #endif/*__CLASSIAS_CLASSIAS_H__*/

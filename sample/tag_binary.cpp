@@ -119,14 +119,16 @@ int main(int argc, char *argv[])
             // Reset the classifier.
             cla.clear();
 
-            // Loop over the features.
+            // field[0] must be empty or a label (for evaluation).
+
+            // Loop over the features in the current instance.
             for (size_t i = 1;i < fields.size();++i) {
                 // Split the field into a feature identifier and value.
                 int fid;
                 double value;
                 get_id_value(fields[i], fid, value, ':');
 
-                // Set the feature weight to the classifier.
+                // Set the feature and its value to the classifier.
                 cla.set(fid, value);
             }
 
@@ -135,7 +137,7 @@ int main(int argc, char *argv[])
             os << (ml ? "+1" : "-1") << std::endl;
 
             // Accumulate the accuracy.
-            if (fields[0] == "+1" || fields[0] == "-1") {
+            if (fields[0] == "+1" || fields[0] == "1"  || fields[0] == "-1") {
                 bool rl = (fields[0] != "-1");
                 acc.set(rl == ml);
             }

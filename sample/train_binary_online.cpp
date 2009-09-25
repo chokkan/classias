@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 
         // The line must have at least a label and a feature.
         if (fields.size() > 2) {
-            // Create a new instance in the data set.
+            // An instance object.
             classias::binstance inst;
             // Set the boolean label for the instance.
             inst.set_label(fields[0] != "-1");
