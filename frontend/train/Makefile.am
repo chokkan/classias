@@ -2,14 +2,14 @@
 
 bin_PROGRAMS = classias-train
 #man_MANS = classias.1
-#EXTRA_DIST = ${man_MANS}
+EXTRA_DIST = ${man_MANS} \
+	../contrib/libexecstream/posix/exec-stream-helpers.h \
+	../contrib/libexecstream/posix/exec-stream-helpers.cpp \
+	../contrib/libexecstream/posix/exec-stream-impl.cpp
 
 classias_train_SOURCES = \
 	../contrib/libexecstream/exec-stream.cpp \
 	../contrib/libexecstream/exec-stream.h \
-	../contrib/libexecstream/posix/exec-stream-helpers.h \
-	../contrib/libexecstream/posix/exec-stream-helpers.cpp \
-	../contrib/libexecstream/posix/exec-stream-impl.cpp \
 	../include/optparse.h \
 	../include/tokenize.h \
 	../include/util.h \

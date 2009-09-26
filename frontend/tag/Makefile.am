@@ -11,6 +11,7 @@ classias_tag_SOURCES = \
 	../include/tokenize.h \
 	../include/util.h \
 	option.h \
+	defaultmap.h \
 	binary.cpp \
 	multi.cpp \
 	candidate.cpp \
