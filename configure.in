@@ -117,26 +117,26 @@ AC_ARG_WITH(
 	[AS_HELP_STRING([--with-liblbfgs=DIR],[liblbfgs directory])],
 	[INCLUDES="-I${withval}/include ${INCLUDES}"; LDFLAGS="-L${withval}/lib ${LDFLAGS}"]
 )
-AC_ARG_WITH(
-	boost,
-	[AS_HELP_STRING([--with-boost=DIR],[boost directory])],
-	[INCLUDES="-I${withval}/include ${INCLUDES}"; LDFLAGS="-L${withval}/lib ${LDFLAGS}"]
-)
+dnl AC_ARG_WITH(
+dnl 	boost,
+dnl 	[AS_HELP_STRING([--with-boost=DIR],[boost directory])],
+dnl 	[INCLUDES="-I${withval}/include ${INCLUDES}"; LDFLAGS="-L${withval}/lib ${LDFLAGS}"]
+dnl )
 AC_ARG_WITH(
 	boost-include,
 	[AS_HELP_STRING([--with-boost-include=DIR],[boost include directory])],
 	[INCLUDES="-I${withval} ${INCLUDES}"]
 )
-AC_ARG_WITH(
-	boost-lib,
-	[AS_HELP_STRING([--with-boost-lib=DIR],[boost library directory])],
-	[LDFLAGS="-L${withval} ${LDFLAGS}"]
-)
-AC_ARG_WITH(
-	boost-postfix,
-	[AS_HELP_STRING([--with-boost-postfix=STR],[boost postfix])],
-	[BOOST_POSTFIX="${withval}"]
-)
+dnl AC_ARG_WITH(
+dnl 	boost-lib,
+dnl 	[AS_HELP_STRING([--with-boost-lib=DIR],[boost library directory])],
+dnl 	[LDFLAGS="-L${withval} ${LDFLAGS}"]
+dnl )
+dnl AC_ARG_WITH(
+dnl 	boost-postfix,
+dnl 	[AS_HELP_STRING([--with-boost-postfix=STR],[boost postfix])],
+dnl 	[BOOST_POSTFIX="${withval}"]
+dnl )
 
 CPPFLAGS_saved="${CPPFLAGS}"
 CPPFLAGS="${INCLUDES} ${CPPFLAGS}"
@@ -150,8 +150,8 @@ AC_CHECK_LIB(lbfgs, lbfgs)
 AC_CHECK_HEADERS(tr1/unordered_map)
 AC_CHECK_HEADERS(boost/unordered_map.hpp)
 
-AC_CHECK_HEADERS(boost/regex.hpp)
-AC_CHECK_LIB(boost_regex${BOOST_POSTFIX}, main)
+dnl AC_CHECK_HEADERS(boost/regex.hpp)
+dnl AC_CHECK_LIB(boost_regex${BOOST_POSTFIX}, main)
 
 CPPFLAGS="${CPPFLAGS_saved}"
 INCLUDES="-I\$(top_srcdir) -I\$(top_srcdir)/include -I\$(srcdir) ${INCLUDES}"
