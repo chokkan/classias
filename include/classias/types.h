@@ -388,9 +388,9 @@ public:
 
 template <
     class type,
-    class allocator_type = std::allocator<type>
+    class alloc_type = std::allocator<type>
     >
-class default_vector : public std::vector<type, allocator_type>
+class default_vector : public std::vector<type, alloc_type>
 {
 public:
     typedef std::vector<type, allocator_type> base_type;
