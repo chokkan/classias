@@ -132,7 +132,7 @@ public:
      */
     precall(int N) : m_n(N)
     {
-        m_stat = new label_stat[N];
+        m_stat = 0 < N ? new label_stat[N] : NULL;
     }
 
     /**
@@ -140,7 +140,10 @@ public:
      */
     virtual ~precall()
     {
-        delete[] m_stat;
+        if (m_stat != NULL) {
+            delete[] m_stat;
+            m_stat = NULL;
+        }
     }
 
     /**
@@ -359,7 +362,9 @@ static void holdout_evaluation_multi(
 
         int argmax = cls.argmax();
         acc.set(argmax == it->get_label());
-        pr.set(argmax, it->get_label());
+        if (!acconly) {    
+            pr.set(argmax, it->get_label());
+        }
     }
 
     // Report accuracy, precision, recall, and f1 score.
