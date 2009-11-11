@@ -198,11 +198,14 @@ public:
      *  @param  holdout     The group number for holdout evaluation. Specify
      *                      a negative value if a holdout evaluation is
      *                      unnecessary.
+     *  @param  acconly     Unused (reserved only for the compatibility with
+     *                      multi-class classification).
      */
     void train(
         const data_type& data,
         std::ostream& os,
-        int holdout = -1
+        int holdout = -1,
+        bool acconly = true
         )
     {
         // Ring buffer for moving averages.
@@ -429,11 +432,14 @@ public:
      *  @param  holdout     The group number for holdout evaluation. Specify
      *                      a negative value if a holdout evaluation is
      *                      unnecessary.
+     *  @param  acconly     The flag indicating whether precision, recall, and
+     *                      F1 scores are unnecessary.
      */
     void train(
         const data_type& data,
         std::ostream& os,
-        int holdout = -1
+        int holdout = -1,
+        bool acconly = true
         )
     {
         // Ring buffer for moving averages.
@@ -531,6 +537,7 @@ public:
                     cla,
                     data.feature_generator,
                     holdout,
+                    acconly,
                     data.positive_labels.begin(),
                     data.positive_labels.end()
                     );

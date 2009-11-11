@@ -248,7 +248,12 @@ train(option& opt)
 
             os << "===== Cross validation (" << (i + 1) << "/" << num_groups << ") =====" << std::endl;
             sw.start();
-            trainer.train(data, opt.os, i);
+            trainer.train(
+                data,
+                opt.os,
+                i,
+                (opt.type == option::TYPE_CANDIDATE)
+                );
             sw.stop();
             os << "Seconds required: " << sw.get() << std::endl;
             os << std::endl;
@@ -260,7 +265,12 @@ train(option& opt)
 
         // Start training.
         sw.start();
-        trainer.train(data, opt.os, (0 < opt.holdout ? (opt.holdout-1) : -1));
+        trainer.train(
+            data,
+            opt.os,
+            (0 < opt.holdout ? (opt.holdout-1) : -1),
+            (opt.type == option::TYPE_CANDIDATE)
+            );
         sw.stop();
         os << "Seconds required: " << sw.get() << std::endl;
         os << std::endl;

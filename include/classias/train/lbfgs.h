@@ -482,11 +482,14 @@ public:
      *  @param  holdout     The group number for holdout evaluation. Specify
      *                      a negative value if a holdout evaluation is
      *                      unnecessary.
+     *  @param  acconly     Unused (reserved only for the compatibility with
+     *                      multi-class classification).
      */
     void train(
         const data_type& data,
         std::ostream& os,
-        int holdout = -1
+        int holdout = -1,
+        bool acconly = true
         )
     {
         // Initialize the weight vector.
@@ -573,6 +576,8 @@ protected:
     value_type *m_oexps;
     /// A data set for training.
     const data_type* m_data;
+    /// The flag indicating whether 
+    bool m_acconly;
 
 public:
     /**
@@ -582,6 +587,7 @@ public:
     {
         m_oexps = NULL;
         m_data = NULL;
+        m_acconly = true;
         clear();
     }
 
@@ -669,11 +675,14 @@ public:
      *  @param  holdout     The group number for holdout evaluation. Specify
      *                      a negative value if a holdout evaluation is
      *                      unnecessary.
+     *  @param  acconly     The flag indicating whether precision, recall, and
+     *                      F1 scores are unnecessary.
      */
     void train(
         const data_type& data,
         std::ostream& os,
-        int holdout = -1
+        int holdout = -1,
+        bool acconly = true
         )
     {
         const size_t K = data.num_features();
@@ -708,6 +717,7 @@ public:
 
         // Call the L-BFGS solver.
         m_data = &data;
+        m_acconly = acconly;
         int ret = lbfgs_solve(
             (const int)K,
             os,
@@ -734,6 +744,7 @@ protected:
             cla,
             this->m_data->feature_generator,
             this->m_holdout,
+            this->m_acconly,
             this->m_data->positive_labels.begin(),
             this->m_data->positive_labels.end()
             );

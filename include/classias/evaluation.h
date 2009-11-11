@@ -327,6 +327,7 @@ static void holdout_evaluation_multi(
     classifier_type& cls,
     feature_generator_type& fgen,
     int holdout,
+    bool acconly,
     label_iterator_type label_first,
     label_iterator_type label_last
     )
@@ -363,8 +364,10 @@ static void holdout_evaluation_multi(
 
     // Report accuracy, precision, recall, and f1 score.
     acc.output(os);
-    pr.output_micro(os, label_first, label_last);
-    pr.output_macro(os, label_first, label_last);
+    if (!acconly) {
+        pr.output_micro(os, label_first, label_last);
+        pr.output_macro(os, label_first, label_last);
+    }
 }
 
 };
