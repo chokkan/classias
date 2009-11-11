@@ -110,9 +110,7 @@ public:
     inline void clear()
     {
         m_argmax = -1;
-        for (int i = 0;i < this->size();++i) {
-            m_scores[i] = 0.;
-        }
+        m_scores.clear();
     }
 
     /**

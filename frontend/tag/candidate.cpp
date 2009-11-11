@@ -108,9 +108,9 @@ parse_line(
     label = *itv;
 
     // Set the truth value for this candidate.
-    if (name.compare(0, 1, "+") == 0 || name.compare(0, 1, "T") == 0) {
+    if (label.compare(0, 1, "+") == 0 || label.compare(0, 1, "T") == 0) {
         truth = true;
-    } else if (name.compare(0, 1, "-") == 0 || name.compare(0, 1, "F") == 0) {
+    } else if (label.compare(0, 1, "-") == 0 || label.compare(0, 1, "F") == 0) {
         truth = false;
     } else {
         throw invalid_data("a class label must begins with '+', 'T', '-', or 'F'", line, lines);
@@ -203,6 +203,7 @@ int candidate_tag(option& opt, std::ifstream& ifs)
         if (line.compare(0, 4, "@boi") == 0) {
             rl = -1;
             inst.clear();
+            labels.clear();
 
         } else if (line == "@eoi") {
             inst.finalize();
@@ -231,7 +232,7 @@ int candidate_tag(option& opt, std::ifstream& ifs)
             bool truth = false;
             parse_line(inst, fgen, label, truth, opt, line, lines);
             if (truth) {
-                rl = inst.size();
+                rl = inst.size() - 1;
             }
             labels.push_back(label);
             if (labels.size() != inst.size()) {
