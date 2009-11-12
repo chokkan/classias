@@ -105,16 +105,16 @@ parse_line(
         throw invalid_data("an empty label found", line, lines);
     }
 
-    label = *itv;
-
     // Set the truth value for this candidate.
-    if (label.compare(0, 1, "+") == 0 || label.compare(0, 1, "T") == 0) {
+    if (itv->compare(0, 1, "+") == 0) {
         truth = true;
-    } else if (label.compare(0, 1, "-") == 0 || label.compare(0, 1, "F") == 0) {
+    } else if (itv->compare(0, 1, "-") == 0) {
         truth = false;
     } else {
-        throw invalid_data("a class label must begins with '+', 'T', '-', or 'F'", line, lines);
+        throw invalid_data("a class label must begins with '+' or '-'", line, lines);
     }
+
+    label = itv->substr(1);
 
     // Create a new candidate.
     int i = inst.size();

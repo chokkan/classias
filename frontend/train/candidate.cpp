@@ -100,12 +100,12 @@ read_line(
 
     // Set the truth value for this candidate.
     bool truth = false;
-    if (name.compare(0, 1, "+") == 0 || name.compare(0, 1, "T") == 0) {
+    if (name.compare(0, 1, "+") == 0) {
         truth = true;
-    } else if (name.compare(0, 1, "-") == 0 || name.compare(0, 1, "F") == 0) {
+    } else if (name.compare(0, 1, "-") == 0) {
         truth = false;
     } else {
-        throw invalid_data("a class label must begins with '+', 'T', '-', or 'F'", line, lines);
+        throw invalid_data("a class label must begins with '+' or '-'", line, lines);
     }
 
     // Create a new candidate.
