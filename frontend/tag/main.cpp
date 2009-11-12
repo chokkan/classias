@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
     } else if (opt.mode == option::MODE_VERSION) {
         // Show the copyright information.
         os << CLASSIAS_NAME " ";
-        os << CLASSIAS_MAJOR_VERSION << "." << CLASSIAS_MINOR_VERSION << " ";
+        os << CLASSIAS_VERSION << " ";
         os << "tagger ";
         os << CLASSIAS_COPYRIGHT << std::endl;
         os << std::endl;

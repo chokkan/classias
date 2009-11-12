@@ -251,7 +251,7 @@ int main(int argc, char *argv[])
 
     // Show the copyright information.
     os << CLASSIAS_NAME " ";
-    os << CLASSIAS_MAJOR_VERSION << "." << CLASSIAS_MINOR_VERSION << " ";
+    os << CLASSIAS_VERSION << " ";
     os << "trainer ";
     os << CLASSIAS_COPYRIGHT << std::endl;
     os << std::endl;
