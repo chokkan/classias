@@ -189,6 +189,13 @@ read_stream(
             }
 
         } else if (line == "@eoi") {
+            if (data.empty()) {
+                throw invalid_data("Declarative @eoi found before a declarative @boi", line, lines);
+            }
+
+            if (data.back().get_label() < 0) {
+                throw invalid_data("No true candidate exists in the current instance", line, lines);
+            }
 
         } else {
             // A new candidate.

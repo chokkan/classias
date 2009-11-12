@@ -309,6 +309,7 @@ public:
     inline void clear()
     {
         candidates.clear();
+        m_label = -1;
     }
 
     /**
