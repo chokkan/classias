@@ -73,7 +73,7 @@ public:
 
 protected:
     /// The model.
-    model_type& m_model;
+    const model_type& m_model;
     /// The score of this instance.
     value_type m_score;
 
@@ -82,7 +82,7 @@ public:
      * Constructs an object.
      *  @param  model       The model associated with the classifier.
      */
-    linear_binary(model_type& model)
+    linear_binary(const model_type& model)
         : m_model(model)
     {
         clear();
@@ -208,7 +208,7 @@ public:
      * Constructs an object.
      *  @param  model       The model associated with the classifier.
      */
-    linear_binary_logistic(model_type& model)
+    linear_binary_logistic(const model_type& model)
         : base_type(model)
     {
     }

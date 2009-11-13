@@ -45,9 +45,9 @@ public:
         }
     }
 
-    const type_type& operator[](const key_type& key) const
+    const type_type operator[](const key_type& key) const
     {
-        iterator it = this->find(key);
+        const_iterator it = this->find(key);
         return (it != this->end() ? it->second : 0);
     }
 };

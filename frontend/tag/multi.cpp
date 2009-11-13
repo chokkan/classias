@@ -114,8 +114,8 @@ parse_line(
     rl = name;
 
     // Initialize the classifier.
-    inst.resize(labels.size());
     inst.clear();
+    inst.resize(labels.size());
 
     // Set attributes for the instance.
     for (++itv;itv != values.end();++itv) {
@@ -176,7 +176,7 @@ read_model(
             throw invalid_model("feature name is missing", line);
         }
 
-        model[line.substr(pos)] = w;
+        model.insert(model_type::pair_type(line.substr(pos), w));
     }
 }
 

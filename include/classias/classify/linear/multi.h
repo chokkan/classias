@@ -79,7 +79,7 @@ protected:
     typedef std::vector<value_type> scores_type;
 
     /// The model.
-    model_type&     m_model;
+    const model_type& m_model;
     /// The scores of labels.
     scores_type     m_scores;
     /// The index of the label that gives the highest score.
@@ -90,7 +90,7 @@ public:
      * Constructs an instance.
      *  @param  model       The model associated with the classifier.
      */
-    linear_multi(model_type& model)
+    linear_multi(const model_type& model)
         : m_model(model)
     {
         clear();
@@ -302,7 +302,7 @@ public:
      * Constructs an instance.
      *  @param  model       The model associated with the classifier.
      */
-    linear_multi_logistic(model_type& model)
+    linear_multi_logistic(const model_type& model)
         : base_type(model), m_lognorm(0)
     {
         clear();
