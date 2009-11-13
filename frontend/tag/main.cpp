@@ -98,7 +98,7 @@ public:
             output |= OUTPUT_COMMENT;
 
         ON_OPTION(SHORTOPT('q') || LONGOPT("quiet"))
-            output = OUTPUT_NONE;
+            output &= OUTPUT_NONE_MASK;
 
         ON_OPTION_WITH_ARG(SHORTOPT('n') || LONGOPT("negative"))
             negative_labels.insert(arg);

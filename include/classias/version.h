@@ -35,6 +35,6 @@
 
 #define	CLASSIAS_NAME           "Classias"
 #define	CLASSIAS_COPYRIGHT      "Copyright (c) 2008,2009 Naoaki Okazaki"
-#define	CLASSIAS_VERSION        "1.0.2"
+#define	CLASSIAS_VERSION        "1.0.3"
 
 #endif/*__CLASSIAS_VERSION_H__*/
