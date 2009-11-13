@@ -91,6 +91,9 @@ public:
                 throw invalid_value(ss.str());
             }
 
+        ON_OPTION(SHORTOPT('a') || LONGOPT("all"))
+            output |= OUTPUT_ALL;
+
         ON_OPTION(SHORTOPT('k') || LONGOPT("comment"))
             output |= OUTPUT_COMMENT;
 
@@ -126,7 +129,8 @@ static void usage(std::ostream& os, const char *argv0)
     os << "  -n, --negative=LABEL  assume LABEL to be a negative label" << std::endl;
     os << "  -w, --score           output scores for the labels" << std::endl;
     os << "  -p, --probability     output probabilities for the labels" << std::endl;
-    os << "  -k, --comment         output commentlines for the tagging output" << std::endl;
+    os << "  -a, --all             output all candidate labels in the tagging output" << std::endl;
+    os << "  -k, --comment         output comment lines in the tagging output" << std::endl;
     os << "  -q, --quiet           suppress tagging results from the output" << std::endl;
     os << "  -s, --token-separator=SEP assume SEP character as a token separator:" << std::endl;
     os << "      ' ',  s, spc, space       a SPACE (' ') character (DEFAULT)" << std::endl;

@@ -38,6 +38,7 @@
 #include <iostream>
 #include <iterator>
 #include <string>
+#include <vector>
 
 #include <classias/classias.h>
 #include <classias/classify/linear/multi.h>
@@ -164,6 +165,7 @@ int candidate_tag(option& opt, std::ifstream& ifs)
     feature_generator fgen;
     std::istream& is = opt.is;
     std::ostream& os = opt.os;
+    std::vector<std::string> comments;
 
     // Load a model.
     model_type model;
@@ -193,9 +195,15 @@ int candidate_tag(option& opt, std::ifstream& ifs)
 
         // A comment line.
         if (line.compare(0, 1, "#") == 0) {
-            // Output the comment line if necessary.
             if (opt.output & option::OUTPUT_COMMENT) {
-                os << line << std::endl;
+                if (0 < inst.size()) {
+                    // Store the comment line to the current instance.
+                    comments[inst.size()-1] += line;
+                    comments[inst.size()-1] += '\n';
+                } else {
+                    // Output the comment line if necessary.
+                    os << line << std::endl;
+                }
             }
             continue;
         }
@@ -205,11 +213,35 @@ int candidate_tag(option& opt, std::ifstream& ifs)
             inst.clear();
             labels.clear();
 
+            if (opt.output & option::OUTPUT_ALL) {
+                os << "@boi" << std::endl;
+            }
+
         } else if (line == "@eoi") {
             inst.finalize();
 
-            // Output the label.
-            if (opt.output & option::OUTPUT_MLABEL) {
+            // Output the tagging result if necessary.
+            if (opt.output & option::OUTPUT_ALL) {
+                // Output all candidates.
+                for (int i = 0;i < inst.size();++i) {
+                    os << ((i == inst.argmax()) ? '+' : '-');
+                    os << labels[i];
+
+                    // Output the probability or score.
+                    if (opt.output & option::OUTPUT_PROBABILITY) {
+                        os << opt.value_separator << inst.prob(i);
+                    } else if (opt.output & option::OUTPUT_SCORE) {
+                        os << opt.value_separator << inst.score(i);
+                    }
+                    os << std::endl;
+
+                    os << comments[i];
+                }
+
+                os << "@eoi" << std::endl;
+
+            } else if (opt.output & option::OUTPUT_MLABEL) {
+                // Output the argmax label.
                 os << labels[inst.argmax()];
 
                 // Output the probability or score.
@@ -237,6 +269,9 @@ int candidate_tag(option& opt, std::ifstream& ifs)
             labels.push_back(label);
             if (labels.size() != inst.size()) {
                 throw invalid_data("", line, lines);
+            }
+            if ((int)comments.size() < inst.size()) {
+                comments.resize(inst.size());
             }
         }
     }
