@@ -212,6 +212,7 @@ int candidate_tag(option& opt, std::ifstream& ifs)
             rl = -1;
             inst.clear();
             labels.clear();
+            comments.clear();
 
             if (opt.output & option::OUTPUT_ALL) {
                 os << "@boi" << std::endl;
@@ -239,6 +240,7 @@ int candidate_tag(option& opt, std::ifstream& ifs)
                 }
 
                 os << "@eoi" << std::endl;
+                os << std::endl;
 
             } else if (opt.output & option::OUTPUT_MLABEL) {
                 // Output the argmax label.
@@ -262,6 +264,7 @@ int candidate_tag(option& opt, std::ifstream& ifs)
             rl = -1;
             inst.clear();
             labels.clear();
+            comments.clear();
 
         } else {
             std::string label;
