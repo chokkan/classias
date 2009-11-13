@@ -235,7 +235,6 @@ int candidate_tag(option& opt, std::ifstream& ifs)
                 }
 
                 os << "@eoi" << std::endl;
-                os << std::endl;
 
             } else if (opt.output & option::OUTPUT_MLABEL) {
                 // Output the argmax label.
