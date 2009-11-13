@@ -188,13 +188,8 @@ int candidate_tag(option& opt, std::ifstream& ifs)
         }
         ++lines;
 
-        // Skip an empty line.
-        if (line.empty()) {
-            continue;
-        }
-
-        // A comment line.
-        if (line.compare(0, 1, "#") == 0) {
+        // An empty line or comment line.
+        if (line.empty() || line.compare(0, 1, "#") == 0) {
             if (opt.output & option::OUTPUT_COMMENT) {
                 if (0 < inst.size()) {
                     // Store the comment line to the current instance.
