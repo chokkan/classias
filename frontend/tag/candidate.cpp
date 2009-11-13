@@ -259,6 +259,10 @@ int candidate_tag(option& opt, std::ifstream& ifs)
                 acc.set(inst.argmax() == rl);
             }
 
+            rl = -1;
+            inst.clear();
+            labels.clear();
+
         } else {
             std::string label;
             bool truth = false;
