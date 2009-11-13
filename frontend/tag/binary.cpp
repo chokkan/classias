@@ -146,8 +146,8 @@ int binary_tag(option& opt, std::ifstream& ifs)
         }
         ++lines;
 
-        // A comment line.
-        if (line.compare(0, 1, "#") == 0) {
+        // An empty line or comment line.
+        if (line.empty() || line.compare(0, 1, "#") == 0) {
             // Output the comment line if necessary.
             if (opt.output & option::OUTPUT_COMMENT) {
                 os << line << std::endl;

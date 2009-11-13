@@ -218,8 +218,8 @@ int multi_tag(option& opt, std::ifstream& ifs)
         }
         ++lines;
 
-        // A comment line.
-        if (line.compare(0, 1, "#") == 0) {
+        // An empty line or comment line.
+        if (line.empty() || line.compare(0, 1, "#") == 0) {
             // Output the comment line if necessary.
             if (opt.output & option::OUTPUT_COMMENT) {
                 os << line << std::endl;
@@ -231,8 +231,30 @@ int multi_tag(option& opt, std::ifstream& ifs)
         std::string rlabel;
         parse_line(inst, fgen, rlabel, labels, opt, line, lines);
 
-        // Output the label.
-        if (opt.output & option::OUTPUT_MLABEL) {
+        // Output the tagging result if necessary.
+        if (opt.output & option::OUTPUT_ALL) {
+            os << "@boi" << std::endl;
+
+            // Output all candidates.
+            for (int i = 0;i < inst.size();++i) {
+                // Output the tagging result and label.
+                os << ((i == inst.argmax()) ? '+' : '-');
+                os << labels.to_item(i);
+
+                // Output the probability or score.
+                if (opt.output & option::OUTPUT_PROBABILITY) {
+                    os << opt.value_separator << inst.prob(i);
+                } else if (opt.output & option::OUTPUT_SCORE) {
+                    os << opt.value_separator << inst.score(i);
+                }
+
+                os << std::endl;
+            }
+
+            os << "@eoi" << std::endl;
+
+        } else if (opt.output & option::OUTPUT_MLABEL) {
+            // Output the label.
             os << labels.to_item(inst.argmax());
 
             // Output the probability or score.

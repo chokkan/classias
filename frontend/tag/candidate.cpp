@@ -204,6 +204,7 @@ int candidate_tag(option& opt, std::ifstream& ifs)
         }
 
         if (line.compare(0, 4, "@boi") == 0) {
+            // Begin of an instance.
             rl = -1;
             inst.clear();
             labels.clear();
@@ -220,6 +221,7 @@ int candidate_tag(option& opt, std::ifstream& ifs)
             if (opt.output & option::OUTPUT_ALL) {
                 // Output all candidates.
                 for (int i = 0;i < inst.size();++i) {
+                    // Output the tagging result and label.
                     os << ((i == inst.argmax()) ? '+' : '-');
                     os << labels[i];
 
@@ -229,8 +231,8 @@ int candidate_tag(option& opt, std::ifstream& ifs)
                     } else if (opt.output & option::OUTPUT_SCORE) {
                         os << opt.value_separator << inst.score(i);
                     }
-                    os << std::endl;
 
+                    os << std::endl;
                     os << comments[i];
                 }
 
