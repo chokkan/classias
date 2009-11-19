@@ -60,7 +60,8 @@ public:
     enum {
         OUTPUT_NONE =           0x0000,
         OUTPUT_MLABEL =         0x0001,
-        OUTPUT_ALL =            0x0002,
+        OUTPUT_FALSE =          0x0002,
+        OUTPUT_ALL =            0x0004,
         OUTPUT_NONE_MASK =      0xFFF0,
         OUTPUT_COMMENT =        0x0004,
         OUTPUT_SCORE =          0x0010,

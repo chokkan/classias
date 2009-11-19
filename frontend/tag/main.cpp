@@ -94,6 +94,9 @@ public:
         ON_OPTION(SHORTOPT('a') || LONGOPT("all"))
             output |= OUTPUT_ALL;
 
+        ON_OPTION(SHORTOPT('f') || LONGOPT("false"))
+            output |= OUTPUT_FALSE;
+
         ON_OPTION(SHORTOPT('k') || LONGOPT("comment"))
             output |= OUTPUT_COMMENT;
 
@@ -130,6 +133,7 @@ static void usage(std::ostream& os, const char *argv0)
     os << "  -w, --score           output scores for the labels" << std::endl;
     os << "  -p, --probability     output probabilities for the labels" << std::endl;
     os << "  -a, --all             output all candidate labels in the tagging output" << std::endl;
+    os << "  -f, --false           output false instances" << std::endl;
     os << "  -k, --comment         output comment lines in the tagging output" << std::endl;
     os << "  -q, --quiet           suppress tagging results from the output" << std::endl;
     os << "  -s, --token-separator=SEP assume SEP character as a token separator:" << std::endl;

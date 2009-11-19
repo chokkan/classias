@@ -125,6 +125,24 @@ read_model(
     }
 }
 
+void output_model_label(
+    std::ostream& os,
+    classifier_type& inst,
+    option& opt
+    )
+{
+    os << (static_cast<bool>(inst) ? "+1" : "-1");
+
+    // Output the probability or score.
+    if (opt.output & option::OUTPUT_PROBABILITY) {
+        os << opt.value_separator << inst.prob();
+    } else if (opt.output & option::OUTPUT_SCORE) {
+        os << opt.value_separator << inst.score();
+    }
+
+    os << std::endl;
+}
+
 int binary_tag(option& opt, std::ifstream& ifs)
 {
     int lines = 0;
@@ -160,18 +178,15 @@ int binary_tag(option& opt, std::ifstream& ifs)
         classifier_type inst(model);
         parse_line(inst, rlabel, opt, line, lines);
 
-        // Output the label.
-        if (opt.output & option::OUTPUT_MLABEL) {
-            os << (static_cast<bool>(inst) ? "+1" : "-1");
-
-            // Output the probability or score.
-            if (opt.output & option::OUTPUT_PROBABILITY) {
-                os << opt.value_separator << inst.prob();
-            } else if (opt.output & option::OUTPUT_SCORE) {
-                os << opt.value_separator << inst.score();
+        if (opt.output & option::OUTPUT_FALSE) {
+            // False analysis
+            if (rlabel != static_cast<bool>(inst)) {
+                os << (rlabel ? "+1" : "-1") << opt.token_separator;
+                output_model_label(os, inst, opt);
             }
-
-            os << std::endl;
+        } else if (opt.output & option::OUTPUT_MLABEL) {
+            // Output the label.
+            output_model_label(os, inst, opt);
         }
 
         // Accumulate the performance.
