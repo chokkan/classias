@@ -33,6 +33,7 @@
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
+#include <cstdlib>
 #include <ctime>
 #include <exception>
 #include <sstream>

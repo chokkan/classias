@@ -34,6 +34,7 @@
 #include <config.h>
 #endif/*HAVE_CONFIG_H*/
 
+#include <cstdlib>
 #include <iostream>
 #include <map>
 #include <string>

@@ -180,6 +180,50 @@ read_model(
     }
 }
 
+void output_model_label(
+    std::ostream& os,
+    classifier_type& inst,
+    const classias::quark& labels,
+    option& opt
+    )
+{
+    // Output the tagging result if necessary.
+    if (opt.output & option::OUTPUT_ALL) {
+        os << "@boi" << std::endl;
+
+        // Output all candidates.
+        for (int i = 0;i < inst.size();++i) {
+            // Output the tagging result and label.
+            os << ((i == inst.argmax()) ? '+' : '-');
+            os << labels.to_item(i);
+
+            // Output the probability or score.
+            if (opt.output & option::OUTPUT_PROBABILITY) {
+                os << opt.value_separator << inst.prob(i);
+            } else if (opt.output & option::OUTPUT_SCORE) {
+                os << opt.value_separator << inst.score(i);
+            }
+
+            os << std::endl;
+        }
+
+        os << "@eoi" << std::endl;
+
+    } else  {
+        // Output the label.
+        os << labels.to_item(inst.argmax());
+
+        // Output the probability or score.
+        if (opt.output & option::OUTPUT_PROBABILITY) {
+            os << opt.value_separator << inst.prob(inst.argmax());
+        } else if (opt.output & option::OUTPUT_SCORE) {
+            os << opt.value_separator << inst.score(inst.argmax());
+        }
+
+        os << std::endl;
+    }
+}
+
 int multi_tag(option& opt, std::ifstream& ifs)
 {
     int lines = 0;
@@ -231,40 +275,15 @@ int multi_tag(option& opt, std::ifstream& ifs)
         std::string rlabel;
         parse_line(inst, fgen, rlabel, labels, opt, line, lines);
 
-        // Output the tagging result if necessary.
-        if (opt.output & option::OUTPUT_ALL) {
-            os << "@boi" << std::endl;
-
-            // Output all candidates.
-            for (int i = 0;i < inst.size();++i) {
-                // Output the tagging result and label.
-                os << ((i == inst.argmax()) ? '+' : '-');
-                os << labels.to_item(i);
-
-                // Output the probability or score.
-                if (opt.output & option::OUTPUT_PROBABILITY) {
-                    os << opt.value_separator << inst.prob(i);
-                } else if (opt.output & option::OUTPUT_SCORE) {
-                    os << opt.value_separator << inst.score(i);
-                }
-
-                os << std::endl;
+        if (opt.output & option::OUTPUT_FALSE) {
+            // False analysis
+            if (labels.to_value(rlabel) != inst.argmax()) {
+                os << rlabel << opt.token_separator;
+                output_model_label(os, inst, labels, opt);
             }
-
-            os << "@eoi" << std::endl;
-
         } else if (opt.output & option::OUTPUT_MLABEL) {
             // Output the label.
-            os << labels.to_item(inst.argmax());
-
-            // Output the probability or score.
-            if (opt.output & option::OUTPUT_PROBABILITY) {
-                os << opt.value_separator << inst.prob(inst.argmax());
-            } else if (opt.output & option::OUTPUT_SCORE) {
-                os << opt.value_separator << inst.score(inst.argmax());
-            }
-
-            os << std::endl;
+                output_model_label(os, inst, labels, opt);
         }
 
         // Accumulate the performance.
