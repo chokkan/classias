@@ -129,7 +129,7 @@ read_data(
                     read_stream(ifs, data, opt, i);
                 } else {
                     os << ": failed" << std::endl;
-                    throw invalid_data("An error occurred when reading a file", 0);
+                    throw invalid_data("An error occurred when reading a file");
                 }
             } else {
                 // Read a compressed file from an external decompressor.
@@ -141,11 +141,12 @@ read_data(
                     read_stream(ifs, data, opt, i);
                     proc.close();
                     if (proc.exit_code() != 0) {
-                        os << ": (exit_code = " << proc.exit_code() << ")";
+                        os << ": failed (exit_code = " << proc.exit_code() << ")";
+                        throw invalid_data("An error occurred when decompressing a file");
                     }
                 } else {
-                    os << ": failed (" << proc.exit_code() << ")" << std::endl;
-                    throw invalid_data("An error occurred when decompressing a file", 0);
+                    os << ": failed (exit_code = " << proc.exit_code() << ")" << std::endl;
+                    throw invalid_data("An error occurred when decompressing a file");
                 }
             }
             os << std::endl;
