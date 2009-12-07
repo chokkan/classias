@@ -51,6 +51,7 @@
 
 typedef defaultmap<std::string, double> model_type;
 typedef std::vector<std::string> labels_type;
+typedef std::vector<std::string> comments_type;
 typedef classias::classify::linear_multi_logistic<model_type> classifier_type;
 
 class feature_generator
@@ -158,6 +159,64 @@ read_model(
     }
 }
 
+static void output_model_candidates(
+    std::ostream& os,
+    classifier_type& inst,
+    const int rl,
+    const labels_type& labels,
+    const comments_type& comments,
+    option& opt
+    )
+{
+    // Output all candidates.
+    for (int i = 0;i < inst.size();++i) {
+        // Output the reference class.
+        if (opt.output & option::OUTPUT_RLABEL) {
+            os << ((i == rl) ? '+' : '-');
+        }
+
+        // Output the tagging result and label.
+        if (opt.output & option::OUTPUT_MLABEL) {
+            os << ((i == inst.argmax()) ? '+' : '-');
+        }
+
+        os << labels[i];
+
+        // Output the probability or score.
+        if (opt.output & option::OUTPUT_PROBABILITY) {
+            os << opt.value_separator << inst.prob(i);
+        } else if (opt.output & option::OUTPUT_SCORE) {
+            os << opt.value_separator << inst.score(i);
+        }
+
+        os << std::endl;
+        os << comments[i];
+    }
+
+    os << "@eoi" << std::endl;
+}
+
+static void output_model_label(
+    std::ostream& os,
+    classifier_type& inst,
+    const labels_type& labels,
+    const comments_type& comments,
+    option& opt
+    )
+{
+    // Output the argmax label.
+    os << labels[inst.argmax()];
+
+    // Output the probability or score.
+    if (opt.output & option::OUTPUT_PROBABILITY) {
+        os << opt.value_separator << inst.prob(inst.argmax());
+    } else if (opt.output & option::OUTPUT_SCORE) {
+        os << opt.value_separator << inst.score(inst.argmax());
+    }
+
+    os << std::endl;
+}
+
 int candidate_tag(option& opt, std::ifstream& ifs)
 {
     int rl = -1;
@@ -165,7 +224,7 @@ int candidate_tag(option& opt, std::ifstream& ifs)
     feature_generator fgen;
     std::istream& is = opt.is;
     std::ostream& os = opt.os;
-    std::vector<std::string> comments;
+    comments_type comments;
 
     // Load a model.
     model_type model;
@@ -217,39 +276,65 @@ int candidate_tag(option& opt, std::ifstream& ifs)
         } else if (line == "@eoi") {
             inst.finalize();
 
-            // Output the tagging result if necessary.
-            if (opt.output & option::OUTPUT_ALL) {
-                // Output all candidates.
-                for (int i = 0;i < inst.size();++i) {
-                    // Output the tagging result and label.
-                    os << ((i == inst.argmax()) ? '+' : '-');
-                    os << labels[i];
+            if (opt.condition == option::CONDITION_ALL ||
+                (opt.condition == option::CONDITION_FALSE && rl != inst.argmax())) {
+                if (opt.output & option::OUTPUT_ALL) {
+                    for (int i = 0;i < inst.size();++i) {
+                        if (opt.output & option::OUTPUT_RLABEL) {
+                            os << ((i == rl) ? '+' : '-');
+                        }
+                        os << ((i == inst.argmax()) ? '+' : '-');
+                        os << labels[i];
 
-                    // Output the probability or score.
+                        if (opt.output & option::OUTPUT_PROBABILITY) {
+                            os << opt.value_separator << inst.prob(i);
+                        } else if (opt.output & option::OUTPUT_SCORE) {
+                            os << opt.value_separator << inst.score(i);
+                        }
+
+                        os << std::endl;
+                        os << comments[i];
+                    }
+
+                    os << "@eoi" << std::endl;
+
+                } else {
+                    if (opt.output & option::OUTPUT_RLABEL) {
+                        os << labels[rl] << opt.token_separator;
+                    }
+                    os << labels[inst.argmax()];
+
                     if (opt.output & option::OUTPUT_PROBABILITY) {
-                        os << opt.value_separator << inst.prob(i);
+                        os << opt.value_separator << inst.prob(inst.argmax());
                     } else if (opt.output & option::OUTPUT_SCORE) {
-                        os << opt.value_separator << inst.score(i);
+                        os << opt.value_separator << inst.score(inst.argmax());
                     }
 
                     os << std::endl;
-                    os << comments[i];
-                }
 
-                os << "@eoi" << std::endl;
+                }
+            }
+
+            // Output the tagging result if necessary.
+            if (opt.output & option::OUTPUT_FALSE)
+            if (opt.output & option::OUTPUT_ALL) {
+                if (opt.output & option::OUTPUT_FALSE) {
+                    if (inst.argmax() != rl) {
+                        output_model_candidates(os, inst, rl, labels, comments, opt);
+                    }
+                } else {
+                    output_model_candidates(os, inst, rl, labels, comments, opt);
+                }
 
             } else if (opt.output & option::OUTPUT_MLABEL) {
-                // Output the argmax label.
-                os << labels[inst.argmax()];
-
-                // Output the probability or score.
-                if (opt.output & option::OUTPUT_PROBABILITY) {
-                    os << opt.value_separator << inst.prob(inst.argmax());
-                } else if (opt.output & option::OUTPUT_SCORE) {
-                    os << opt.value_separator << inst.score(inst.argmax());
+                if (opt.output & option::OUTPUT_FALSE) {
+                    if (inst.argmax() != rl) {
+                        os << labels[rl] << opt.token_separator;
+                        output_model_label(os, inst, labels, comments, opt);
+                    }
+                } else {
+                    output_model_label(os, inst, labels, comments, opt);
                 }
-
-                os << std::endl;
             }
 
             // Accumulate the performance.

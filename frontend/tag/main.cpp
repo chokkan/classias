@@ -91,18 +91,6 @@ public:
                 throw invalid_value(ss.str());
             }
 
-        ON_OPTION(SHORTOPT('a') || LONGOPT("all"))
-            output |= OUTPUT_ALL;
-
-        ON_OPTION(SHORTOPT('f') || LONGOPT("false"))
-            output |= OUTPUT_FALSE;
-
-        ON_OPTION(SHORTOPT('k') || LONGOPT("comment"))
-            output |= OUTPUT_COMMENT;
-
-        ON_OPTION(SHORTOPT('q') || LONGOPT("quiet"))
-            output &= OUTPUT_NONE_MASK;
-
         ON_OPTION_WITH_ARG(SHORTOPT('n') || LONGOPT("negative"))
             negative_labels.insert(arg);
 
@@ -111,6 +99,19 @@ public:
 
         ON_OPTION(SHORTOPT('p') || LONGOPT("probability"))
             output |= OUTPUT_PROBABILITY;
+
+        ON_OPTION(SHORTOPT('k') || LONGOPT("comment"))
+            output |= OUTPUT_COMMENT;
+
+        ON_OPTION(SHORTOPT('a') || LONGOPT("all"))
+            output |= OUTPUT_ALL;
+
+        ON_OPTION(SHORTOPT('f') || LONGOPT("false"))
+            condition = CONDITION_FALSE;
+            output |= OUTPUT_RLABEL;
+
+        ON_OPTION(SHORTOPT('q') || LONGOPT("quiet"))
+            condition = CONDITION_NONE;
 
         ON_OPTION(SHORTOPT('v') || LONGOPT("version"))
             mode = MODE_VERSION;
@@ -132,9 +133,9 @@ static void usage(std::ostream& os, const char *argv0)
     os << "  -n, --negative=LABEL  assume LABEL to be a negative label" << std::endl;
     os << "  -w, --score           output scores for the labels" << std::endl;
     os << "  -p, --probability     output probabilities for the labels" << std::endl;
-    os << "  -a, --all             output all candidate labels in the tagging output" << std::endl;
-    os << "  -f, --false           output false instances" << std::endl;
     os << "  -k, --comment         output comment lines in the tagging output" << std::endl;
+    os << "  -a, --all             output all candidate labels in the tagging output" << std::endl;
+    os << "  -f, --false           output false instances only" << std::endl;
     os << "  -q, --quiet           suppress tagging results from the output" << std::endl;
     os << "  -s, --token-separator=SEP assume SEP character as a token separator:" << std::endl;
     os << "      ' ',  s, spc, space       a SPACE (' ') character (DEFAULT)" << std::endl;

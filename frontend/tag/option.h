@@ -58,10 +58,17 @@ public:
     };
 
     enum {
+        CONDITION_NONE = 0,
+        CONDITION_ALL,
+        CONDITION_FALSE,
+    };
+
+    enum {
         OUTPUT_NONE =           0x0000,
         OUTPUT_MLABEL =         0x0001,
-        OUTPUT_FALSE =          0x0002,
-        OUTPUT_ALL =            0x0004,
+        OUTPUT_RLABEL =         0x0002,
+        OUTPUT_FALSE =          0x0004,
+        OUTPUT_ALL =            0x0008,
         OUTPUT_NONE_MASK =      0xFFF0,
         OUTPUT_COMMENT =        0x0004,
         OUTPUT_SCORE =          0x0010,
@@ -75,7 +82,7 @@ public:
     int         mode;
     std::string model;
     bool        test;
-    bool        false_analysis;
+    int         condition;
     int         output;
     double      bias;
 
@@ -91,7 +98,7 @@ public:
         ) :
         is(_is), os(_os), es(_es),
         mode(MODE_NORMAL),
-        test(false), false_analysis(false), output(OUTPUT_MLABEL),
+        test(false), condition(CONDITION_ALL), output(OUTPUT_MLABEL),
         bias(1.0), token_separator(' '), value_separator(':')
     {
     }
