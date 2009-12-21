@@ -218,6 +218,9 @@ int multi_tag(option& opt, std::ifstream& ifs)
     classias::accuracy acc;
     classias::precall pr(labels.size());
 
+    // Create another quark for labels unseen in the training stage.
+    classias::quark rlabels = labels;
+
     for (;;) {
         // Read a line.
         std::string line;
@@ -240,19 +243,23 @@ int multi_tag(option& opt, std::ifstream& ifs)
         std::string rlabel;
         parse_line(inst, fgen, rlabel, labels, opt, line, lines);
 
+        // Determine whether we output this instance or not.
         if (opt.condition == option::CONDITION_ALL ||
-            (opt.condition == option::CONDITION_FALSE && labels.to_value(rlabel) != inst.argmax())) {
+            (opt.condition == option::CONDITION_FALSE && labels.to_item(inst.argmax()) != rlabel)) {
             if (opt.output & option::OUTPUT_ALL) {
+                // Output all candidates
                 os << "@boi" << std::endl;
 
-                // Output all candidates.
                 for (int i = 0;i < inst.size();++i) {
+                    // Output the reference label.
                     if (opt.output & option::OUTPUT_RLABEL) {
-                        os << ((i == labels.to_value(rlabel)) ? '+' : '-');
+                        os << ((labels.to_item(i) == rlabel) ? '+' : '-');
                     }
+                    // Output the predicted label.
                     os << ((i == inst.argmax()) ? '+' : '-');
                     os << labels.to_item(i);
 
+                    // Output the score/probability if necessary.
                     if (opt.output & option::OUTPUT_PROBABILITY) {
                         os << opt.value_separator << inst.prob(i);
                     } else if (opt.output & option::OUTPUT_SCORE) {
@@ -265,11 +272,17 @@ int multi_tag(option& opt, std::ifstream& ifs)
                 os << "@eoi" << std::endl;
 
             } else  {
+                // Output the predicted candidate only.
+
+                // Output the reference label.
                 if (opt.output & option::OUTPUT_RLABEL) {
                     os << rlabel << opt.token_separator;
                 }
+
+                // Output the predicted label.
                 os << labels.to_item(inst.argmax());
 
+                // Output the score/probability if necessary.
                 if (opt.output & option::OUTPUT_PROBABILITY) {
                     os << opt.value_separator << inst.prob(inst.argmax());
                 } else if (opt.output & option::OUTPUT_SCORE) {
@@ -281,25 +294,17 @@ int multi_tag(option& opt, std::ifstream& ifs)
 
         }
 
-        if (opt.output & option::OUTPUT_FALSE) {
-            // False analysis
-            if (labels.to_value(rlabel) != inst.argmax()) {
-                os << rlabel << opt.token_separator;
-                output_model_label(os, inst, labels, opt);
-            }
-        } else if (opt.output & option::OUTPUT_MLABEL) {
-            // Output the label.
-                output_model_label(os, inst, labels, opt);
-        }
-
         // Accumulate the performance.
         if (opt.test) {
-            try {
-                int rl = inst.argmax();
-                int ml = labels.to_value(rlabel);
+            int rl = inst.argmax();
+            int ml = rlabels.to_value(rlabel, -1);
+            if (ml != -1) {
                 acc.set(ml == rl);
                 pr.set(ml, rl);
-            } catch (classias::quark_error&) {
+            } else {
+                int ml = rlabels(rlabel);
+                pr.resize(rlabels.size());
+                pr.set(ml, rl);
             }
         }
     }

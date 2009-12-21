@@ -128,6 +128,8 @@ class quark_base {
 public:
     /// The type representing an item.
     typedef item_base item_type;
+    /// The type of this class.
+    typedef quark_base<item_base> this_class;
 
     /// The type implementing a vector of items.
     typedef std::vector<item_type> inverse_map_type;
@@ -151,10 +153,32 @@ public:
     }
 
     /**
+     * Constructs the object by copying the source object.
+     *  @param  src             The source object.
+     */
+    quark_base(const this_class& src)
+    {
+        m_fwd = src.m_fwd;
+        m_inv = src.m_inv;
+    }
+
+    /**
      * Destructs the object.
      */
     virtual ~quark_base()
     {
+    }
+
+    /**
+     * Copies another object to this object.
+     *  @param  src             The source object.
+     *  @return this_class&     The reference to this object.
+     */
+    this_class& operator=(const this_class& src)
+    {
+        m_fwd = src.m_fwd;
+        m_inv = src.m_inv;
+        return *this;
     }
 
     /**
@@ -224,6 +248,23 @@ public:
             return it->second;
         } else {
             throw quark_error("Unknown forward mapping");
+        }           
+    }
+
+    /**
+     * Returns the unique identifier for an item.
+     *  If the item is unknown, this function returns the default identifier.
+     *  @param  x               The item.
+     *  @param  def             The default identifier if the item is unknown.
+     *  @return value_type      The unique identifier.
+     */
+    inline value_type to_value(const item_type& x, const value_type& def) const
+    {
+        typename forward_map_type::const_iterator it = m_fwd.find(x);
+        if (it != m_fwd.end()) {
+            return it->second;
+        } else {
+            return def;
         }           
     }
 

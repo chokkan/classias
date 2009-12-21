@@ -122,17 +122,16 @@ protected:
         }
     };
 
-    int m_n;                ///< The number of labels.
-    label_stat* m_stat;     ///< The label-wise stats.
+    std::vector<label_stat> m_stat; ///< The label-wise stats.
 
 public:
     /**
      * Constructs an object.
      *  @param  N           The number of labels.
      */
-    precall(int N) : m_n(N)
+    precall(int N)
     {
-        m_stat = 0 < N ? new label_stat[N] : NULL;
+        resize(N);
     }
 
     /**
@@ -140,10 +139,15 @@ public:
      */
     virtual ~precall()
     {
-        if (m_stat != NULL) {
-            delete[] m_stat;
-            m_stat = NULL;
-        }
+    }
+
+    /**
+     * Resize the number of labels.
+     *  @param  N           The number of labels.
+     */
+    void resize(int N)
+    {
+        m_stat.resize(N);
     }
 
     /**

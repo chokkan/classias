@@ -224,6 +224,8 @@ int candidate_tag(option& opt, std::ifstream& ifs)
     feature_generator fgen;
     std::istream& is = opt.is;
     std::ostream& os = opt.os;
+    bool inner = false;
+    std::string comment_outer, comment_inner;
     comments_type comments;
 
     // Load a model.
@@ -254,9 +256,12 @@ int candidate_tag(option& opt, std::ifstream& ifs)
                     // Store the comment line to the current instance.
                     comments[inst.size()-1] += line;
                     comments[inst.size()-1] += '\n';
+                } else if (inner) {
+                    comment_inner += line;
+                    comment_inner += '\n';
                 } else {
-                    // Output the comment line if necessary.
-                    os << line << std::endl;
+                    comment_outer += line;
+                    comment_outer += '\n';
                 }
             }
             continue;
@@ -268,24 +273,31 @@ int candidate_tag(option& opt, std::ifstream& ifs)
             inst.clear();
             labels.clear();
             comments.clear();
-
-            if (opt.output & option::OUTPUT_ALL) {
-                os << "@boi" << std::endl;
-            }
+            inner = true;
 
         } else if (line == "@eoi") {
             inst.finalize();
 
+            // Determine whether we output this instance or not.
             if (opt.condition == option::CONDITION_ALL ||
                 (opt.condition == option::CONDITION_FALSE && rl != inst.argmax())) {
+
+                // Output BOI.
+                os << comment_outer;
+                os << "@boi" << std::endl;
+                os << comment_inner;
+
                 if (opt.output & option::OUTPUT_ALL) {
                     for (int i = 0;i < inst.size();++i) {
+                        // Output the reference label.
                         if (opt.output & option::OUTPUT_RLABEL) {
                             os << ((i == rl) ? '+' : '-');
                         }
+                        // Output the predicted label.
                         os << ((i == inst.argmax()) ? '+' : '-');
                         os << labels[i];
 
+                        // Output the score/probability if necessary.
                         if (opt.output & option::OUTPUT_PROBABILITY) {
                             os << opt.value_separator << inst.prob(i);
                         } else if (opt.output & option::OUTPUT_SCORE) {
@@ -296,14 +308,15 @@ int candidate_tag(option& opt, std::ifstream& ifs)
                         os << comments[i];
                     }
 
-                    os << "@eoi" << std::endl;
-
                 } else {
+                    // Output the reference label.
                     if (opt.output & option::OUTPUT_RLABEL) {
                         os << labels[rl] << opt.token_separator;
                     }
+                    // Output the predicted label.
                     os << labels[inst.argmax()];
 
+                    // Output the score/probability if necessary.
                     if (opt.output & option::OUTPUT_PROBABILITY) {
                         os << opt.value_separator << inst.prob(inst.argmax());
                     } else if (opt.output & option::OUTPUT_SCORE) {
@@ -313,28 +326,9 @@ int candidate_tag(option& opt, std::ifstream& ifs)
                     os << std::endl;
 
                 }
-            }
 
-            // Output the tagging result if necessary.
-            if (opt.output & option::OUTPUT_FALSE)
-            if (opt.output & option::OUTPUT_ALL) {
-                if (opt.output & option::OUTPUT_FALSE) {
-                    if (inst.argmax() != rl) {
-                        output_model_candidates(os, inst, rl, labels, comments, opt);
-                    }
-                } else {
-                    output_model_candidates(os, inst, rl, labels, comments, opt);
-                }
-
-            } else if (opt.output & option::OUTPUT_MLABEL) {
-                if (opt.output & option::OUTPUT_FALSE) {
-                    if (inst.argmax() != rl) {
-                        os << labels[rl] << opt.token_separator;
-                        output_model_label(os, inst, labels, comments, opt);
-                    }
-                } else {
-                    output_model_label(os, inst, labels, comments, opt);
-                }
+                // Output EOI.
+                os << "@eoi" << std::endl;
             }
 
             // Accumulate the performance.
@@ -346,6 +340,7 @@ int candidate_tag(option& opt, std::ifstream& ifs)
             inst.clear();
             labels.clear();
             comments.clear();
+            inner = false;
 
         } else {
             std::string label;

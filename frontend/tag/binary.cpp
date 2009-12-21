@@ -160,14 +160,19 @@ int binary_tag(option& opt, std::ifstream& ifs)
         classifier_type inst(model);
         parse_line(inst, rlabel, opt, line, lines);
 
+        // Determine whether we output this instance or not.
         if (opt.condition == option::CONDITION_ALL ||
             (opt.condition == option::CONDITION_FALSE && rlabel != static_cast<bool>(inst))) {
 
+            // Output the reference label.
             if (opt.output & option::OUTPUT_RLABEL) {
                 os << (rlabel ? "+1" : "-1") << opt.token_separator;
             }
+
+            // Output the predicted label.
             os << (static_cast<bool>(inst) ? "+1" : "-1");
 
+            // Output the score/probability if necessary.
             if (opt.output & option::OUTPUT_PROBABILITY) {
                 os << opt.value_separator << inst.prob();
             } else if (opt.output & option::OUTPUT_SCORE) {
