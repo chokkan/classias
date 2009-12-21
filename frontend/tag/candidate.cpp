@@ -340,6 +340,8 @@ int candidate_tag(option& opt, std::ifstream& ifs)
             inst.clear();
             labels.clear();
             comments.clear();
+            comment_inner.clear();
+            comment_outer.clear();
             inner = false;
 
         } else {

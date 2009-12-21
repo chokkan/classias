@@ -6,7 +6,7 @@ BINDIR=$HOME/build/$PKG
 TARGET=`pwd`/$PKG-`/bin/arch`.tar.gz
 
 rm -rf $BINDIR
-./configure --prefix=$BINDIR --with-liblbfgs=$LIBLBFGS
+./configure --prefix=$BINDIR --with-liblbfgs=$LIBLBFGS --with-boost-include=$HOME/local/include/boost-1_39 --with-boost-library=$HOME/local/lib --with-boost-postfix=-gcc41-mt
 make LDFLAGS=-all-static
 make install
 cd $BINDIR/..
