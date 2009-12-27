@@ -100,6 +100,9 @@ public:
         ON_OPTION(SHORTOPT('p') || LONGOPT("probability"))
             output |= OUTPUT_PROBABILITY;
 
+        ON_OPTION(SHORTOPT('r') || LONGOPT("reference"))
+            output |= OUTPUT_RLABEL;
+
         ON_OPTION(SHORTOPT('k') || LONGOPT("comment"))
             output |= OUTPUT_COMMENT;
 
@@ -133,6 +136,7 @@ static void usage(std::ostream& os, const char *argv0)
     os << "  -n, --negative=LABEL  assume LABEL to be a negative label" << std::endl;
     os << "  -w, --score           output scores for the labels" << std::endl;
     os << "  -p, --probability     output probabilities for the labels" << std::endl;
+    os << "  -r, --reference       output reference labels as well as predicted labels" << std::endl;
     os << "  -k, --comment         output comment lines in the tagging output" << std::endl;
     os << "  -a, --all             output all candidate labels in the tagging output" << std::endl;
     os << "  -f, --false           output false instances only" << std::endl;
