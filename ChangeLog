@@ -1,5 +1,21 @@
+2009-12-28  Naoaki Okazaki  <okazaki at chokkan org>
+
+	* Classias 1.1:
+	- [classias-tag] Implemented false analyses (-f).
+	- [classias-tag] Added an option (-r) that outputs the reference
+	  labels in the given data together with predicted labels.
+	- [classias-tag] Added an option (-a) that outputs all
+	  candidates for each instance.
+	- [classias-tag] Fixed a crash problem with specific data
+	  (Many thanks to Hiromi Wakaki).
+	- [classias-train] Fixed a crash problem when an input file
+	  does not exist (Thanks to He Tan).
+	- Numerous minor fixes and tunings.
+
+
 2009-09-25  Naoaki Okazaki  <okazaki at chokkan org>
 
 	* Classias 1.0:
 	- Initial public release.
+
 
