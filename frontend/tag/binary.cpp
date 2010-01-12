@@ -106,8 +106,7 @@ read_model(
             break;
         }
 
-        if (line.compare(0, 6, "@bias\t") == 0) {
-            opt.bias = std::atof(line.c_str() + 6);
+        if (line.compare(0, 1, "@") == 0) {
             continue;
         }
 

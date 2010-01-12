@@ -83,7 +83,6 @@ public:
     bool        test;
     int         condition;
     int         output;
-    double      bias;
 
     char        token_separator;
     char        value_separator;
@@ -98,7 +97,7 @@ public:
         is(_is), os(_os), es(_es),
         mode(MODE_NORMAL),
         test(false), condition(CONDITION_ALL), output(OUTPUT_MLABEL),
-        bias(1.0), token_separator(' '), value_separator(':')
+        token_separator(' '), value_separator(':')
     {
     }
 };

@@ -154,15 +154,13 @@ read_model(
             break;
         }
 
-        // Bias feature value.
-        if (line.compare(0, 6, "@bias\t") == 0) {
-            opt.bias = std::atof(line.c_str() + 6);
-            continue;
-        }
-
         // Candidate label.
         if (line.compare(0, 7, "@label\t") == 0) {
             labels(line.substr(7));
+            continue;
+        }
+
+        if (line.compare(0, 1, "@") == 0) {
             continue;
         }
 

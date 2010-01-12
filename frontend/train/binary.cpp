@@ -203,13 +203,16 @@ output_model(
 
     // Output a model type.
     os << "@classias\tlinear\tbinary" << std::endl;
-    os << "@bias\t" << opt.bias << std::endl;
 
     // Store the feature weights.
     for (aid_type i = 0;i < attributes.size();++i) {
         value_type w = model[i];
         if (w != 0.) {
-            os << w << '\t' << attributes.to_item(i) << std::endl;
+            const std::string& attr = attributes.to_item(i);
+            if (attr == "__BIAS__") {
+                w *= opt.bias;
+            }
+            os << w << '\t' << attr << std::endl;
         }
     }
 }

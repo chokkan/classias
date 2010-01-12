@@ -220,7 +220,6 @@ output_model(
     // Output a model type.
     os << "@classias\tlinear\tmulti\t";
     os << data.feature_generator.name() << std::endl;
-    os << "@bias\t" << opt.bias << std::endl;
 
     // Output a set of labels.
     for (int_t l = 0;l < data.num_labels();++l) {
@@ -233,9 +232,12 @@ output_model(
         if (w != 0.) {
             int_t a, l;
             data.feature_generator.backward(i, a, l);
-            os << w << '\t'
-                << data.attributes.to_item(a) << '\t'
-                << data.labels.to_item(l) << std::endl;
+            const std::string& attr = data.attributes.to_item(a);
+            const std::string& label = data.labels.to_item(l);
+            if (attr == "__BIAS__") {
+                w *= opt.bias;
+            }
+            os << w << '\t' << attr << '\t' << label << std::endl;
         }
     }
 }
