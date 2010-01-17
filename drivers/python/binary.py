@@ -8,21 +8,21 @@ class classifier:
 
     def __init__(self, model=None):
         if model is not None:
-            self.weights = model.weights    # External model.
+            self.weights = model.weights
         else:
-            self.weights = weights          # Build-in model.
+            self.weights = weights
         self.clear()
 
     def clear(self):
         self.score = self.weights.get('__BIAS__', 0.)
 
-    def add(self, a, v):
-        self.score += self.weights.get(a, 0.) * v
+    def add(self, attr, value):
+        self.score += self.weights.get(attr, 0.) * value
 
-    def set(self, inst):
+    def set(self, iterable):
         self.clear()
-        for a, v in inst:
-            self.set(a, v)
+        for a, v in iterable:
+            self.add(a, v)
 
     def label(self):
         return (0. < self.score)
