@@ -86,9 +86,9 @@ public:
         TYPE_CANDIDATE,     /// Multi-candidate ranker.
     };
 
-    std::istream&   is;
-    std::ostream&   os;
-    std::ostream&   es;
+    std::istream*   is;
+    std::ostream*   os;
+    std::ostream*   es;
 
     files_type  files;
 
@@ -105,20 +105,22 @@ public:
     std::string filter_string;
     bool        cross_validation;
     labels_type negative_labels;
+    bool        logfile;
 
     char        token_separator;
     char        value_separator;
 
     option(
-        std::istream& _is = std::cin,
-        std::ostream& _os = std::cout,
-        std::ostream& _es = std::cerr
+        std::istream* _is = &std::cin,
+        std::ostream* _os = &std::cout,
+        std::ostream* _es = &std::cerr
         ) :
         is(_is), os(_os), es(_es),
         mode(MODE_NORMAL), type(TYPE_MULTI_DENSE), model(""),
         algorithm("lbfgs.logistic"),        
         shuffle(false), bias(1.),
         split(0), holdout(-1), cross_validation(false),
+        logfile(false),
         token_separator(' '), value_separator(':')
     {
     }

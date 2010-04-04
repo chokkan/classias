@@ -35,6 +35,7 @@
 #endif/*HAVE_CONFIG_H*/
 
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <map>
 #include <string>
@@ -57,9 +58,9 @@ protected:
 
 public:
     optionparser(
-        std::istream& _is = std::cin,
-        std::ostream& _os = std::cout,
-        std::ostream& _es = std::cerr
+        std::istream* _is = &std::cin,
+        std::ostream* _os = &std::cout,
+        std::ostream* _es = &std::cerr
         ) : option(_is, _os, _es)
     {
         // Build synsets for algorithms.
@@ -132,6 +133,9 @@ public:
 
         ON_OPTION_WITH_ARG(SHORTOPT('n') || LONGOPT("negative"))
             negative_labels.insert(arg);
+
+        ON_OPTION(SHORTOPT('l') || LONGOPT("log-to-file"))
+            logfile = true;
 
         ON_OPTION_WITH_ARG(SHORTOPT('s') || LONGOPT("token-separator"))
             if (strcmp(arg, " ") == 0 || strcasecmp(arg, "s") == 0 || strcasecmp(arg, "spc") == 0 || strcasecmp(arg, "space") == 0) {
@@ -220,6 +224,9 @@ static void usage(std::ostream& os, const char *argv0)
     os << "                        for training" << std::endl;
     os << "  -x, --cross-validate  repeat holdout evaluations for #i in {1, ..., N}" << std::endl;
     os << "                        (N-fold cross validation)" << std::endl;
+    os << "  -l, --log-to-file     write the training log to a file instead of to STDOUT;" << std::endl;
+    os << "                        The filename is determined automatically by the training" << std::endl;
+    os << "                        algorithm, parameters, and source files" << std::endl;
 #if     defined(HAVE_REGEX) || defined(HAVE_BOOST_REGEX_HPP)
     os << "  -F, --filter=REGEX    filter attributes whose names are matched by REGEX" << std::endl;
 #endif/*defined(HAVE_REGEX) || defined(HAVE_BOOST_REGEX_HPP)*/
@@ -240,22 +247,28 @@ static void usage(std::ostream& os, const char *argv0)
     os << std::endl;
 }
 
+void output_copyright(std::ostream& os)
+{
+    os << CLASSIAS_NAME " ";
+    os << CLASSIAS_VERSION << " ";
+    os << "trainer ";
+    os << CLASSIAS_COPYRIGHT << std::endl;
+    os << std::endl;
+}
+
 
 int main(int argc, char *argv[])
 {
     int ret = 0;
     int arg_used = 0;
     optionparser opt;
-    std::istream& is = opt.is;
-    std::ostream& os = opt.os;
-    std::ostream& es = opt.es;
+    std::istream& is = *opt.is;
+    std::ostream& os = *opt.os;
+    std::ostream& es = *opt.es;
+    std::ofstream ofs;
 
     // Show the copyright information.
-    os << CLASSIAS_NAME " ";
-    os << CLASSIAS_VERSION << " ";
-    os << "trainer ";
-    os << CLASSIAS_COPYRIGHT << std::endl;
-    os << std::endl;
+    output_copyright(os);
 
     // Parse the command-line options.
     try { 
@@ -277,6 +290,30 @@ int main(int argc, char *argv[])
     // Set the source files.
     for (int i = arg_used;i < argc;++i) {
         opt.files.push_back(argv[i]);
+    }
+
+    // Open a log file if necessary.
+    if (opt.logfile) {
+        // Generate a filename for the log file.
+        std::string fname;
+        fname += "log";
+        for (int i = 0;i < (int)opt.files.size();++i) {
+            fname += '_';
+            fname += opt.files[i];
+        }
+        fname += '_';
+        fname += opt.algorithm;
+        for (int i = 0;i < (int)opt.params.size();++i) {
+            fname += '_';
+            fname += opt.params[i];
+        }
+
+        ofs.open(fname.c_str());
+        if (ofs.fail()) {
+            es << "ERROR: failed to open the log file: " << fname << std::endl;
+            return 1;
+        }
+        opt.os = &ofs;
     }
 
     // Branch for tasks.

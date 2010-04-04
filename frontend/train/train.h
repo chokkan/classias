@@ -192,12 +192,12 @@ train(option& opt)
     stopwatch sw;
     data_type data;
     int num_groups = 0;
-    std::ostream& os = opt.os;
+    std::ostream& os = *opt.os;
 
     // Show the help message for the algorithm and exit if necessary.
     if (opt.mode == option::MODE_HELP_ALGORITHM) {
         trainer_type tr;
-        tr.params().help(opt.os);
+        tr.params().help(os);
         return 0;
     }
 
@@ -251,7 +251,7 @@ train(option& opt)
             sw.start();
             trainer.train(
                 data,
-                opt.os,
+                os,
                 i,
                 (opt.type == option::TYPE_CANDIDATE)
                 );
@@ -268,7 +268,7 @@ train(option& opt)
         sw.start();
         trainer.train(
             data,
-            opt.os,
+            os,
             (0 < opt.holdout ? (opt.holdout-1) : -1),
             (opt.type == option::TYPE_CANDIDATE)
             );
