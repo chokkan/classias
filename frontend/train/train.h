@@ -89,8 +89,8 @@ read_data(
     const option& opt
     )
 {
-    std::ostream& os = std::cout;
-    std::ostream& es = std::cerr;
+    std::ostream& os = *opt.os;
+    std::ostream& es = *opt.es;
 
     // Read files for training data.
     if (opt.files.empty()) {

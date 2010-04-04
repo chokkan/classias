@@ -297,6 +297,10 @@ int main(int argc, char *argv[])
         // Generate a filename for the log file.
         std::string fname;
         fname += "log";
+
+        if (opt.files.empty()) {
+            fname += "_STDIN";
+        }
         for (int i = 0;i < (int)opt.files.size();++i) {
             fname += '_';
             fname += opt.files[i];
@@ -313,6 +317,8 @@ int main(int argc, char *argv[])
             es << "ERROR: failed to open the log file: " << fname << std::endl;
             return 1;
         }
+
+        output_copyright(ofs);
         opt.os = &ofs;
     }
 
