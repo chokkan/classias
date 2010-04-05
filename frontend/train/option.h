@@ -106,6 +106,7 @@ public:
     bool        cross_validation;
     labels_type negative_labels;
     bool        logfile;
+    std::string logbase;
 
     char        token_separator;
     char        value_separator;
@@ -120,7 +121,7 @@ public:
         algorithm("lbfgs.logistic"),        
         shuffle(false), bias(1.),
         split(0), holdout(-1), cross_validation(false),
-        logfile(false),
+        logfile(false), logbase(""),
         token_separator(' '), value_separator(':')
     {
     }

@@ -137,6 +137,9 @@ public:
         ON_OPTION(SHORTOPT('l') || LONGOPT("log-to-file"))
             logfile = true;
 
+        ON_OPTION_WITH_ARG(SHORTOPT('L') || LONGOPT("logbase"))
+            logbase = arg;
+
         ON_OPTION_WITH_ARG(SHORTOPT('s') || LONGOPT("token-separator"))
             if (strcmp(arg, " ") == 0 || strcasecmp(arg, "s") == 0 || strcasecmp(arg, "spc") == 0 || strcasecmp(arg, "space") == 0) {
                 token_separator = ' ';
@@ -227,6 +230,7 @@ static void usage(std::ostream& os, const char *argv0)
     os << "  -l, --log-to-file     write the training log to a file instead of to STDOUT;" << std::endl;
     os << "                        The filename is determined automatically by the training" << std::endl;
     os << "                        algorithm, parameters, and source files" << std::endl;
+    os << "  -L, --logbase=BASE    set the base name for a log file (used with -l option)" << std::endl;
 #if     defined(HAVE_REGEX) || defined(HAVE_BOOST_REGEX_HPP)
     os << "  -F, --filter=REGEX    filter attributes whose names are matched by REGEX" << std::endl;
 #endif/*defined(HAVE_REGEX) || defined(HAVE_BOOST_REGEX_HPP)*/
@@ -296,15 +300,13 @@ int main(int argc, char *argv[])
     if (opt.logfile) {
         // Generate a filename for the log file.
         std::string fname;
-        fname += "log";
 
-        if (opt.files.empty()) {
-            fname += "_STDIN";
+        if (opt.logbase.empty()) {
+            fname += "log.classias-train";
+        } else {
+            fname += opt.logbase;
         }
-        for (int i = 0;i < (int)opt.files.size();++i) {
-            fname += '_';
-            fname += opt.files[i];
-        }
+
         fname += '_';
         fname += opt.algorithm;
         for (int i = 0;i < (int)opt.params.size();++i) {
