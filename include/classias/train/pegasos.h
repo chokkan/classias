@@ -104,7 +104,7 @@ protected:
     /// The loss.
     value_type m_loss;
     /// The update count.
-    int m_t;
+    value_type m_t;
 
     /// Parameter interface.
     parameter_exchange m_params;
@@ -338,7 +338,7 @@ public:
         value_type& proj = this->m_proj;
         value_type& scale = this->m_scale;
         value_type& norm22 = this->m_norm22;
-        int& t = this->m_t;
+        value_type& t = this->m_t;
         value_type& t0 = this->m_t0;
         value_type& loss = this->m_loss;
 
@@ -470,7 +470,7 @@ public:
         value_type& proj = this->m_proj;
         value_type& scale = this->m_scale;
         value_type& norm22 = this->m_norm22;
-        int& t = this->m_t;
+        value_type& t = this->m_t;
         value_type& t0 = this->m_t0;
         value_type& loss = this->m_loss;
 
