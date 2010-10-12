@@ -215,8 +215,17 @@ public:
      */
     void report(std::ostream& os)
     {
+        // Count the number of active features.
+        int num_active = 0;
+        for (size_t i = 0;i < m_model.size();++i) {
+            if (m_model[i] != 0.) {
+                ++num_active;
+            }
+        }
+
         os << "Loss: " << m_report.loss << std::endl;
         os << "Feature L2-norm: " << m_report.norm2 << std::endl;
+        os << "Active features: " << num_active << " / " << m_model.size() << std::endl;
         os << "Learning rate (eta): " << m_eta << std::endl;
         os << "Total number of feature updates: " << m_t << std::endl;
     }
