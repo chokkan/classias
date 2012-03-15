@@ -39,16 +39,14 @@
 #if defined(_MSC_VER)
 #if defined(HAVE_UNORDERED_MAP)
 #include <unordered_map>
-#define UNORDERED_MAP   std::tr1::unordered_map
+#define UNORDERED_MAP   std::unordered_map
 namespace std {
-    namespace tr1 {
-        template<>
-        struct hash<std::pair<int, int> > {
-            size_t operator()(const std::pair<int, int>& item) const
-            {
-                return (size_t)((item.first << 8) + (item.second & 0xFF));
-            }
-        };
+    template<>
+    struct hash<std::pair<int, int> > {
+        size_t operator()(const std::pair<int, int>& item) const
+        {
+            return (size_t)((item.first << 8) + (item.second & 0xFF));
+        }
     };
 };
 #else

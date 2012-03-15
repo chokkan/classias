@@ -1,22 +1,19 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib", "lib\lib.vcproj", "{971180DC-DCB1-46A7-A93B-3317A4599405}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "train", "frontend\train\train.vcproj", "{302CA988-3A1D-4D2C-9950-9CAA8DA67AAD}"
-	ProjectSection(ProjectDependencies) = postProject
-		{971180DC-DCB1-46A7-A93B-3317A4599405} = {971180DC-DCB1-46A7-A93B-3317A4599405}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tag", "frontend\tag\tag.vcproj", "{E0433E06-6953-4178-9BFB-F3F5DF9F671A}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "train_binary_batch", "sample\train_binary_batch.vcproj", "{58590B6E-64F5-4BC5-9F3D-27B58197E335}"
-EndProject
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sample programs", "Sample programs", "{514693AF-7849-4029-8FD6-40EC0EB6F317}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "train_binary_online", "sample\train_binary_online.vcproj", "{B65A832E-4C70-4D83-9715-9B8F1FE83069}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib", "lib\lib.vcxproj", "{971180DC-DCB1-46A7-A93B-3317A4599405}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tag_binary", "sample\tag_binary.vcproj", "{7375C155-D969-452E-B455-2285A1949641}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "train", "frontend\train\train.vcxproj", "{302CA988-3A1D-4D2C-9950-9CAA8DA67AAD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tag", "frontend\tag\tag.vcxproj", "{E0433E06-6953-4178-9BFB-F3F5DF9F671A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "train_binary_batch", "sample\train_binary_batch.vcxproj", "{58590B6E-64F5-4BC5-9F3D-27B58197E335}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "train_binary_online", "sample\train_binary_online.vcxproj", "{B65A832E-4C70-4D83-9715-9B8F1FE83069}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tag_binary", "sample\tag_binary.vcxproj", "{7375C155-D969-452E-B455-2285A1949641}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -294,15 +294,15 @@ int multi_tag(option& opt, std::ifstream& ifs)
 
         // Accumulate the performance.
         if (opt.test) {
-            int rl = inst.argmax();
-            int ml = rlabels.to_value(rlabel, rlabels.size());
-            if (ml != rlabels.size()) {
-                acc.set(ml == rl);
-                pr.set(ml, rl);
+            int pl = inst.argmax();
+            int rl = rlabels.to_value(rlabel, rlabels.size());
+            if (rl != rlabels.size()) {
+                acc.set(pl == rl);
+                pr.set(pl, rl);
             } else {
-                int ml = rlabels(rlabel);
+                int rl = rlabels(rlabel);
                 pr.resize(rlabels.size());
-                pr.set(ml, rl);
+                pr.set(pl, rl);
             }
         }
     }
