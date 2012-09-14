@@ -104,11 +104,6 @@ parse_line(
         throw invalid_data("no field found in the line", line, lines);
     }
 
-    // Make sure that the first token (class) is not empty.
-    if (itv->empty()) {
-        throw invalid_data("an empty label found", line, lines);
-    }
-
     // Parse the instance label.
     get_name_value(*itv, name, value, opt.value_separator);
     rl = name;
@@ -132,7 +127,7 @@ parse_line(
 
     // Apply the bias feature if any.
     for (int i = 0;i < (int)labels.size();++i) {
-        inst.set(i, fgen, "__BIAS__", labels.to_item(i), value);
+        inst.set(i, fgen, "__BIAS__", labels.to_item(i), 1.0);
     }
 
     // Finalize the instance.
