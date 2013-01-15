@@ -305,6 +305,7 @@ int multi_tag(option& opt, std::ifstream& ifs)
     // Output the performance if necessary.
     if (opt.test) {
         acc.output(os);
+        pr.output_labelwise(os, labels, positives.begin(), positives.end());
         pr.output_micro(os, positives.begin(), positives.end());
         pr.output_macro(os, positives.begin(), positives.end());
     }

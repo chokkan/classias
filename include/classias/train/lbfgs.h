@@ -745,6 +745,7 @@ protected:
             this->m_data->feature_generator,
             this->m_holdout,
             this->m_acconly,
+            this->m_data->labels,
             this->m_data->positive_labels.begin(),
             this->m_data->positive_labels.end()
             );

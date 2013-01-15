@@ -162,6 +162,30 @@ public:
         if (r == p) m_stat[p].num_match++;
     }
 
+    template <class labels_type, class positive_iterator_type>
+    void output_labelwise(
+        std::ostream& os,
+        const labels_type& labels,
+        positive_iterator_type pb,
+        positive_iterator_type pe
+        ) const
+    {
+        os << "Performance by label (#match, #model, #ref) (precision, recall, F1):" << std::endl;
+        for (positive_iterator_type it = pb;it != pe;++it) {
+            int num_match = m_stat[*it].num_match;
+            int num_prediction = m_stat[*it].num_prediction;
+            int num_reference = m_stat[*it].num_reference;
+            double precision = divide(num_match, num_prediction);
+            double recall = divide(num_match, num_reference);
+            double f1score = divide(2 * precision * recall, precision + recall);
+
+            os <<
+                "    " << labels.to_item(*it) << ": " <<
+                "(" << num_match << ", " << num_prediction << ", " << num_reference << ") " <<
+                "(" << precision << ", " << recall << ", " << f1score << ")" << std::endl;
+        }
+    }
+
     /**
      * Outputs micro-average precision, recall, F1 scores.
      *  @param  os          The output stream.
@@ -325,6 +349,7 @@ template <
     class iterator_type,
     class classifier_type,
     class feature_generator_type,
+    class labels_type,
     class label_iterator_type
 >
 static void holdout_evaluation_multi(
@@ -335,6 +360,7 @@ static void holdout_evaluation_multi(
     feature_generator_type& fgen,
     int holdout,
     bool acconly,
+    const labels_type& labels,
     label_iterator_type label_first,
     label_iterator_type label_last
     )
@@ -374,6 +400,7 @@ static void holdout_evaluation_multi(
     // Report accuracy, precision, recall, and f1 score.
     acc.output(os);
     if (!acconly) {
+        pr.output_labelwise(os, labels, label_first, label_last);
         pr.output_micro(os, label_first, label_last);
         pr.output_macro(os, label_first, label_last);
     }

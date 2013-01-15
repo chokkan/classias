@@ -538,6 +538,7 @@ public:
                     data.feature_generator,
                     holdout,
                     acconly,
+                    data.labels,
                     data.positive_labels.begin(),
                     data.positive_labels.end()
                     );
