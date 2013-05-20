@@ -504,7 +504,7 @@ public:
 
         // Call the L-BFGS solver.
         m_data = &data;
-        int ret = lbfgs_solve(
+        int ret = this->lbfgs_solve(
             (const int)K,
             os,
             holdout,
@@ -718,7 +718,7 @@ public:
         // Call the L-BFGS solver.
         m_data = &data;
         m_acconly = acconly;
-        int ret = lbfgs_solve(
+        int ret = this->lbfgs_solve(
             (const int)K,
             os,
             holdout,
