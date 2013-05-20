@@ -1,7 +1,5 @@
 # $Id$
 
-SUBDIRS = classify train
-
 classiasincludedir = $(includedir)/classias/train
 
 classiasinclude_HEADERS = \
