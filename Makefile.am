@@ -3,7 +3,7 @@
 SUBDIRS = include sample frontend win32
 
 docdir = $(prefix)/share/doc/@PACKAGE@
-doc_DATA = README INSTALL COPYING COPYING AUTHORS ChangeLog
+doc_DATA = README INSTALL COPYING AUTHORS ChangeLog
 
 EXTRA_DIST = \
 	autogen.sh \
