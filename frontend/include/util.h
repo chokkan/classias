@@ -70,6 +70,7 @@ public:
     invalid_data& operator=(const invalid_data& rho)
     {
         message = rho.message;
+        return *this;
     }
 
     virtual ~invalid_data() throw()
