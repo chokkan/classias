@@ -45,9 +45,6 @@ AC_LANG_CPLUSPLUS
 dnl ------------------------------------------------------------------
 dnl Initialization for variables
 dnl ------------------------------------------------------------------
-CXXFLAGS="${ac_save_CXXFLAGS}"
-LDFLAGS="${ac_save_LDFLAGS}"
-INCLUDES="${ac_save_INCLUDES}"
 BOOST_INCLUDES=""
 BOOST_LDFLAGS=""
 BOOST_POSTFIX=""
